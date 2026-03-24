@@ -1,0 +1,54 @@
+/* Tailwind 指令 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   Block ID 隱藏規則
+   ======================================== */
+
+/*
+ * 閱讀模式：隱藏 ^fc- Block ID
+ * Obsidian 會將 ^block-id 渲染為 <a> 或含有特定 class 的元素
+ */
+.markdown-preview-view .block-language-fc,
+.markdown-preview-view a[href*="^fc-"],
+.markdown-rendered a[href*="^fc-"] {
+  display: none !important;
+}
+
+/* 閱讀模式：以 ^fc- 開頭的純文字 Block ID 會由 postProcessor 負責處理隱藏 */
+
+/*
+ * 編輯模式（CodeMirror 6）：
+ * Block ID 文字（^fc-xxxxxx）預設隱藏，
+ * 只有當游標位於該行時才以半透明方式顯示
+ */
+.cm-line .cm-blockid,
+.cm-line .fc-block-id {
+  opacity: 0;
+  font-size: 0;
+  width: 0;
+  overflow: hidden;
+  display: inline-block;
+  transition: opacity 0.2s ease, font-size 0.2s ease;
+}
+
+.cm-activeLine .cm-blockid,
+.cm-activeLine .fc-block-id {
+  opacity: 0.4;
+  font-size: inherit;
+  width: auto;
+  overflow: visible;
+  color: var(--text-muted);
+}
+
+/* ========================================
+   外掛容器基礎樣式
+   ======================================== */
+
+#fc-plugin-root {
+  /* 繼承 Obsidian 的文字顏色與字體 */
+  color: var(--text-normal);
+  font-family: var(--font-interface);
+}

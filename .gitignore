@@ -1,0 +1,18 @@
+# 依賴
+node_modules/
+
+# 編譯產物
+dist/
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
+# Obsidian 測試環境
+.obsidian/
