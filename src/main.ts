@@ -57,6 +57,29 @@ export default class FlashcardsPlugin extends Plugin {
             },
         });
 
+        // ── 註冊 MarkdownPostProcessor (隱藏閱讀模式的 Block ID) ──
+        this.registerMarkdownPostProcessor((element) => {
+            // 精準配對：空白 + ^fc- + 恰好 6 個英數字/減號/底線
+            const blockIdRegex = /\s*\^fc-[A-Za-z0-9_-]{6}\b/g;
+
+            // 遞迴尋找並替換 Element 內所有文字節點
+            const walk = (node: Node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (node.textContent && blockIdRegex.test(node.textContent)) {
+                        node.textContent = node.textContent.replace(blockIdRegex, "");
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const el = node as HTMLElement;
+                    // 跳過程式碼區塊，避免誤刪
+                    if (el.tagName === "CODE" || el.tagName === "PRE") {
+                        return;
+                    }
+                    node.childNodes.forEach(walk);
+                }
+            };
+            walk(element);
+        });
+
         // ── 最後才載入儲存資料（即使失敗也不影響上方已註冊的功能） ──
         await this.dataStore.load();
 
