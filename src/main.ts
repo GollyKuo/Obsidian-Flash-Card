@@ -57,6 +57,19 @@ export default class FlashcardsPlugin extends Plugin {
             },
         });
 
+        // ── 註冊左側功能區圖示 (Ribbon) ──
+        this.addRibbonIcon("scan", "掃描當前文件的閃卡", () => {
+            this.scanCurrentFile();
+        });
+        
+        this.addRibbonIcon("graduation-cap", "開始閃卡複習", () => {
+            new ReviewModalContainer(this.app, this.dataStore).open();
+        });
+
+        this.addRibbonIcon("bar-chart", "顯示閃卡統計", () => {
+            this.showStats();
+        });
+
         // ── 註冊 MarkdownPostProcessor (隱藏閱讀模式的 Block ID) ──
         this.registerMarkdownPostProcessor((element) => {
             // 精準配對：空白 + ^fc- + 恰好 6 個英數字/減號/底線
