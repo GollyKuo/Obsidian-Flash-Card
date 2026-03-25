@@ -13,7 +13,7 @@ const prod = process.argv.includes("--production");
 const watch = process.argv.includes("--watch");
 
 // Obsidian Vault 外掛目標路徑
-const VAULT_PLUGIN_DIR = String.raw`D:\【Golly】\系統預設資料夾\Documents\Antigravity\Obsidian Test\.obsidian\plugins\ai-enriched-flashcards`;
+const VAULT_PLUGIN_DIR = String.raw`D:\【Golly】\系統預設資料夾\Documents\Antigravity\Obsidian Test\Test\.obsidian\plugins\ai-enriched-flashcards`;
 
 /**
  * PostCSS 外掛：處理 Tailwind CSS 並加上隔離前綴

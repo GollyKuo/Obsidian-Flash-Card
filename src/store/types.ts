@@ -21,6 +21,8 @@ export interface FSRSState {
     lapses: number;
     /** 卡片狀態：新卡 / 學習中 / 複習中 / 重新學習 */
     state: "new" | "learning" | "review" | "relearning";
+    /** 上次複習時間（ISO 8601），null 表示尚未複習 */
+    lastReview?: string;
 }
 
 /** 單張閃卡的完整記錄 */

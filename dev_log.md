@@ -4,6 +4,29 @@
 
 ---
 
+## V0.1.1 — 隱藏 Block ID + 閃卡複習系統 (2026-03-25)
+
+從 V0.1 乾淨重寫。解決了前幾次迭代中的 5 個已知問題。
+
+### 新增
+- **BlockIdHider** (`src/editor/BlockIdHider.ts`)：CM6 ViewPlugin，隱藏非游標行的 `^fc-xxxxxx`
+- **ReviewModal** (`src/ui/ReviewModal.tsx`)：React 複習介面，inline style，FSRS 四鍵評分
+- **ReviewModalContainer** (`src/ui/ReviewModalContainer.tsx`)：Obsidian Modal ↔ React 橋接
+- **指令**：「開始閃卡複習」（`start-review`），可透過 Ctrl+P 呼叫
+- **DataStore.reviewCard()**：整合 `ts-fsrs` 的 FSRS 排程演算法
+
+### 修正
+- **Folder already exists**：`ensureDirectory` 加入 try/catch 靜默處理
+- **File already exists**：`save()` 新增 `safeCreate` 方法，失敗時 fallback 到 `adapter.write`
+- **指令未註冊**：`onload()` 中先註冊所有指令/擴充，最後才 `await dataStore.load()`
+- **型別安全**：State 枚舉與字串之間使用顯式映射表（stateMap / stateRevMap）
+
+### 架構改進
+- 共用 `isAlreadyExistsError()` 工具方法
+- `FSRSState` 新增 `lastReview?` 欄位
+
+---
+
 ## V0.1 — 首個可用版本 (2026-03-25)
 
 ### 新增

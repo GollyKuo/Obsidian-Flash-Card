@@ -1,18 +1,19 @@
 /**
  * AI-Enriched Flashcards — Obsidian 外掛主入口
  *
- * 功能概覽：
+ * V0.1.1 功能：
  * - M1：CSS 隔離環境（Tailwind fc- 前綴 + #fc-plugin-root 包裹）
  * - M2：閃卡語法解析 + Block ID 自動生成（On Blur）
- * - M3（預留）：CM6 ViewPlugin HUD 圖示
- * - M4（預留）：Gemini AI 豐富化
- * - M5（預留）：FSRS 複習 Modal
+ * - M3：CM6 ViewPlugin — 隱藏 Block ID
+ * - M5：FSRS 複習 Modal + 開始閃卡複習指令
  */
 
 import { Plugin, MarkdownView, Notice } from "obsidian";
 import { FlashcardParser } from "./parser/FlashcardParser";
 import { BlockIdManager } from "./blockid/BlockIdManager";
 import { DataStore } from "./store/DataStore";
+import { blockIdHiderExtension } from "./editor/BlockIdHider";
+import { ReviewModalContainer } from "./ui/ReviewModalContainer";
 
 // 引入樣式（由 esbuild + PostCSS 處理）
 import "./styles/main.css";
@@ -28,36 +29,36 @@ export default class FlashcardsPlugin extends Plugin {
     async onload(): Promise<void> {
         console.log("[Flashcards] 載入 AI-Enriched Flashcards 外掛");
 
-        // 初始化核心模組
+        // ── 初始化核心模組 ──
         this.parser = new FlashcardParser();
         this.blockIdManager = new BlockIdManager(this, this.parser);
         this.dataStore = new DataStore(this);
 
-        // 載入儲存的資料
-        await this.dataStore.load();
-
-        // 註冊 Block ID 的 On Blur 事件監聽
+        // ── 註冊事件與擴充（不依賴 DataStore 資料） ──
         this.blockIdManager.registerEvents();
+        this.registerEditorExtension(blockIdHiderExtension);
 
-        // 註冊指令：掃描當前文件的閃卡
+        // ── 註冊指令 ──
         this.addCommand({
             id: "scan-current-file",
             name: "掃描當前文件的閃卡",
             callback: () => this.scanCurrentFile(),
         });
-
-        // 註冊指令：顯示閃卡統計
         this.addCommand({
             id: "show-stats",
             name: "顯示閃卡統計",
             callback: () => this.showStats(),
         });
+        this.addCommand({
+            id: "start-review",
+            name: "開始閃卡複習",
+            callback: () => {
+                new ReviewModalContainer(this.app, this.dataStore).open();
+            },
+        });
 
-        // TODO M3：註冊 CM6 ViewPlugin（HUD 圖示）
-        // this.registerEditorExtension([...]);
-
-        // TODO M5：註冊複習 Modal 指令
-        // this.addCommand({ id: "open-review", ... });
+        // ── 最後才載入儲存資料（即使失敗也不影響上方已註冊的功能） ──
+        await this.dataStore.load();
 
         new Notice("✨ AI-Enriched Flashcards 已載入");
     }
