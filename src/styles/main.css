@@ -67,6 +67,9 @@
 .cm-editor .fc-answer-highlight.cm-highlight,
 .cm-editor .fc-answer-highlight .cm-highlight,
 .cm-editor .fc-answer-highlight .cm-formatting-highlight,
+.cm-editor .fc-answer-highlight-line .cm-highlight,
+.cm-editor .fc-answer-highlight-line .cm-formatting-highlight,
+.cm-editor .fc-answer-highlight-line [class*="cm-highlight"],
 .cm-editor .fc-answer-highlight [class*="cm-highlight"] {
   background: rgb(
     var(--fc-answer-highlight-rgb) / var(--fc-answer-highlight-opacity)
@@ -90,6 +93,9 @@
 .cm-editor .fc-answer-highlight.cm-highlight,
 .cm-editor .fc-answer-highlight .cm-highlight,
 .cm-editor .fc-answer-highlight .cm-formatting-highlight,
+.cm-editor .fc-answer-highlight-line .cm-highlight,
+.cm-editor .fc-answer-highlight-line .cm-formatting-highlight,
+.cm-editor .fc-answer-highlight-line [class*="cm-highlight"],
 .cm-editor .fc-answer-highlight [class*="cm-highlight"] {
   border-radius: 0;
   padding: 0;

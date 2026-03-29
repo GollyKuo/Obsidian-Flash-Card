@@ -17,6 +17,9 @@ import {
 const ANSWER_HIGHLIGHT = Decoration.mark({
     class: "fc-answer-highlight",
 });
+const ANSWER_HIGHLIGHT_LINE = Decoration.line({
+    class: "fc-answer-highlight-line",
+});
 const SYNTAX_HIDE = Decoration.replace({});
 
 type SettingsAccessor = () => FlashcardsPluginSettings;
@@ -92,6 +95,10 @@ function buildDecorations(
                     parser,
                     scopes,
                 });
+
+                if (ranges.length > 0) {
+                    builder.add(line.from, line.from, ANSWER_HIGHLIGHT_LINE);
+                }
 
                 for (const range of ranges) {
                     const start = line.from + range.from;

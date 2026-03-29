@@ -34,6 +34,7 @@ const postcssPlugin = {
                         /^\.theme-light$/,
                         /^\.theme-dark$/,
                         /^\.cm-editor \.fc-answer-highlight/,
+                        /^\.cm-editor \.fc-answer-highlight-line/,
                         /^body\.fc-answer-highlight-scope-cloze \.markdown-preview-view mark$/,
                         /^body\.fc-answer-highlight-scope-cloze \.markdown-rendered mark$/,
                     ],
