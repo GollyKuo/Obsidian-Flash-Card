@@ -9,11 +9,15 @@ import {
 } from "@codemirror/view";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import { FlashcardsPluginSettings } from "../settings/types";
-import { collectAnswerHighlightRanges } from "./answerHighlightRules";
+import {
+    collectAnswerHighlightRanges,
+    collectAnswerSyntaxHideRanges,
+} from "./answerHighlightRules";
 
 const ANSWER_HIGHLIGHT = Decoration.mark({
     class: "fc-answer-highlight",
 });
+const SYNTAX_HIDE = Decoration.replace({});
 
 type SettingsAccessor = () => FlashcardsPluginSettings;
 
@@ -56,10 +60,8 @@ function buildDecorations(
 ): DecorationSet {
     const builder = new RangeSetBuilder<Decoration>();
     const scopes = new Set(getSettings().answerHighlightScopes);
-
-    if (scopes.size === 0) {
-        return builder.finish();
-    }
+    const activeLineNumber =
+        view.state.doc.lineAt(view.state.selection.main.head).number - 1;
 
     const lines = view.state.doc.toString().split("\n");
 
@@ -68,18 +70,35 @@ function buildDecorations(
 
         while (pos <= to) {
             const line = view.state.doc.lineAt(pos);
-            const ranges = collectAnswerHighlightRanges({
-                lines,
-                lineNumber: line.number - 1,
-                parser,
-                scopes,
-            });
+            const lineNumber = line.number - 1;
+            if (lineNumber !== activeLineNumber) {
+                const syntaxRanges = collectAnswerSyntaxHideRanges({
+                    line: line.text,
+                    parser,
+                });
+                for (const range of syntaxRanges) {
+                    const start = line.from + range.from;
+                    const end = line.from + range.to;
+                    if (end > start) {
+                        builder.add(start, end, SYNTAX_HIDE);
+                    }
+                }
+            }
 
-            for (const range of ranges) {
-                const start = line.from + range.from;
-                const end = line.from + range.to;
-                if (end > start) {
-                    builder.add(start, end, ANSWER_HIGHLIGHT);
+            if (scopes.size > 0) {
+                const ranges = collectAnswerHighlightRanges({
+                    lines,
+                    lineNumber,
+                    parser,
+                    scopes,
+                });
+
+                for (const range of ranges) {
+                    const start = line.from + range.from;
+                    const end = line.from + range.to;
+                    if (end > start) {
+                        builder.add(start, end, ANSWER_HIGHLIGHT);
+                    }
                 }
             }
 

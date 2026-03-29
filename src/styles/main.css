@@ -57,8 +57,16 @@
    Answer Highlight
    ======================================== */
 
+.theme-light,
+.theme-dark {
+  --fc-answer-highlight-rgb: 77 77 77;
+  --fc-answer-highlight-opacity: 0.32;
+}
+
 .cm-editor .fc-answer-highlight {
-  background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  background: rgb(
+    var(--fc-answer-highlight-rgb) / var(--fc-answer-highlight-opacity)
+  );
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
   border-radius: 7px;
   padding: 0 0.24em;
@@ -66,9 +74,17 @@
   -webkit-box-decoration-break: clone;
 }
 
+/* 避免 Obsidian 原生 == 高亮覆蓋外掛高亮 */
+.cm-editor .fc-answer-highlight .cm-highlight {
+  background: transparent !important;
+  color: inherit;
+}
+
 body.fc-answer-highlight-scope-cloze .markdown-preview-view mark,
 body.fc-answer-highlight-scope-cloze .markdown-rendered mark {
-  background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  background: rgb(
+    var(--fc-answer-highlight-rgb) / var(--fc-answer-highlight-opacity)
+  );
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
   border-radius: 7px;
   padding: 0 0.24em;

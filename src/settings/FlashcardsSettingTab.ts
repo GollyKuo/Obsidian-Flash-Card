@@ -83,6 +83,50 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 });
         }
 
+        new Setting(containerEl)
+            .setName("高亮底色")
+            .setDesc("自訂答案高亮底色（編輯模式與填空閱讀模式共用）")
+            .addColorPicker((picker) => {
+                picker.setValue(this.plugin.settings.answerHighlightColor);
+                picker.onChange(async (value) => {
+                    this.plugin.settings.answerHighlightColor = value;
+                    await this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName("高亮透明度")
+            .setDesc("0% 為完全透明，100% 為不透明")
+            .addSlider((slider) => {
+                slider.setLimits(0, 100, 1);
+                slider.setDynamicTooltip();
+                slider.setValue(
+                    this.clampPercentage(
+                        this.plugin.settings.answerHighlightOpacity
+                    )
+                );
+                slider.onChange(async (value) => {
+                    this.plugin.settings.answerHighlightOpacity =
+                        this.clampPercentage(value);
+                    await this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName("重設高亮樣式")
+            .setDesc("還原為預設深灰半透明主題")
+            .addButton((button) => {
+                button.setButtonText("重設");
+                button.onClick(async () => {
+                    this.plugin.settings.answerHighlightColor =
+                        DEFAULT_SETTINGS.answerHighlightColor;
+                    this.plugin.settings.answerHighlightOpacity =
+                        DEFAULT_SETTINGS.answerHighlightOpacity;
+                    await this.plugin.saveSettings();
+                    this.display();
+                });
+            });
+
         containerEl.createEl("h3", { text: "AI 設定（預留）" });
 
         new Setting(containerEl)
@@ -173,5 +217,9 @@ export class FlashcardsSettingTab extends PluginSettingTab {
             case "bidirectional":
                 return "套用於 `:::` 雙向卡右側內容";
         }
+    }
+
+    private clampPercentage(value: number): number {
+        return Math.max(0, Math.min(100, Math.round(value)));
     }
 }

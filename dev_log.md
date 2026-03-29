@@ -2,6 +2,30 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.12 — 語法自動隱藏與高亮主題修正 (2026-03-30)
+
+### 新增
+- **答案語法自動隱藏**：在 `src/editor/answerHighlightRules.ts` 新增 `collectAnswerSyntaxHideRanges`，支援 `::`、`;;`、`:::`、`問題 ::` 的語法位置判定。
+- **Editor 自動隱藏行為**：`src/editor/AnswerHighlighter.ts` 新增語法隱藏 decoration；游標離開行時自動隱藏語法、回到該行時還原顯示。
+- **高亮主題設定**：`FlashcardsPluginSettings` 新增 `answerHighlightColor`、`answerHighlightOpacity`，並在 `FlashcardsSettingTab` 提供色彩選擇器、透明度滑桿與重設按鈕。
+
+### 架構調整
+- **主題變數集中管理**：`src/main.ts` 新增 `applyAnswerHighlightThemeVariables()`，以 CSS 變數統一控制高亮底色與透明度，設定變更即時生效。
+- **高亮衝突修正**：`src/styles/main.css` 新增 `.fc-answer-highlight .cm-highlight` 覆蓋規則，避免 Obsidian 原生 `== ==` 黃底蓋掉外掛高亮。
+- **樣式作用域修正**：`esbuild.config.mjs` 更新 `ignoredSelectors`，確保主題變數與衝突修正規則不被 `#fc-plugin-root` 前綴污染。
+
+### 文件同步
+- **RoadMap 更新**：`Sprint F` 新增並標記完成 `語法離行隱藏`、`高亮主題設定`、`== == 重疊衝突修正`（2026-03-30，V0.1.12）。
+- **Instruction 更新**：補充 `Syntax Visibility Rule` 與 `Highlight Conflict Guard` 實作原則。
+- **Manual 更新**：新增語法自動隱藏、高亮主題設定與高亮衝突修正說明。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 31 項測試（含新增語法隱藏規則測試）。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.11 — 答案高亮範圍多選設定 (2026-03-29)
 
 ### 新增

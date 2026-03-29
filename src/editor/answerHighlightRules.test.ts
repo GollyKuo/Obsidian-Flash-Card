@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { FlashcardParser } from "../parser/FlashcardParser";
-import { collectAnswerHighlightRanges } from "./answerHighlightRules";
+import {
+    collectAnswerHighlightRanges,
+    collectAnswerSyntaxHideRanges,
+} from "./answerHighlightRules";
 
 describe("collectAnswerHighlightRanges", () => {
     const parser = new FlashcardParser();
@@ -70,5 +73,45 @@ describe("collectAnswerHighlightRanges", () => {
 
         expect(firstLineRanges).toEqual([{ from: 4, to: 9 }]);
         expect(secondLineRanges).toEqual([{ from: 4, to: 9 }]);
+    });
+});
+
+describe("collectAnswerSyntaxHideRanges", () => {
+    const parser = new FlashcardParser();
+
+    it("hides forward token", () => {
+        const ranges = collectAnswerSyntaxHideRanges({
+            line: "概念 :: 正向答案",
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 3, to: 5 }]);
+    });
+
+    it("hides reverse token", () => {
+        const ranges = collectAnswerSyntaxHideRanges({
+            line: "解釋 ;; 概念",
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 3, to: 5 }]);
+    });
+
+    it("hides bidirectional token", () => {
+        const ranges = collectAnswerSyntaxHideRanges({
+            line: "單字 ::: 翻譯",
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 3, to: 6 }]);
+    });
+
+    it("hides multiline trigger token", () => {
+        const ranges = collectAnswerSyntaxHideRanges({
+            line: "問題 ::",
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 3, to: 5 }]);
     });
 });

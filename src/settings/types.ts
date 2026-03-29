@@ -4,6 +4,8 @@ export interface FlashcardsPluginSettings {
     dataDirectory: string;
     autoSyncOnModify: boolean;
     answerHighlightScopes: AnswerHighlightScope[];
+    answerHighlightColor: string;
+    answerHighlightOpacity: number;
     aiEnabled: boolean;
     aiProvider: "gemini";
     aiModel: string;
@@ -14,6 +16,8 @@ export const DEFAULT_SETTINGS: FlashcardsPluginSettings = {
     dataDirectory: "_Flashcards",
     autoSyncOnModify: true,
     answerHighlightScopes: ["cloze"],
+    answerHighlightColor: "#4d4d4d",
+    answerHighlightOpacity: 32,
     aiEnabled: false,
     aiProvider: "gemini",
     aiModel: "gemini-3-flash",

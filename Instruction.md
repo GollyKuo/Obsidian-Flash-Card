@@ -2,7 +2,7 @@
 
 ## 版本
 
-- `v1.3`
+- `v1.4`
 
 ## 專案目標 (Objective)
 
@@ -63,6 +63,8 @@
   - AI generated audio 存於 `_Flashcards/Assets/audio/`
   - `data.json` 僅記錄 relative path，不直接內嵌大型資產內容
 - **Answer Highlight Theme**: 支援低對比答案底色主題，並提供顏色/透明度與套用範圍（cloze-only / mixed / all answers）設定。
+- **Syntax Visibility Rule**: 在編輯模式中，`::`、`;;`、`:::` 與多行觸發 `問題 ::` 於游標離行後自動隱藏，回到該行時再顯示。
+- **Highlight Conflict Guard**: `==填空==` 在編輯模式需避免 Obsidian 原生 `.cm-highlight` 蓋過外掛答案高亮，確保單一一致的視覺層。
 - **Cleaning Tool**: 提供 settings-based maintenance tool，可移除所有 Block ID，讓筆記回到 pure Markdown。
 - **Storage Principle**: index 應優先視為可重建的 derived structure，而不是無限制膨脹的 primary schema；單卡更新應避免整包重寫。
 - **Highlight Scope Control**: 答案底色應由使用者設定決定套用範圍，避免將所有語法一律強制高亮。
@@ -80,4 +82,6 @@
 - 已完成 Sprint D 第二階段：queue / batch 儲存策略與 benchmark/profiling
 - 已完成 Sprint D 第三階段：`data.json` 改為 manifest，卡片資料改為 `Cards/<blockId>.json` 分片儲存，支援增量寫入
 - 已完成答案高亮範圍多選設定：`填空`、`單行答案`、`多行答案`、`雙向卡`
+- 已完成答案語法自動隱藏與高亮衝突修正：`::` / `;;` / `:::` / `問題 ::` 離行隱藏，並修復 `== ==` 與外掛高亮疊色
+- 已完成答案高亮主題設定：支援底色與透明度自訂，並可重設預設值
 - 下一步進入 Sprint E：先建立 Dashboard Workspace 的 `Cards` 分區骨架
