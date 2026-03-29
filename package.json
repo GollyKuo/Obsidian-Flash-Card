@@ -1,6 +1,6 @@
 {
     "name": "ai-enriched-flashcards",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "description": "AI-Enriched Flashcards Obsidian Plugin",
     "main": "main.js",
     "scripts": {

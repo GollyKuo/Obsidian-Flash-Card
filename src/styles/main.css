@@ -57,27 +57,37 @@
    Cloze（== ==）視覺優化
    ======================================== */
 
-/* 閱讀模式：將 mark 呈現為較柔和的膠囊標籤 */
+/* 閱讀模式：將 mark 呈現為低對比深灰膠囊（接近 inline-code 視覺） */
 .markdown-preview-view mark,
 .markdown-rendered mark {
-  background: color-mix(in srgb, var(--interactive-accent) 18%, transparent);
-  color: var(--text-normal);
-  border: 1px solid
-    color-mix(in srgb, var(--interactive-accent) 42%, transparent);
-  border-radius: 6px;
+  background: var(
+    --code-background,
+    color-mix(in srgb, var(--background-secondary) 82%, var(--background-modifier-border) 18%)
+  );
+  color: color-mix(in srgb, var(--text-normal) 74%, var(--text-muted) 26%);
+  border: none;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--background-modifier-border) 72%, transparent);
+  border-radius: 8px;
   padding: 0 0.28em;
+  font-weight: 500;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
 
-/* 編輯模式（Live Preview）：同步 cloze 視覺，避免預覽/編輯落差 */
+/* 編輯模式（Live Preview）：同步低對比深灰 cloze 視覺 */
 .cm-editor .cm-highlight {
-  background: color-mix(in srgb, var(--interactive-accent) 16%, transparent) !important;
-  color: var(--text-normal);
-  border: 1px solid
-    color-mix(in srgb, var(--interactive-accent) 40%, transparent);
-  border-radius: 6px;
+  background: var(
+    --code-background,
+    color-mix(in srgb, var(--background-secondary) 82%, var(--background-modifier-border) 18%)
+  ) !important;
+  color: color-mix(in srgb, var(--text-normal) 74%, var(--text-muted) 26%);
+  border: none;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--background-modifier-border) 72%, transparent);
+  border-radius: 8px;
   padding: 0 0.2em;
+  font-weight: 500;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
