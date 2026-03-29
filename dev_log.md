@@ -2,23 +2,6 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
-## V0.1.13 — 編輯器高亮覆蓋與邊框樣式修正 (2026-03-30)
-
-### 修正
-- **原生高亮覆蓋補強**：`src/styles/main.css` 新增 `.fc-answer-highlight.cm-highlight` 規則，確保當 CodeMirror 將 `fc-answer-highlight` 與 `.cm-highlight` 套在同一個元素時，仍由外掛底色接管，不再露出 Obsidian 原生黃底。
-- **邊框視覺收斂**：編輯模式的答案高亮取消膠囊式 padding，並將圓角降到接近直角，減少因字體/符號切段造成的毛毛蟲狀邊框。
-- **Build selector 白名單修正**：`esbuild.config.mjs` 將 `.cm-editor .fc-answer-highlight*` 納入 `ignoredSelectors`，避免新的覆蓋規則在打包時再次被前綴污染。
-
-### 文件同步
-- **Manual 更新**：補充編輯模式高亮覆蓋與平直樣式調整說明（V0.1.13）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 31 項測試。
-- **建置**：`npm run build` 通過。
-
----
-
 ## V0.1.12 — 語法自動隱藏與高亮主題修正 (2026-03-30)
 
 ### 新增
