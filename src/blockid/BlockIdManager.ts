@@ -7,7 +7,7 @@
  * 3. 透過 vault.process() 原子性寫入 Block ID
  */
 
-import { Plugin, MarkdownView, TFile } from "obsidian";
+import { Plugin, MarkdownView, debounce, TFile } from "obsidian";
 import { nanoid } from "nanoid";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import {
@@ -26,8 +26,6 @@ export class BlockIdManager {
     private lastCursorLine: number = -1;
     /** 上一次游標所在的檔案 */
     private lastFile: TFile | null = null;
-    /** 避免同一事件迴圈內重複檢查游標 */
-    private cursorCheckScheduled = false;
 
     constructor(plugin: Plugin, parser: FlashcardParser) {
         this.plugin = plugin;
@@ -74,30 +72,26 @@ export class BlockIdManager {
             })
         );
 
-        // 監聽編輯器變更事件（例如按 Enter 換行）
-        // 下一個事件迴圈立即檢查游標是否離開閃卡行，避免 500ms 防抖延遲
+        // 使用防抖的游標移動偵測
+        // 每 500ms 檢查一次游標是否離開閃卡行
+        const debouncedCheck = debounce(
+            () => this.checkCursorChange(),
+            500,
+            true
+        );
+
+        // 監聽編輯器變更事件
         this.plugin.registerEvent(
             this.plugin.app.workspace.on("editor-change", () => {
-                this.scheduleCursorCheck();
+                debouncedCheck();
             })
         );
 
         // 也監聽 click 事件觸發的游標移動
         this.plugin.registerDomEvent(document, "click", () => {
-            this.scheduleCursorCheck();
+            // 使用 setTimeout 確保游標位置已更新
+            setTimeout(() => debouncedCheck(), 100);
         });
-    }
-
-    private scheduleCursorCheck(): void {
-        if (this.cursorCheckScheduled) {
-            return;
-        }
-
-        this.cursorCheckScheduled = true;
-        setTimeout(() => {
-            this.cursorCheckScheduled = false;
-            this.checkCursorChange();
-        }, 0);
     }
 
     /**

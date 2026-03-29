@@ -2,24 +2,6 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
-## V0.1.10 — Cloze 顯示優化與 Block ID 即時化 (2026-03-29)
-
-### 新增
-- **Cloze 視覺優化**：在 `src/styles/main.css` 新增 `== ==`（`mark` / `.cm-highlight`）樣式，將預設高亮改為柔和膠囊風格，統一閱讀與編輯模式觀感。
-
-### 架構調整
-- **Block ID 觸發即時化**：`src/blockid/BlockIdManager.ts` 移除 `500ms debounce`，改為事件後下一個 event loop 立即檢查游標離行（`setTimeout(..., 0)` + 單次排程防重複），降低 `::` 後附加 Block ID 的可感延遲。
-
-### 文件同步
-- **Manual 更新**：補充 `==填空==` 的顯示優化說明（V0.1.10）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 22 項測試。
-- **建置**：`npm run build` 通過。
-
----
-
 ## V0.1.9 — Sprint D 第三階段：分片儲存與增量寫入 (2026-03-29)
 
 ### 新增
