@@ -54,13 +54,10 @@
 }
 
 /* ========================================
-   Cloze（== ==）顯示樣式
+   Answer Highlight
    ======================================== */
 
-/* 閱讀與編輯模式共用：低對比淺灰膠囊，避免高亮過刺眼 */
-.markdown-preview-view mark,
-.markdown-rendered mark,
-.cm-editor .cm-highlight {
+.cm-editor .fc-answer-highlight {
   background: color-mix(in srgb, var(--text-normal) 14%, transparent);
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
   border-radius: 7px;
@@ -69,8 +66,12 @@
   -webkit-box-decoration-break: clone;
 }
 
-/* Live Preview 需提高優先權，蓋過主題預設 mark/hightlight 色 */
-.cm-editor .cm-highlight {
-  background: color-mix(in srgb, var(--text-normal) 14%, transparent) !important;
-  color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%) !important;
+body.fc-answer-highlight-scope-cloze .markdown-preview-view mark,
+body.fc-answer-highlight-scope-cloze .markdown-rendered mark {
+  background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
+  border-radius: 7px;
+  padding: 0 0.24em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }

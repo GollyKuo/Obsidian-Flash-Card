@@ -1,4 +1,9 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import {
+    ANSWER_HIGHLIGHT_SCOPE_LABELS,
+    ANSWER_HIGHLIGHT_SCOPES,
+    AnswerHighlightScope,
+} from "./answerHighlightScopes";
 import { DEFAULT_SETTINGS } from "./types";
 import type FlashcardsPlugin from "../main";
 
@@ -45,6 +50,38 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName("目前資料檔路徑")
             .setDesc(this.plugin.dataStore.getDataFilePath());
+
+        containerEl.createEl("h3", { text: "答案高亮設定" });
+        containerEl.createEl("p", {
+            text: "可重複多選要套用背景色的答案類型。填空會同時影響閱讀模式與編輯模式，其餘類型目前以編輯模式為主。",
+        });
+
+        for (const scope of ANSWER_HIGHLIGHT_SCOPES) {
+            new Setting(containerEl)
+                .setName(ANSWER_HIGHLIGHT_SCOPE_LABELS[scope])
+                .setDesc(this.getAnswerHighlightScopeDescription(scope))
+                .addToggle((toggle) => {
+                    toggle.setValue(
+                        this.plugin.settings.answerHighlightScopes.includes(scope)
+                    );
+                    toggle.onChange(async (value) => {
+                        const next = new Set(
+                            this.plugin.settings.answerHighlightScopes
+                        );
+
+                        if (value) {
+                            next.add(scope);
+                        } else {
+                            next.delete(scope);
+                        }
+
+                        this.plugin.settings.answerHighlightScopes = [
+                            ...ANSWER_HIGHLIGHT_SCOPES,
+                        ].filter((item) => next.has(item));
+                        await this.plugin.saveSettings();
+                    });
+                });
+        }
 
         containerEl.createEl("h3", { text: "AI 設定（預留）" });
 
@@ -121,5 +158,20 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                     }
                 });
             });
+    }
+
+    private getAnswerHighlightScopeDescription(
+        scope: AnswerHighlightScope
+    ): string {
+        switch (scope) {
+            case "cloze":
+                return "套用於 `==填空==` 語法";
+            case "single-line":
+                return "套用於 `::` 與 `;;` 的單行答案區段";
+            case "multi-line":
+                return "套用於 `問題 ::` 後方縮排的多行答案";
+            case "bidirectional":
+                return "套用於 `:::` 雙向卡右側內容";
+        }
     }
 }

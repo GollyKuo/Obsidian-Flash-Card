@@ -1,6 +1,7 @@
 import { Plugin } from "obsidian";
 import { BlockIdManager } from "../blockid/BlockIdManager";
 import { BlockIdCleanupService } from "../blockid/BlockIdCleanupService";
+import { createAnswerHighlighterExtension } from "../editor/AnswerHighlighter";
 import { blockIdHiderExtension } from "../editor/BlockIdHider";
 import { blockIdPreviewCleaner } from "../editor/registerBlockIdPreviewCleaner";
 import { FlashcardParser } from "../parser/FlashcardParser";
@@ -37,6 +38,9 @@ export function createFlashcardsRuntime(
     const blockIdCleanupService = new BlockIdCleanupService(plugin, syncService);
 
     plugin.registerEditorExtension(blockIdHiderExtension);
+    plugin.registerEditorExtension(
+        createAnswerHighlighterExtension(parser, getSettings)
+    );
     plugin.registerMarkdownPostProcessor(blockIdPreviewCleaner);
 
     return {

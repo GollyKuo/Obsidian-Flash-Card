@@ -2,6 +2,30 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.11 — 答案高亮範圍多選設定 (2026-03-29)
+
+### 新增
+- **答案高亮範圍設定**：在 `src/settings/FlashcardsSettingTab.ts` 新增可重複多選的設定項目，支援 `填空`、`單行答案`、`多行答案`、`雙向卡`。
+- **高亮規則模組**：新增 `src/editor/answerHighlightRules.ts` 與對應測試 `answerHighlightRules.test.ts`，集中管理各類語法的答案區段判定。
+- **Editor 高亮 Extension**：新增 `src/editor/AnswerHighlighter.ts`，依設定範圍對答案區段加上 `fc-answer-highlight` decoration。
+
+### 架構調整
+- **設定模型擴充**：`FlashcardsPluginSettings` 新增 `answerHighlightScopes`，預設為 `["cloze"]`，維持現有體驗不突變。
+- **樣式責任收斂**：`src/styles/main.css` 不再直接依賴 `.cm-highlight`，改為插件專屬的 `.fc-answer-highlight` class，避免誤影響一般 Markdown highlight。
+- **設定即時生效**：`src/main.ts` 在儲存設定後呼叫 `workspace.updateOptions()`，讓 editor extension 可反映最新勾選項目。
+
+### 文件同步
+- **RoadMap 更新**：`Sprint F` 已納入答案高亮主題與套用範圍設定規劃。
+- **Instruction 更新**：新增 `Answer Highlight Theme` 原則，明確定義範圍選項。
+- **Manual 更新**：補充使用者可於設定頁多選答案高亮範圍（V0.1.11）。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，新增答案高亮規則測試。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.10 — 回到 V0.1.9 基線後重做視覺與觸發體驗 (2026-03-29)
 
 ### 架構調整

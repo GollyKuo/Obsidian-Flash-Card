@@ -31,9 +31,9 @@ const postcssPlugin = {
                     ignoredSelectors: [
                         ":root",
                         /^@keyframes/,
-                        /^\.markdown-preview-view mark$/,
-                        /^\.markdown-rendered mark$/,
-                        /^\.cm-editor \.cm-highlight$/,
+                        /^\.cm-editor \.fc-answer-highlight$/,
+                        /^body\.fc-answer-highlight-scope-cloze \.markdown-preview-view mark$/,
+                        /^body\.fc-answer-highlight-scope-cloze \.markdown-rendered mark$/,
                     ],
                 }),
             ]).process(css, { from: args.path });

@@ -21,6 +21,7 @@ export default class FlashcardsPlugin extends Plugin {
         console.log("[Flashcards] 載入 AI-Enriched Flashcards 外掛");
 
         await this.loadSettings();
+        this.applyAnswerHighlightScopeClasses();
 
         this.runtime = createFlashcardsRuntime(this, () => this.settings);
         this.runtime.blockIdManager.registerEvents();
@@ -57,9 +58,18 @@ export default class FlashcardsPlugin extends Plugin {
 
     async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
+        this.applyAnswerHighlightScopeClasses();
+        this.app.workspace.updateOptions();
 
         if (this.runtime) {
             await this.runtime.dataStore.load();
         }
+    }
+
+    private applyAnswerHighlightScopeClasses(): void {
+        document.body.classList.toggle(
+            "fc-answer-highlight-scope-cloze",
+            this.settings.answerHighlightScopes.includes("cloze")
+        );
     }
 }
