@@ -2,6 +2,22 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.13 — Cloze Widget 顯示穩定性修正 (2026-03-30)
+
+### 修正
+- **游標判定改為 token 級別**：`src/editor/AnswerHighlighter.ts` 不再以整行是否 active 決定 cloze widget 顯示，而是僅在游標進入「該 cloze token 範圍」時還原原語法；避免整行都退回原生 `== ==` 高亮。
+- **樣式 fallback 補強**：`src/styles/main.css` 為 `.fc-answer-highlight` 與 `.fc-cloze-widget` 新增 `background: var(--background-modifier-hover)` fallback，若主題/環境對 `color-mix` 支援不完整，答案高亮仍可見。
+
+### 文件同步
+- **Manual 更新**：補充 cloze token 級別游標顯示規則與高亮 fallback 說明（V0.1.13）。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 29 項測試。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.12 — 高亮渲染重構第一階段（Cloze Widget 接管） (2026-03-30)
 
 ### 新增

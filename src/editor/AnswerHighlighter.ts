@@ -80,8 +80,7 @@ function buildDecorations(
 ): DecorationSet {
     const builder = new RangeSetBuilder<Decoration>();
     const scopes = new Set(getSettings().answerHighlightScopes);
-    const activeLineNumber =
-        view.state.doc.lineAt(view.state.selection.main.head).number - 1;
+    const cursorPos = view.state.selection.main.head;
 
     if (scopes.size === 0) {
         return builder.finish();
@@ -96,8 +95,7 @@ function buildDecorations(
             const line = view.state.doc.lineAt(pos);
             const lineNumber = line.number - 1;
 
-            const shouldUseClozeWidget =
-                scopes.has("cloze") && lineNumber !== activeLineNumber;
+            const shouldUseClozeWidget = scopes.has("cloze");
             const clozeTokenRanges = shouldUseClozeWidget
                 ? collectClozeTokenRanges({
                       line: line.text,
@@ -108,6 +106,11 @@ function buildDecorations(
             for (const clozeRange of clozeTokenRanges) {
                 const start = line.from + clozeRange.from;
                 const end = line.from + clozeRange.to;
+                const isCursorInsideToken =
+                    cursorPos >= start && cursorPos <= end;
+                if (isCursorInsideToken) {
+                    continue;
+                }
                 if (end > start) {
                     builder.add(
                         start,

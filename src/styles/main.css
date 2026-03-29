@@ -58,7 +58,9 @@
    ======================================== */
 
 .cm-editor .fc-answer-highlight {
+  background: var(--background-modifier-hover);
   background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  color: var(--text-normal);
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
   border-radius: 7px;
   padding: 0 0.24em;
@@ -67,7 +69,9 @@
 }
 
 .cm-editor .fc-cloze-widget {
+  background: var(--background-modifier-hover);
   background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  color: var(--text-normal);
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
   border-radius: 2px;
   padding: 0 0.1em;
@@ -76,7 +80,9 @@
 
 body.fc-answer-highlight-scope-cloze .markdown-preview-view mark,
 body.fc-answer-highlight-scope-cloze .markdown-rendered mark {
+  background: var(--background-modifier-hover);
   background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  color: var(--text-normal);
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
   border-radius: 7px;
   padding: 0 0.24em;
