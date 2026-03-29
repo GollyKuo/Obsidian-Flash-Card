@@ -3,16 +3,10 @@ import { AnswerHighlightScope } from "../settings/answerHighlightScopes";
 
 const BIDIRECTIONAL_PATTERN = /^(.+?)\s*:::\s*(.+)$/;
 const FORWARD_PATTERN = /^(.+?)\s*::\s*(.+)$/;
-const FORWARD_MULTILINE_PATTERN = /^(.+?)\s*::\s*$/;
 const REVERSE_PATTERN = /^(.+?)\s*;;\s*(.+)$/;
 const CLOZE_PATTERN = /==([^=]+)==/g;
 
 export interface AnswerHighlightRange {
-    from: number;
-    to: number;
-}
-
-export interface AnswerSyntaxHideRange {
     from: number;
     to: number;
 }
@@ -90,38 +84,6 @@ export function collectAnswerHighlightRanges(params: {
     return mergeRanges(ranges);
 }
 
-export function collectAnswerSyntaxHideRanges(params: {
-    line: string;
-    parser: FlashcardParser;
-}): AnswerSyntaxHideRange[] {
-    const cleanLine = params.parser.stripBlockId(params.line).trimEnd();
-    if (!cleanLine.trim()) {
-        return [];
-    }
-
-    const bidirectionalMatch = cleanLine.match(BIDIRECTIONAL_PATTERN);
-    if (bidirectionalMatch) {
-        return buildTokenRange(cleanLine, ":::", bidirectionalMatch[1].length);
-    }
-
-    const forwardMatch = cleanLine.match(FORWARD_PATTERN);
-    if (forwardMatch) {
-        return buildTokenRange(cleanLine, "::", forwardMatch[1].length);
-    }
-
-    const reverseMatch = cleanLine.match(REVERSE_PATTERN);
-    if (reverseMatch) {
-        return buildTokenRange(cleanLine, ";;", reverseMatch[1].length);
-    }
-
-    const multilineMatch = cleanLine.match(FORWARD_MULTILINE_PATTERN);
-    if (multilineMatch) {
-        return buildTokenRange(cleanLine, "::", multilineMatch[1].length);
-    }
-
-    return [];
-}
-
 function findMultilineAnswerRange(
     lines: string[],
     lineNumber: number,
@@ -169,17 +131,4 @@ function mergeRanges(ranges: AnswerHighlightRange[]): AnswerHighlightRange[] {
     }
 
     return merged;
-}
-
-function buildTokenRange(
-    line: string,
-    token: string,
-    searchFrom: number
-): AnswerSyntaxHideRange[] {
-    const start = line.indexOf(token, searchFrom);
-    if (start < 0) {
-        return [];
-    }
-
-    return [{ from: start, to: start + token.length }];
 }

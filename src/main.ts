@@ -22,7 +22,6 @@ export default class FlashcardsPlugin extends Plugin {
 
         await this.loadSettings();
         this.applyAnswerHighlightScopeClasses();
-        this.applyAnswerHighlightThemeVariables();
 
         this.runtime = createFlashcardsRuntime(this, () => this.settings);
         this.runtime.blockIdManager.registerEvents();
@@ -41,8 +40,6 @@ export default class FlashcardsPlugin extends Plugin {
             void this.runtime.dataStore.flushQueuedSave();
         }
 
-        this.clearAnswerHighlightThemeVariables();
-
         console.log("[Flashcards] 卸載 AI-Enriched Flashcards 外掛");
     }
 
@@ -57,18 +54,11 @@ export default class FlashcardsPlugin extends Plugin {
             ...DEFAULT_SETTINGS,
             ...saved,
         };
-        this.settings.answerHighlightColor = this.normalizeHexColor(
-            this.settings.answerHighlightColor
-        );
-        this.settings.answerHighlightOpacity = this.clampOpacity(
-            this.settings.answerHighlightOpacity
-        );
     }
 
     async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
         this.applyAnswerHighlightScopeClasses();
-        this.applyAnswerHighlightThemeVariables();
         this.app.workspace.updateOptions();
 
         if (this.runtime) {
@@ -81,48 +71,5 @@ export default class FlashcardsPlugin extends Plugin {
             "fc-answer-highlight-scope-cloze",
             this.settings.answerHighlightScopes.includes("cloze")
         );
-    }
-
-    private applyAnswerHighlightThemeVariables(): void {
-        const rgb = this.hexToRgbTriplet(this.settings.answerHighlightColor);
-        document.body.style.setProperty("--fc-answer-highlight-rgb", rgb);
-        document.body.style.setProperty(
-            "--fc-answer-highlight-opacity",
-            String(this.settings.answerHighlightOpacity / 100)
-        );
-    }
-
-    private clearAnswerHighlightThemeVariables(): void {
-        document.body.style.removeProperty("--fc-answer-highlight-rgb");
-        document.body.style.removeProperty("--fc-answer-highlight-opacity");
-    }
-
-    private hexToRgbTriplet(hex: string): string {
-        const cleaned = this.normalizeHexColor(hex).replace(/^#/, "");
-        if (!/^[0-9a-fA-F]{6}$/.test(cleaned)) {
-            return "77 77 77";
-        }
-
-        const r = parseInt(cleaned.slice(0, 2), 16);
-        const g = parseInt(cleaned.slice(2, 4), 16);
-        const b = parseInt(cleaned.slice(4, 6), 16);
-        return `${r} ${g} ${b}`;
-    }
-
-    private normalizeHexColor(value: string): string {
-        const cleaned = value.trim();
-        if (/^#[0-9a-fA-F]{6}$/.test(cleaned)) {
-            return cleaned;
-        }
-
-        return DEFAULT_SETTINGS.answerHighlightColor;
-    }
-
-    private clampOpacity(value: number): number {
-        if (!Number.isFinite(value)) {
-            return DEFAULT_SETTINGS.answerHighlightOpacity;
-        }
-
-        return Math.max(0, Math.min(100, Math.round(value)));
     }
 }

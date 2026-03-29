@@ -31,10 +31,7 @@ const postcssPlugin = {
                     ignoredSelectors: [
                         ":root",
                         /^@keyframes/,
-                        /^\.theme-light$/,
-                        /^\.theme-dark$/,
                         /^\.cm-editor \.fc-answer-highlight$/,
-                        /^\.cm-editor \.fc-answer-highlight \.cm-highlight$/,
                         /^body\.fc-answer-highlight-scope-cloze \.markdown-preview-view mark$/,
                         /^body\.fc-answer-highlight-scope-cloze \.markdown-rendered mark$/,
                     ],
