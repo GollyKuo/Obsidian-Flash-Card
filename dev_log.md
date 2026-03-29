@@ -2,6 +2,24 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.10 — 回到 V0.1.9 基線後重做視覺與觸發體驗 (2026-03-29)
+
+### 架構調整
+- **版本基線回退**：先將 `V0.1.10 ~ V0.1.12` 以 revert 方式回到 `V0.1.9` 架構，再以最小變更重做需求，避免樣式試驗歷史持續疊加。
+- **Block ID 觸發即時化（保留）**：`src/blockid/BlockIdManager.ts` 移除 `500ms debounce`，改為下一個事件迴圈即時檢查游標離行（`setTimeout(..., 0)` + 防重入）。
+- **Cloze 樣式重做**：`src/styles/main.css` 新增低對比淺灰膠囊樣式（`mark` / `.cm-highlight`），降低刺眼感。
+- **樣式作用範圍修正**：`esbuild.config.mjs` 的 `PrefixWrap` 新增 `ignoredSelectors`，確保 cloze 樣式不被包進 `#fc-plugin-root` 而失效。
+
+### 文件同步
+- **Manual 更新**：新增 `==填空==` 低對比淺灰樣式說明，並註記 Block ID 即時附加行為（V0.1.10）。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 22 項測試。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.9 — Sprint D 第三階段：分片儲存與增量寫入 (2026-03-29)
 
 ### 新增

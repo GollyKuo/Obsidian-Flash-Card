@@ -28,7 +28,13 @@ const postcssPlugin = {
                 autoprefixer,
                 PrefixWrap("#fc-plugin-root", {
                     // 不對 @keyframes 和 :root 加前綴
-                    ignoredSelectors: [":root", /^@keyframes/],
+                    ignoredSelectors: [
+                        ":root",
+                        /^@keyframes/,
+                        /^\.markdown-preview-view mark$/,
+                        /^\.markdown-rendered mark$/,
+                        /^\.cm-editor \.cm-highlight$/,
+                    ],
                 }),
             ]).process(css, { from: args.path });
 
