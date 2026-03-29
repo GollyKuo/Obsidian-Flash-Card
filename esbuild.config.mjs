@@ -27,8 +27,16 @@ const postcssPlugin = {
                 tailwindcss,
                 autoprefixer,
                 PrefixWrap("#fc-plugin-root", {
-                    // 不對 @keyframes 和 :root 加前綴
-                    ignoredSelectors: [":root", /^@keyframes/],
+                    // 保持主 UI 樣式隔離，但允許 editor / preview 全域樣式生效
+                    ignoredSelectors: [
+                        ":root",
+                        /^@keyframes/,
+                        /^\.markdown-preview-view/,
+                        /^\.markdown-rendered/,
+                        /^\.cm-line/,
+                        /^\.cm-activeLine/,
+                        /^\.cm-editor/,
+                    ],
                 }),
             ]).process(css, { from: args.path });
 
