@@ -2,23 +2,6 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
-## V0.1.15 — 答案高亮行層級覆蓋修正 (2026-03-30)
-
-### 修正
-- **Line-level 覆蓋策略**：`src/editor/AnswerHighlighter.ts` 針對所有有答案高亮的行新增 `fc-answer-highlight-line` decoration，讓 CSS 可從整行容器層級覆蓋內部所有 `cm-highlight` 相關節點。
-- **Selector 擴充**：`src/styles/main.css` 新增 `.fc-answer-highlight-line .cm-highlight`、`.cm-formatting-highlight` 與相關 descendant 規則，避免 `==填空==` 在答案高亮行中仍殘留原生黃底。
-- **Build 白名單同步**：`esbuild.config.mjs` 新增 `.cm-editor .fc-answer-highlight-line` ignored selector，確保這批新規則在打包後保持全域作用。
-
-### 文件同步
-- **Manual 更新**：補充答案高亮行層級覆蓋機制說明（V0.1.15）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 31 項測試。
-- **建置**：`npm run build` 通過。
-
----
-
 ## V0.1.14 — 內層原生高亮覆蓋補強 (2026-03-30)
 
 ### 修正
