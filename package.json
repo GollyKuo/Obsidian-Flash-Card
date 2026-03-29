@@ -1,12 +1,13 @@
 {
     "name": "ai-enriched-flashcards",
-    "version": "0.1.3",
+    "version": "0.1.9",
     "description": "AI-Enriched Flashcards Obsidian Plugin",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs --watch",
         "build": "node esbuild.config.mjs --production",
-        "test": "vitest run"
+        "test": "vitest run",
+        "benchmark:store": "vitest bench --run src/store/FlashcardIndex.bench.ts src/store/FlashcardStorage.bench.ts"
     },
     "keywords": [],
     "author": "Golly",

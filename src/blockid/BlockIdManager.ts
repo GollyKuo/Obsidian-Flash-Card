@@ -10,6 +10,11 @@
 import { Plugin, MarkdownView, debounce, TFile } from "obsidian";
 import { nanoid } from "nanoid";
 import { FlashcardParser } from "../parser/FlashcardParser";
+import {
+    appendBlockId,
+    hasBlockId,
+    shouldAttachBlockIdOnBlur,
+} from "./blockIdRules";
 
 /** Block ID 前綴 */
 const BLOCK_ID_PREFIX = "fc-";
@@ -39,7 +44,7 @@ export class BlockIdManager {
      * 檢查行末是否已有 Block ID
      */
     hasBlockId(line: string): boolean {
-        return /\^fc-[a-zA-Z0-9_-]+\s*$/.test(line);
+        return hasBlockId(line);
     }
 
     /**
@@ -48,9 +53,11 @@ export class BlockIdManager {
      * @returns 附加 Block ID 後的行內容
      */
     appendBlockId(line: string): string {
-        if (this.hasBlockId(line)) return line;
-        const id = this.generateId();
-        return `${line} ^${id}`;
+        if (this.hasBlockId(line)) {
+            return line;
+        }
+
+        return appendBlockId(line, this.generateId());
     }
 
     /**
@@ -156,20 +163,22 @@ export class BlockIdManager {
             const lineContent = editor.getLine(lineNumber);
             if (!lineContent || lineContent.trim() === "") return;
 
-            // 已經有 Block ID，跳過
-            if (this.hasBlockId(lineContent)) return;
-
             // 取得完整文件內容來檢查多行模式
             const allLines: string[] = [];
             for (let i = 0; i < editor.lineCount(); i++) {
                 allLines.push(editor.getLine(i));
             }
 
-            // 檢查是否為閃卡語法
-            const singleCard = this.parser.parseLine(lineContent, lineNumber);
-            const multiCard = this.parser.parseMultiLine(allLines, lineNumber);
-
-            if (!singleCard && !multiCard) return;
+            if (
+                !shouldAttachBlockIdOnBlur({
+                    parser: this.parser,
+                    lineContent,
+                    lineNumber,
+                    allLines,
+                })
+            ) {
+                return;
+            }
 
             // 使用 vault.process() 原子性寫入 Block ID
             const newId = this.generateId();

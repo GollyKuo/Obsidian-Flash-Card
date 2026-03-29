@@ -10,6 +10,7 @@ import { useState } from "react";
 import { FlashcardRecord } from "../store/types";
 import { DataStore } from "../store/DataStore";
 import { Rating } from "ts-fsrs";
+import type { ReviewRating } from "../review/FsrsScheduler";
 
 interface ReviewModalProps {
     cards: FlashcardRecord[];
@@ -24,7 +25,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ cards, dataStore, onCl
     const card = index < cards.length ? cards[index] : null;
 
     /** 評分後前進至下一張 */
-    const rate = async (rating: Rating) => {
+    const rate = async (rating: ReviewRating) => {
         if (!card) return;
         await dataStore.reviewCard(card.blockId, rating);
         setShowAnswer(false);

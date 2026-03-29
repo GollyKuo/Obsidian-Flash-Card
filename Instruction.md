@@ -1,29 +1,80 @@
-<task_instruction>
-  <version>v1.1</version>
-  <objective>Build the "AI-Enriched Flashcards" Obsidian plugin with strict CSS isolation and RemNote-inspired logic.</objective>
+# 開發指令 (Instruction)
 
-  <tech_stack>
-    - Framework: React 18
-    - Styling: Tailwind (Prefix: 'fc-', Preflight: false) + PostCSS PrefixWrap (#fc-plugin-root)
-    - Icons: Lucide-React
-    - AI: Gemini 3 Flash SDK (@google/generative-ai)
-    - Storage: External JSON at `_Flashcards/data.json`
-  </tech_stack>
+## 版本
 
-  <milestones>
-    <m1>Setup sandbox environment, PostCSS isolation, and CSS rules to hide "^fc-" IDs.</m1>
-    <m2>Implement Flashcard Parser with "On Blur" ID generation logic and indentation support.</m2>
-    <m3>Develop Notion-style HUD (Heads-Up Display) using CM6 View Plugin to show mastery icons at line ends.</m4>
-    <m4>Integrate Gemini 3 Flash for Manual Enrichment and Batch Requesting.</m5>
-    <m5>Build Review Modal with FSRS logic and 4-button low-saturation UI.</m6>
-  </milestones>
+- `v1.3`
 
-  <implementation_details>
-    - **ID Persistence**: Use `nanoid(6)` for ^fc-xxxx IDs.
-    - **Context Awareness**: Automatically pass H1-H6 headers and parent indentation to AI as context.
-    - **Asset Management**: Save AI images/audio to `_Flashcards/Assets/`.
-    - **Cleaning Tool**: Implement a settings toggle to strip all Block IDs and return notes to pure Markdown.
-  </implementation_details>
+## 專案目標 (Objective)
 
-  <action>Initialize project structure and implement M1 & M2 as the first sprint.</action>
-</task_instruction>
+- 建置一套 **AI-Enriched Flashcards Obsidian Plugin**。
+- 核心方向為：**strict CSS isolation**、**RemNote-inspired interaction model**、**FSRS-based review scheduling**、**Obsidian-native editing workflow**。
+- 產品定位是學習與複習系統，不是一般筆記小工具或單純的 note widget。
+
+## 技術堆疊 (Tech Stack)
+
+- **Framework**: React 18
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+  - prefix 使用 `fc-`
+  - `Preflight` 關閉
+  - 搭配 `PostCSS PrefixWrap` 將 UI 隔離於 `#fc-plugin-root`
+- **Icons**: `lucide-react`
+- **AI Layer**: Gemini 3 Flash SDK (`@google/generative-ai`)
+- **Persistence Layer**: sharded JSON storage (`_Flashcards/data.json` manifest + `_Flashcards/Cards/*.json`)
+
+## 里程碑 (Milestones)
+
+### M1. Sandbox 與樣式隔離
+
+- 建立 plugin sandbox 環境
+- 完成 PostCSS isolation
+- 建立隱藏 `^fc-` Block ID 的 CSS / rendering 規則
+
+### M2. Flashcard Parser 與 ID 流程
+
+- 完成 `FlashcardParser`
+- 支援 `On Blur` Block ID generation
+- 支援 indentation-aware multiline parsing
+
+### M3. HUD 與編輯器狀態提示
+
+- 以 `CodeMirror 6 View Plugin` 建立 **Notion-style HUD**
+- 在行尾顯示 mastery icon、due state 與相關狀態提示
+
+### M4. AI Enrichment
+
+- 整合 Gemini 3 Flash
+- 支援 **Manual Enrichment** 與 **Batch Requesting**
+- 預留圖片、音訊與多模態流程
+
+### M5. Review Experience
+
+- 建立 `Review Modal`
+- 接入 FSRS review logic
+- 提供 4-button、low-saturation UI
+
+## 實作細節 (Implementation Details)
+
+- **ID Persistence**: 使用 `nanoid(6)` 生成 `^fc-xxxxxx`。
+- **Context Awareness**: 將 H1-H6 headers、parent indentation、source relationship 自動帶入 AI context。
+- **Data Isolation**: 使用者原始筆記不應被 review metadata 汙染；學習狀態集中存於 `_Flashcards` 儲存層（manifest + card shards）。
+- **Asset Management**:
+  - AI generated images 存於 `_Flashcards/Assets/images/`
+  - AI generated audio 存於 `_Flashcards/Assets/audio/`
+  - `data.json` 僅記錄 relative path，不直接內嵌大型資產內容
+- **Cleaning Tool**: 提供 settings-based maintenance tool，可移除所有 Block ID，讓筆記回到 pure Markdown。
+- **Storage Principle**: index 應優先視為可重建的 derived structure，而不是無限制膨脹的 primary schema；單卡更新應避免整包重寫。
+
+## 當前執行原則 (Current Execution Focus)
+
+- 優先保護 `buildability`、`sync correctness`、`note safety`
+- 採用 `incremental delivery`
+- 在每一步功能擴充前，先確認現有架構是否足以承接下一階段
+- 修改前先確認驗證基線，修改後再執行回歸驗證
+
+## 當前行動 (Action)
+
+- 已完成 Sprint D 第一階段：schema migration 與 `sourcePath` / `due` in-memory index 基礎
+- 已完成 Sprint D 第二階段：queue / batch 儲存策略與 benchmark/profiling
+- 已完成 Sprint D 第三階段：`data.json` 改為 manifest，卡片資料改為 `Cards/<blockId>.json` 分片儲存，支援增量寫入
+- 下一步進入 Sprint E：先建立 Dashboard Workspace 的 `Cards` 分區骨架
