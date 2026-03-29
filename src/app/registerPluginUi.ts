@@ -1,10 +1,18 @@
 import { MarkdownView, Notice, Plugin } from "obsidian";
 import { FlashcardsRuntime } from "./createFlashcardsRuntime";
+import {
+    collectAnswerHighlightRanges,
+    collectClozeTokenRanges,
+} from "../editor/answerHighlightRules";
+import { FlashcardsPluginSettings } from "../settings/types";
 import { ReviewModalContainer } from "../ui/ReviewModalContainer";
+
+type SettingsAccessor = () => FlashcardsPluginSettings;
 
 export function registerPluginUi(
     plugin: Plugin,
-    runtime: FlashcardsRuntime
+    runtime: FlashcardsRuntime,
+    getSettings: SettingsAccessor
 ): void {
     const openReview = () => {
         new ReviewModalContainer(plugin.app, runtime.dataStore).open();
@@ -76,6 +84,50 @@ export function registerPluginUi(
         id: "start-review",
         name: "開始閃卡複習",
         callback: openReview,
+    });
+
+    plugin.addCommand({
+        id: "debug-answer-highlight",
+        name: "顯示答案高亮診斷",
+        callback: () => {
+            const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+            if (!view) {
+                new Notice("目前沒有開啟可診斷的 Markdown 文件");
+                return;
+            }
+
+            const cursor = view.editor.getCursor();
+            const lineText = view.editor.getLine(cursor.line);
+            const lines = view.editor.getValue().split("\n");
+            const settings = getSettings();
+            const scopes = new Set(settings.answerHighlightScopes);
+            const highlightRanges = collectAnswerHighlightRanges({
+                lines,
+                lineNumber: cursor.line,
+                parser: runtime.parser,
+                scopes,
+            });
+            const clozeRanges = collectClozeTokenRanges({
+                line: lineText,
+                parser: runtime.parser,
+            });
+
+            const payload = {
+                version: plugin.manifest.version,
+                file: view.file?.path ?? "(unknown)",
+                lineNumber: cursor.line + 1,
+                scopes: settings.answerHighlightScopes,
+                highlightRanges,
+                clozeRanges,
+                lineText,
+            };
+
+            console.log("[Flashcards][AnswerHighlightDebug]", payload);
+            new Notice(
+                `高亮診斷 v${payload.version}\n行 ${payload.lineNumber}\nscopes: ${payload.scopes.join(", ") || "(empty)"}\nanswers: ${payload.highlightRanges.length}\ncloze: ${payload.clozeRanges.length}\n詳情請看開發者主控台`,
+                12000
+            );
+        },
     });
 
     plugin.addRibbonIcon("scan", "掃描目前文件中的閃卡", async () => {

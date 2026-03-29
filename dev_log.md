@@ -2,6 +2,25 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.14 — 高亮診斷工具與設定防呆 (2026-03-30)
+
+### 新增
+- **答案高亮診斷指令**：在 `src/app/registerPluginUi.ts` 新增 `顯示答案高亮診斷` 指令，會回報目前游標行的 scopes、answer ranges、cloze ranges，並同步輸出詳細資料到開發者主控台。
+
+### 架構調整
+- **設定防呆**：`src/main.ts` 在 `loadSettings()` 會過濾不合法 scope，若 `answerHighlightScopes` 為空則自動回退為 `["cloze"]`，避免高亮系統被空設定關閉。
+- **版本可見性**：外掛啟動 Notice 顯示當前版本號，方便確認 Obsidian 載入的是否是最新 build。
+
+### 文件同步
+- **Manual 更新**：補充「顯示答案高亮診斷」命令用途與版本註記（V0.1.14）。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 29 項測試。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.13 — Cloze Widget 顯示穩定性修正 (2026-03-30)
 
 ### 修正

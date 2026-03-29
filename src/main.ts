@@ -4,6 +4,7 @@ import {
     createFlashcardsRuntime,
 } from "./app/createFlashcardsRuntime";
 import { registerPluginUi } from "./app/registerPluginUi";
+import { ANSWER_HIGHLIGHT_SCOPES } from "./settings/answerHighlightScopes";
 import { FlashcardsSettingTab } from "./settings/FlashcardsSettingTab";
 import {
     DEFAULT_SETTINGS,
@@ -27,12 +28,12 @@ export default class FlashcardsPlugin extends Plugin {
         this.runtime.blockIdManager.registerEvents();
         this.runtime.syncService.registerEvents();
 
-        registerPluginUi(this, this.runtime);
+        registerPluginUi(this, this.runtime, () => this.settings);
         this.addSettingTab(new FlashcardsSettingTab(this.app, this));
 
         await this.runtime.dataStore.load();
 
-        new Notice("AI-Enriched Flashcards 已載入");
+        new Notice(`AI-Enriched Flashcards 已載入 v${this.manifest.version}`);
     }
 
     onunload(): void {
@@ -54,6 +55,15 @@ export default class FlashcardsPlugin extends Plugin {
             ...DEFAULT_SETTINGS,
             ...saved,
         };
+
+        const validScopes = new Set(ANSWER_HIGHLIGHT_SCOPES);
+        const restoredScopes = Array.isArray(this.settings.answerHighlightScopes)
+            ? this.settings.answerHighlightScopes.filter((scope) =>
+                  validScopes.has(scope)
+              )
+            : [];
+        this.settings.answerHighlightScopes =
+            restoredScopes.length > 0 ? restoredScopes : ["cloze"];
     }
 
     async saveSettings(): Promise<void> {
