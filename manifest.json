@@ -1,7 +1,7 @@
 {
   "id": "ai-enriched-flashcards",
   "name": "AI-Enriched Flashcards",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "minAppVersion": "1.0.0",
   "description": "RemNote 風格的閃卡系統，支援多種語法、AI 豐富化與 FSRS 間隔重複演算法。",
   "author": "Golly",

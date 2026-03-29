@@ -2,6 +2,30 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.12 — 高亮渲染重構第一階段（Cloze Widget 接管） (2026-03-30)
+
+### 新增
+- **Cloze Token Range 抽取**：在 `src/editor/answerHighlightRules.ts` 新增 `collectClozeTokenRanges`，統一計算 `==填空==` 的完整 token 與內文範圍。
+- **Cloze 規則測試**：`answerHighlightRules.test.ts` 新增 cloze token 抽取測試，覆蓋單一與多段 cloze 情境。
+
+### 架構調整
+- **編輯器渲染接管（第一階段）**：`src/editor/AnswerHighlighter.ts` 在非編輯行將 cloze token 以 `Decoration.replace + WidgetType` 方式渲染，避免直接依賴 Obsidian 原生 `.cm-highlight` 作為主要視覺來源。
+- **衝突隔離策略調整**：保留 `answerHighlightScopes` 功能不變，僅將 cloze 類型改為 plugin-owned editor rendering；其餘答案型態仍沿用既有 `fc-answer-highlight` decoration。
+- **樣式補充**：`src/styles/main.css` 新增 `.fc-cloze-widget`，讓 cloze widget 在編輯模式與既有答案高亮視覺一致。
+- **打包白名單同步**：`esbuild.config.mjs` 新增 `.cm-editor .fc-cloze-widget` ignored selector，避免被 `#fc-plugin-root` 前綴污染。
+
+### 文件同步
+- **RoadMap 更新**：Sprint F 標註「高亮渲染重構第一階段（Cloze Widget 接管）」已完成（V0.1.12）。
+- **Instruction 更新**：新增 `Cloze Editor Rendering Ownership` 原則與下一步行動。
+- **Manual 更新**：補充 `==填空==` 非編輯行由外掛接管渲染、編輯行保留原語法的行為說明。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 29 項測試。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.11 — 答案高亮範圍多選設定 (2026-03-29)
 
 ### 新增

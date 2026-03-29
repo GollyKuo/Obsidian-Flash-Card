@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { FlashcardParser } from "../parser/FlashcardParser";
-import { collectAnswerHighlightRanges } from "./answerHighlightRules";
+import {
+    collectAnswerHighlightRanges,
+    collectClozeTokenRanges,
+} from "./answerHighlightRules";
 
 describe("collectAnswerHighlightRanges", () => {
     const parser = new FlashcardParser();
@@ -70,5 +73,50 @@ describe("collectAnswerHighlightRanges", () => {
 
         expect(firstLineRanges).toEqual([{ from: 4, to: 9 }]);
         expect(secondLineRanges).toEqual([{ from: 4, to: 9 }]);
+    });
+});
+
+describe("collectClozeTokenRanges", () => {
+    const parser = new FlashcardParser();
+
+    it("extracts full token and inner content range", () => {
+        const ranges = collectClozeTokenRanges({
+            line: "閱讀寫作、==批判思考==、溝通力",
+            parser,
+        });
+
+        expect(ranges).toEqual([
+            {
+                from: 5,
+                to: 13,
+                contentFrom: 7,
+                contentTo: 11,
+                content: "批判思考",
+            },
+        ]);
+    });
+
+    it("supports multiple cloze tokens in one line", () => {
+        const ranges = collectClozeTokenRanges({
+            line: "A ==one== B ==two==",
+            parser,
+        });
+
+        expect(ranges).toEqual([
+            {
+                from: 2,
+                to: 9,
+                contentFrom: 4,
+                contentTo: 7,
+                content: "one",
+            },
+            {
+                from: 12,
+                to: 19,
+                contentFrom: 14,
+                contentTo: 17,
+                content: "two",
+            },
+        ]);
     });
 });

@@ -11,6 +11,14 @@ export interface AnswerHighlightRange {
     to: number;
 }
 
+export interface ClozeTokenRange {
+    from: number;
+    to: number;
+    contentFrom: number;
+    contentTo: number;
+    content: string;
+}
+
 export function collectAnswerHighlightRanges(params: {
     lines: string[];
     lineNumber: number;
@@ -82,6 +90,35 @@ export function collectAnswerHighlightRanges(params: {
     }
 
     return mergeRanges(ranges);
+}
+
+export function collectClozeTokenRanges(params: {
+    line: string;
+    parser: FlashcardParser;
+}): ClozeTokenRange[] {
+    const cleanLine = params.parser.stripBlockId(params.line).trimEnd();
+    if (!cleanLine.trim()) {
+        return [];
+    }
+
+    const ranges: ClozeTokenRange[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = CLOZE_PATTERN.exec(cleanLine)) !== null) {
+        const from = match.index;
+        const to = from + match[0].length;
+        const contentFrom = from + 2;
+        const contentTo = to - 2;
+        ranges.push({
+            from,
+            to,
+            contentFrom,
+            contentTo,
+            content: match[1],
+        });
+    }
+    CLOZE_PATTERN.lastIndex = 0;
+
+    return ranges;
 }
 
 function findMultilineAnswerRange(

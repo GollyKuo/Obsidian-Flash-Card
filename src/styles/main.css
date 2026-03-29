@@ -66,6 +66,14 @@
   -webkit-box-decoration-break: clone;
 }
 
+.cm-editor .fc-cloze-widget {
+  background: color-mix(in srgb, var(--text-normal) 14%, transparent);
+  color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
+  border-radius: 2px;
+  padding: 0 0.1em;
+  white-space: pre-wrap;
+}
+
 body.fc-answer-highlight-scope-cloze .markdown-preview-view mark,
 body.fc-answer-highlight-scope-cloze .markdown-rendered mark {
   background: color-mix(in srgb, var(--text-normal) 14%, transparent);

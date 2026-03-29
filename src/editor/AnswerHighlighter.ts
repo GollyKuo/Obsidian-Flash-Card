@@ -6,16 +6,40 @@ import {
     PluginValue,
     ViewPlugin,
     ViewUpdate,
+    WidgetType,
 } from "@codemirror/view";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import { FlashcardsPluginSettings } from "../settings/types";
-import { collectAnswerHighlightRanges } from "./answerHighlightRules";
+import {
+    collectAnswerHighlightRanges,
+    collectClozeTokenRanges,
+} from "./answerHighlightRules";
 
 const ANSWER_HIGHLIGHT = Decoration.mark({
     class: "fc-answer-highlight",
 });
 
 type SettingsAccessor = () => FlashcardsPluginSettings;
+
+class ClozeWidget extends WidgetType {
+    private readonly text: string;
+
+    constructor(text: string) {
+        super();
+        this.text = text;
+    }
+
+    eq(other: ClozeWidget): boolean {
+        return other.text === this.text;
+    }
+
+    toDOM(): HTMLElement {
+        const el = document.createElement("span");
+        el.className = "fc-answer-highlight fc-cloze-widget";
+        el.textContent = this.text;
+        return el;
+    }
+}
 
 export function createAnswerHighlighterExtension(
     parser: FlashcardParser,
@@ -56,6 +80,8 @@ function buildDecorations(
 ): DecorationSet {
     const builder = new RangeSetBuilder<Decoration>();
     const scopes = new Set(getSettings().answerHighlightScopes);
+    const activeLineNumber =
+        view.state.doc.lineAt(view.state.selection.main.head).number - 1;
 
     if (scopes.size === 0) {
         return builder.finish();
@@ -68,14 +94,51 @@ function buildDecorations(
 
         while (pos <= to) {
             const line = view.state.doc.lineAt(pos);
+            const lineNumber = line.number - 1;
+
+            const shouldUseClozeWidget =
+                scopes.has("cloze") && lineNumber !== activeLineNumber;
+            const clozeTokenRanges = shouldUseClozeWidget
+                ? collectClozeTokenRanges({
+                      line: line.text,
+                      parser,
+                  })
+                : [];
+
+            for (const clozeRange of clozeTokenRanges) {
+                const start = line.from + clozeRange.from;
+                const end = line.from + clozeRange.to;
+                if (end > start) {
+                    builder.add(
+                        start,
+                        end,
+                        Decoration.replace({
+                            widget: new ClozeWidget(clozeRange.content),
+                        })
+                    );
+                }
+            }
+
             const ranges = collectAnswerHighlightRanges({
                 lines,
-                lineNumber: line.number - 1,
+                lineNumber,
                 parser,
                 scopes,
             });
 
-            for (const range of ranges) {
+            const filteredRanges =
+                clozeTokenRanges.length === 0
+                    ? ranges
+                    : ranges.filter(
+                          (range) =>
+                              !clozeTokenRanges.some(
+                                  (clozeRange) =>
+                                      clozeRange.from === range.from &&
+                                      clozeRange.to === range.to
+                              )
+                      );
+
+            for (const range of filteredRanges) {
                 const start = line.from + range.from;
                 const end = line.from + range.to;
                 if (end > start) {
