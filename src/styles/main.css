@@ -65,17 +65,10 @@
 
 .cm-editor .fc-answer-highlight,
 .cm-editor .fc-answer-highlight.cm-highlight,
-.cm-editor .fc-answer-highlight .cm-highlight,
-.cm-editor .fc-answer-highlight .cm-formatting-highlight,
-.cm-editor .fc-answer-highlight [class*="cm-highlight"] {
+.cm-editor .fc-answer-highlight .cm-highlight {
   background: rgb(
     var(--fc-answer-highlight-rgb) / var(--fc-answer-highlight-opacity)
-  ) !important;
-  background-color: rgb(
-    var(--fc-answer-highlight-rgb) / var(--fc-answer-highlight-opacity)
-  ) !important;
-  background-image: none !important;
-  box-shadow: none !important;
+  );
   color: color-mix(in srgb, var(--text-normal) 88%, var(--text-muted) 12%);
 }
 
@@ -88,9 +81,7 @@
 
 /* 避免 Obsidian 原生 == 高亮覆蓋外掛高亮 */
 .cm-editor .fc-answer-highlight.cm-highlight,
-.cm-editor .fc-answer-highlight .cm-highlight,
-.cm-editor .fc-answer-highlight .cm-formatting-highlight,
-.cm-editor .fc-answer-highlight [class*="cm-highlight"] {
+.cm-editor .fc-answer-highlight .cm-highlight {
   border-radius: 0;
   padding: 0;
 }
