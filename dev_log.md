@@ -2,22 +2,6 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
-## V0.1.12 — Cloze 樣式作用範圍修正 (2026-03-29)
-
-### 架構調整
-- **PostCSS PrefixWrap 配置修正**：修正實際打包路徑的 `esbuild.config.mjs`（並同步調整 `postcss.config.js`），將 `.markdown-preview-view`、`.markdown-rendered`、`.cm-*` 相關 selector 加入 `ignoredSelectors`。
-- **效果**：`== ==` cloze 樣式與 Block ID 相關 editor/preview 樣式不再被 `#fc-plugin-root` 包住，現在可正確套用在 Obsidian 編輯與閱讀區。
-
-### 文件同步
-- **Manual 更新**：補充 cloze 顯示優化已包含作用範圍修正（V0.1.12）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 22 項測試。
-- **建置**：`npm run build` 通過。
-
----
-
 ## V0.1.11 — Cloze 低對比深灰樣式微調 (2026-03-29)
 
 ### 架構調整
