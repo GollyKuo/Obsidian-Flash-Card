@@ -2,6 +2,22 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.14 — 內層原生高亮覆蓋補強 (2026-03-30)
+
+### 修正
+- **內層 highlight class 全面接管**：`src/styles/main.css` 進一步將 `.fc-answer-highlight` 內的 `.cm-highlight`、`.cm-formatting-highlight` 與其他 `cm-highlight` 相關子節點統一改套外掛底色，避免答案高亮範圍內再次露出 Obsidian 原生黃底。
+- **背景覆蓋強化**：同時覆蓋 `background`、`background-color`、`background-image`、`box-shadow`，降低不同主題或語法 token class 對高亮視覺的一致性干擾。
+
+### 文件同步
+- **Manual 更新**：補充答案高亮範圍內的內層 `==填空==` 高亮覆蓋補強說明（V0.1.14）。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 31 項測試。
+- **建置**：`npm run build` 通過。
+
+---
+
 ## V0.1.13 — 編輯器高亮覆蓋與邊框樣式修正 (2026-03-30)
 
 ### 修正
