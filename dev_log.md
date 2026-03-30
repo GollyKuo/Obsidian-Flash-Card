@@ -2,6 +2,29 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.13 — 答案高亮膠囊化平整邊緣（2026-03-30）
+
+### 目的
+- 針對「答案高亮在符號附近邊緣破碎」問題，驗證是否可改為單一膠囊 chip 呈現。
+
+### 主要調整
+- `src/editor/AnswerHighlighter.ts`：
+  - 非游標行的答案區改為 `Decoration.replace + AnswerChipWidget` 渲染。
+  - 由單一 widget 承載整段答案文字，避免 CodeMirror 分詞切成多個圓角片段。
+- `src/editor/answerChipText.ts`：
+  - 新增答案文字顯示正規化，讓 `[[target|alias]]` 這類 Obsidian 內聯語法在 chip 中優先顯示 alias，而不是原始語法字串。
+  - 補上常見內聯語法顯示轉換（wikilink / markdown link / cloze），降低 chip 與原生閱讀視覺落差。
+- `src/styles/editor.css`：
+  - 新增 `.fc-answer-chip` 膠囊樣式（圓角、細邊框、低對比底色）。
+  - 移除舊版依賴 `.fc-answer-highlight` / `.cm-highlight` 分段高亮的樣式路徑。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 37 項測試。
+- **建置**：`npm run build` 通過，並成功複製到 Vault 外掛目錄。
+
+---
+
 ## V0.1.12（重做版）— v0.1.11 基線重建（2026-03-30）
 
 ### 目的

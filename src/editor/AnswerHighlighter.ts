@@ -6,25 +6,39 @@ import {
     PluginValue,
     ViewPlugin,
     ViewUpdate,
+    WidgetType,
 } from "@codemirror/view";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import { FlashcardsPluginSettings } from "../settings/types";
+import { toAnswerChipText } from "./answerChipText";
 import {
     collectAnswerHighlightRanges,
-    collectClozeTokenRanges,
     collectFlashcardSyntaxTokenRanges,
 } from "./answerHighlightRules";
 
-const ANSWER_HIGHLIGHT = Decoration.mark({
-    class: "fc-answer-highlight",
-});
 const HIDE_FLASHCARD_SYNTAX = Decoration.replace({});
 
-const CLOZE_LINE_HIGHLIGHT = Decoration.line({
-    class: "fc-cloze-line",
-});
-
 type SettingsAccessor = () => FlashcardsPluginSettings;
+
+class AnswerChipWidget extends WidgetType {
+    private readonly text: string;
+
+    constructor(text: string) {
+        super();
+        this.text = text;
+    }
+
+    eq(other: AnswerChipWidget): boolean {
+        return other.text === this.text;
+    }
+
+    toDOM(): HTMLElement {
+        const el = document.createElement("span");
+        el.className = "fc-answer-chip";
+        el.textContent = this.text;
+        return el;
+    }
+}
 
 export function createAnswerHighlighterExtension(
     parser: FlashcardParser,
@@ -101,16 +115,7 @@ function buildDecorations(
             const line = view.state.doc.lineAt(pos);
             const lineNumber = line.number - 1;
             const isCursorLine = line.number === cursorLineNumber;
-            const clozeTokenRanges = scopes.has("cloze")
-                ? collectClozeTokenRanges({
-                      line: line.text,
-                      parser,
-                  })
-                : [];
-
-            if (!isCursorLine && clozeTokenRanges.length > 0) {
-                builder.add(line.from, line.from, CLOZE_LINE_HIGHLIGHT);
-            }
+            const cleanLine = parser.stripBlockId(line.text).trimEnd();
 
             if (!isCursorLine) {
                 const syntaxTokenRanges = collectFlashcardSyntaxTokenRanges({
@@ -132,23 +137,22 @@ function buildDecorations(
                     parser,
                     scopes,
                 });
-                const filteredRanges =
-                    clozeTokenRanges.length === 0
-                        ? ranges
-                        : ranges.filter(
-                              (range) =>
-                                  !clozeTokenRanges.some(
-                                      (clozeRange) =>
-                                          clozeRange.from === range.from &&
-                                          clozeRange.to === range.to
-                                  )
-                          );
 
-                for (const range of filteredRanges) {
+                for (const range of ranges) {
                     const start = line.from + range.from;
                     const end = line.from + range.to;
                     if (end > start) {
-                        builder.add(start, end, ANSWER_HIGHLIGHT);
+                        const rawText = cleanLine.slice(range.from, range.to);
+                        const displayText = toAnswerChipText(rawText);
+                        if (displayText) {
+                            builder.add(
+                                start,
+                                end,
+                                Decoration.replace({
+                                    widget: new AnswerChipWidget(displayText),
+                                })
+                            );
+                        }
                     }
                 }
             }

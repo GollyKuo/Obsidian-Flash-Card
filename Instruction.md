@@ -64,6 +64,7 @@
   - `data.json` 僅記錄 relative path，不直接內嵌大型資產內容
 - **Answer Highlight Theme**: 支援低對比答案底色主題，並提供顏色/透明度與套用範圍（cloze-only / mixed / all answers）設定。
 - **Cloze Editor Rendering Ownership**: 編輯模式下 `==填空==` 由 plugin decoration 接管高亮樣式，非游標行隱藏語法符號並套用答案樣式，游標行保留原始語法以利編輯。
+- **Answer Chip Rendering**: 答案顯示採單一 chip widget，降低符號分詞造成的高亮邊緣破碎；chip 文字需保留常見內聯語法的顯示語意（例如 wikilink alias）。
 - **Cleaning Tool**: 提供 settings-based maintenance tool，可移除所有 Block ID，讓筆記回到 pure Markdown。
 - **Storage Principle**: index 應優先視為可重建的 derived structure，而不是無限制膨脹的 primary schema；單卡更新應避免整包重寫。
 - **Highlight Scope Control**: 答案底色應由使用者設定決定套用範圍，避免將所有語法一律強制高亮。
@@ -82,4 +83,5 @@
 - 已完成 Sprint D 第三階段：`data.json` 改為 manifest，卡片資料改為 `Cards/<blockId>.json` 分片儲存，支援增量寫入
 - 已完成答案高亮範圍多選設定：`填空`、`單行答案`、`多行答案`、`雙向卡`
 - 已完成高亮渲染重構第一階段：`==填空==` 在編輯模式非游標行由 plugin decoration 接管，並處理原生高亮衝突（V0.1.12）
-- 下一步進入高亮渲染重構第二階段：處理主題可配置與語法隱藏/顯示策略，再銜接 Sprint E 的 Dashboard `Cards` 分區骨架
+- 已完成高亮渲染重構第二階段（V0.1.13）：答案改為單一 chip 膠囊渲染，並補上內聯語法顯示正規化（wikilink alias / markdown link label）
+- 下一步進入高亮主題可配置細化，再銜接 Sprint E 的 Dashboard `Cards` 分區骨架
