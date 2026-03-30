@@ -16,10 +16,14 @@ import {
 } from "@codemirror/view";
 
 /** 匹配行末 Block ID 的正則表達式（含前方空白） */
-const BLOCK_ID_RE = /\s+\^fc-[a-zA-Z0-9_-]+\s*$/;
+const INLINE_BLOCK_ID_RE = /\s+\^fc-[a-zA-Z0-9_-]+\s*$/;
+const STANDALONE_BLOCK_ID_RE = /^\s*\^fc-[a-zA-Z0-9_-]+\s*$/;
 
 /** 用於替換（視覺隱藏）Block ID 的裝飾 */
 const HIDE = Decoration.replace({});
+const HIDE_STANDALONE_LINE = Decoration.line({
+    class: "fc-hidden-block-id-line",
+});
 
 /**
  * ViewPlugin 實作：掃描可見範圍，對非游標行的 Block ID 加上隱藏裝飾
@@ -50,13 +54,27 @@ class BlockIdHiderPlugin implements PluginValue {
                 const line = view.state.doc.lineAt(pos);
 
                 // 僅隱藏非游標行的 Block ID
-                if (line.number !== cursorLine.number) {
-                    const m = line.text.match(BLOCK_ID_RE);
+                const isCursorLine = line.number === cursorLine.number;
+                const isAdjacentToCursor =
+                    Math.abs(line.number - cursorLine.number) <= 1;
+                const isStandaloneBlockIdLine = STANDALONE_BLOCK_ID_RE.test(
+                    line.text
+                );
+
+                if (!isCursorLine) {
+                    const m = line.text.match(INLINE_BLOCK_ID_RE);
                     if (m && m.index !== undefined) {
                         const start = line.from + m.index;
                         if (start < line.to) {
                             builder.add(start, line.to, HIDE);
                         }
+                    }
+                }
+
+                if (isStandaloneBlockIdLine && !isAdjacentToCursor) {
+                    builder.add(line.from, line.from, HIDE_STANDALONE_LINE);
+                    if (line.from < line.to) {
+                        builder.add(line.from, line.to, HIDE);
                     }
                 }
 

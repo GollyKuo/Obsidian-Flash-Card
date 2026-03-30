@@ -7,37 +7,43 @@ import tailwindcss from "tailwindcss";
 import autoprefixer from "autoprefixer";
 import PrefixWrap from "postcss-prefixwrap";
 
-// 是否為生產環境
+// Build mode
 const prod = process.argv.includes("--production");
-// 是否為 watch 模式
 const watch = process.argv.includes("--watch");
 
-// Obsidian Vault 外掛目標路徑
+// Obsidian Vault plugin destination
 const VAULT_PLUGIN_DIR = String.raw`D:\【Golly】\系統預設資料夾\Documents\Antigravity\Obsidian Test\Test\.obsidian\plugins\ai-enriched-flashcards`;
 
 /**
- * PostCSS 外掛：處理 Tailwind CSS 並加上隔離前綴
+ * PostCSS pipeline.
+ * - `main.css` keeps `#fc-plugin-root` isolation.
+ * - `editor.css` is intentionally unprefixed for CodeMirror selectors.
  */
 const postcssPlugin = {
     name: "postcss",
     setup(build) {
         build.onLoad({ filter: /\.css$/ }, async (args) => {
             const css = await fs.promises.readFile(args.path, "utf8");
-            const result = await postcss([
-                tailwindcss,
-                autoprefixer,
-                PrefixWrap("#fc-plugin-root", {
-                    // 不對 @keyframes 和 :root 加前綴
-                    ignoredSelectors: [
-                        ":root",
-                        /^@keyframes/,
-                        /^\.cm-editor \.fc-answer-highlight$/,
-                        /^\.cm-editor \.fc-cloze-widget$/,
-                        /^body\.fc-answer-highlight-scope-cloze \.markdown-preview-view mark$/,
-                        /^body\.fc-answer-highlight-scope-cloze \.markdown-rendered mark$/,
-                    ],
-                }),
-            ]).process(css, { from: args.path });
+
+            const plugins = args.path.endsWith("editor.css")
+                ? [tailwindcss, autoprefixer]
+                : [
+                      tailwindcss,
+                      autoprefixer,
+                      PrefixWrap("#fc-plugin-root", {
+                          ignoredSelectors: [
+                              ":root",
+                              /^@keyframes/,
+                              /^\.cm-editor\b/,
+                              /^body\.fc-answer-highlight-scope-cloze \.markdown-preview-view mark$/,
+                              /^body\.fc-answer-highlight-scope-cloze \.markdown-rendered mark$/,
+                          ],
+                      }),
+                  ];
+
+            const result = await postcss(plugins).process(css, {
+                from: args.path,
+            });
 
             return {
                 contents: result.css,
@@ -47,26 +53,19 @@ const postcssPlugin = {
     },
 };
 
-/**
- * 複製打包結果到 Obsidian Vault 的外掛
- */
+/** Copy build output to Obsidian Vault plugin folder. */
 const copyPlugin = {
     name: "copy-to-vault",
     setup(build) {
         build.onEnd(async () => {
             try {
-                // 確保目標目錄存在
                 await fs.promises.mkdir(VAULT_PLUGIN_DIR, { recursive: true });
 
                 const srcDir = path.dirname(build.initialOptions.outfile);
-
-                // 複製 main.js
                 const mainSrc = build.initialOptions.outfile;
                 const mainDest = path.join(VAULT_PLUGIN_DIR, "main.js");
                 await fs.promises.copyFile(mainSrc, mainDest);
 
-                // 複製 CSS（esbuild 輸出的 CSS 檔名跟隨 outfile，所以是 main.css）
-                // Obsidian 要求檔名為 styles.css
                 const cssCandidates = ["styles.css", "main.css"];
                 const stylesDest = path.join(VAULT_PLUGIN_DIR, "styles.css");
                 for (const cssName of cssCandidates) {
@@ -77,14 +76,13 @@ const copyPlugin = {
                     }
                 }
 
-                // 複製 manifest.json
                 const manifestSrc = path.resolve("manifest.json");
                 const manifestDest = path.join(VAULT_PLUGIN_DIR, "manifest.json");
                 await fs.promises.copyFile(manifestSrc, manifestDest);
 
-                console.log("✅ 已複製到 Vault 外掛目錄");
+                console.log("Copied build output to Vault plugin directory.");
             } catch (err) {
-                console.error("❌ 複製到 Vault 失敗:", err);
+                console.error("Failed to copy build output to Vault:", err);
             }
         });
     },
@@ -125,7 +123,7 @@ const context = await esbuild.context({
 
 if (watch) {
     await context.watch();
-    console.log("👀 正在監視檔案變更...");
+    console.log("Watching for file changes...");
 } else {
     await context.rebuild();
     await context.dispose();

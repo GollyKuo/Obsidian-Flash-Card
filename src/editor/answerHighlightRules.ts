@@ -4,6 +4,10 @@ import { AnswerHighlightScope } from "../settings/answerHighlightScopes";
 const BIDIRECTIONAL_PATTERN = /^(.+?)\s*:::\s*(.+)$/;
 const FORWARD_PATTERN = /^(.+?)\s*::\s*(.+)$/;
 const REVERSE_PATTERN = /^(.+?)\s*;;\s*(.+)$/;
+const BIDIRECTIONAL_TOKEN_PATTERN = /^(.+?)(\s*:::\s*)(.+)$/;
+const FORWARD_TOKEN_PATTERN = /^(.+?)(\s*::\s*)(.+)$/;
+const REVERSE_TOKEN_PATTERN = /^(.+?)(\s*;;\s*)(.+)$/;
+const FORWARD_MULTILINE_TOKEN_PATTERN = /^(.+?)(\s*::\s*)$/;
 const CLOZE_PATTERN = /==([^=]+)==/g;
 
 export interface AnswerHighlightRange {
@@ -17,6 +21,11 @@ export interface ClozeTokenRange {
     contentFrom: number;
     contentTo: number;
     content: string;
+}
+
+export interface FlashcardSyntaxTokenRange {
+    from: number;
+    to: number;
 }
 
 export function collectAnswerHighlightRanges(params: {
@@ -121,6 +130,45 @@ export function collectClozeTokenRanges(params: {
     return ranges;
 }
 
+export function collectFlashcardSyntaxTokenRanges(params: {
+    lines: string[];
+    lineNumber: number;
+    parser: FlashcardParser;
+}): FlashcardSyntaxTokenRange[] {
+    const { lines, lineNumber, parser } = params;
+    const line = lines[lineNumber];
+    if (!line) {
+        return [];
+    }
+
+    const cleanLine = parser.stripBlockId(line).trimEnd();
+    if (!cleanLine.trim()) {
+        return [];
+    }
+
+    const bidirectionalMatch = cleanLine.match(BIDIRECTIONAL_TOKEN_PATTERN);
+    if (bidirectionalMatch) {
+        return [extractTokenRange(bidirectionalMatch[1], bidirectionalMatch[2])];
+    }
+
+    const forwardMatch = cleanLine.match(FORWARD_TOKEN_PATTERN);
+    if (forwardMatch) {
+        return [extractTokenRange(forwardMatch[1], forwardMatch[2])];
+    }
+
+    const reverseMatch = cleanLine.match(REVERSE_TOKEN_PATTERN);
+    if (reverseMatch) {
+        return [extractTokenRange(reverseMatch[1], reverseMatch[2])];
+    }
+
+    const multilineMatch = cleanLine.match(FORWARD_MULTILINE_TOKEN_PATTERN);
+    if (multilineMatch && parser.parseMultiLine(lines, lineNumber)) {
+        return [extractTokenRange(multilineMatch[1], multilineMatch[2])];
+    }
+
+    return [];
+}
+
 function findMultilineAnswerRange(
     lines: string[],
     lineNumber: number,
@@ -168,4 +216,18 @@ function mergeRanges(ranges: AnswerHighlightRange[]): AnswerHighlightRange[] {
     }
 
     return merged;
+}
+
+function extractTokenRange(
+    frontSegment: string,
+    tokenSegment: string
+): FlashcardSyntaxTokenRange {
+    const tokenOffset = tokenSegment.search(/[:;]/);
+    const tokenStart = frontSegment.length + Math.max(tokenOffset, 0);
+    const trimmedToken = tokenSegment.trim();
+
+    return {
+        from: tokenStart,
+        to: tokenStart + trimmedToken.length,
+    };
 }

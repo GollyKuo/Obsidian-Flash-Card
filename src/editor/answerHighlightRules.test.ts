@@ -3,6 +3,7 @@ import { FlashcardParser } from "../parser/FlashcardParser";
 import {
     collectAnswerHighlightRanges,
     collectClozeTokenRanges,
+    collectFlashcardSyntaxTokenRanges,
 } from "./answerHighlightRules";
 
 describe("collectAnswerHighlightRanges", () => {
@@ -118,5 +119,49 @@ describe("collectClozeTokenRanges", () => {
                 content: "two",
             },
         ]);
+    });
+});
+
+describe("collectFlashcardSyntaxTokenRanges", () => {
+    const parser = new FlashcardParser();
+
+    it("extracts forward delimiter token only", () => {
+        const ranges = collectFlashcardSyntaxTokenRanges({
+            lines: ["Question :: Answer"],
+            lineNumber: 0,
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 9, to: 11 }]);
+    });
+
+    it("extracts reverse delimiter token only", () => {
+        const ranges = collectFlashcardSyntaxTokenRanges({
+            lines: ["Answer ;; Question"],
+            lineNumber: 0,
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 7, to: 9 }]);
+    });
+
+    it("extracts bidirectional delimiter token only", () => {
+        const ranges = collectFlashcardSyntaxTokenRanges({
+            lines: ["A ::: B"],
+            lineNumber: 0,
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 2, to: 5 }]);
+    });
+
+    it("extracts multiline question delimiter token only", () => {
+        const ranges = collectFlashcardSyntaxTokenRanges({
+            lines: ["Prompt ::", "    Answer"],
+            lineNumber: 0,
+            parser,
+        });
+
+        expect(ranges).toEqual([{ from: 7, to: 9 }]);
     });
 });

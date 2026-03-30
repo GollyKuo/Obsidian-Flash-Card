@@ -2,6 +2,31 @@
 
 本文件記錄專案所有的版本更動、架構調整與重要事件。
 
+## V0.1.12（重做版）— v0.1.11 基線重建（2026-03-30）
+
+### 目的
+- 以 `v0.1.11` 的穩定邏輯為基線，移除後續試錯過程中證明無效或不穩定的作法。
+- 保留已驗證有效的功能行為，並以更乾淨、可維護的方式重新落地。
+
+### 正式採用的作法
+- **編輯器樣式分層**：新增 `src/styles/editor.css`，將 CodeMirror 專用規則自 `main.css` 拆分，避免與預覽/UI 樣式耦合。
+- **Build 分流**：`esbuild.config.mjs` 對 `editor.css` 停用 `#fc-plugin-root` prefix-wrap，保證 `.cm-editor` selector 可正確命中。
+- **答案高亮策略**：`AnswerHighlighter` 改為 decoration-only 流程，游標行不套高亮，離開游標後才套用，保留可編輯性。
+- **語法 token 隱藏**：新增 `:: / ;; / :::` token range 判定，游標離開時隱藏語法，回到該行時恢復原語法。
+- **Block ID 顯示邏輯**：`BlockIdHider` 同時支援行尾型與獨立行型 `^fc-...`，避免殘留空白陰影。
+
+### 移除或淘汰的方向
+- 不再使用 cloze widget replace 作為主要渲染路徑。
+- 不再讓 CSS 與 decoration 同時控制同一個 block id 顯示責任。
+- 不再把 editor 規則與 `#fc-plugin-root` 預覽規則混放在同一個樣式責任層。
+
+### 驗證
+- **型別檢查**：`npx tsc --noEmit` 通過。
+- **測試**：`npm test` 通過，共 33 項測試。
+- **建置**：`npm run build` 通過，並成功複製到 Vault 外掛目錄。
+
+---
+
 ## V0.1.14 — 高亮診斷工具與設定防呆 (2026-03-30)
 
 ### 新增

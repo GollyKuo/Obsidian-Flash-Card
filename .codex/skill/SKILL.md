@@ -38,6 +38,7 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 ## 工作流程規則
 
 - 進行重大修改前，如需要脈絡，先閱讀 `Manual.md`、`Instruction.md`、`RoadMap.md`、`dev_log.md`。
+- 遇到除錯、渲染異常、樣式衝突或反覆嘗試未果的問題時，先查閱 `Retrospective.md`，優先沿用已驗證的排查順序與教訓，避免重複走錯方向。
 - 每次推進下一個開發步驟前，先檢查目前架構是否足以承接該功能；若存在明顯缺口，應先提出並優先補強，再繼續往下實作。
 - 進行程式碼修改時，應先做修改前驗證（至少確認當前 build/test 基線），完成後再做修改後驗證，確保變更未引入回歸。
 - 優先採用 incremental delivery，避免一次做大型、推測性過高的重寫。

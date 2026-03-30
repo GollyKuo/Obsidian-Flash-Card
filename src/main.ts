@@ -13,6 +13,7 @@ import {
 
 // 引入樣式（由 esbuild + PostCSS 處理）
 import "./styles/main.css";
+import "./styles/editor.css";
 
 export default class FlashcardsPlugin extends Plugin {
     settings: FlashcardsPluginSettings = { ...DEFAULT_SETTINGS };

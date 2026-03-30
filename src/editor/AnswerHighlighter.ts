@@ -6,40 +6,25 @@ import {
     PluginValue,
     ViewPlugin,
     ViewUpdate,
-    WidgetType,
 } from "@codemirror/view";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import { FlashcardsPluginSettings } from "../settings/types";
 import {
     collectAnswerHighlightRanges,
     collectClozeTokenRanges,
+    collectFlashcardSyntaxTokenRanges,
 } from "./answerHighlightRules";
 
 const ANSWER_HIGHLIGHT = Decoration.mark({
     class: "fc-answer-highlight",
 });
+const HIDE_FLASHCARD_SYNTAX = Decoration.replace({});
+
+const CLOZE_LINE_HIGHLIGHT = Decoration.line({
+    class: "fc-cloze-line",
+});
 
 type SettingsAccessor = () => FlashcardsPluginSettings;
-
-class ClozeWidget extends WidgetType {
-    private readonly text: string;
-
-    constructor(text: string) {
-        super();
-        this.text = text;
-    }
-
-    eq(other: ClozeWidget): boolean {
-        return other.text === this.text;
-    }
-
-    toDOM(): HTMLElement {
-        const el = document.createElement("span");
-        el.className = "fc-answer-highlight fc-cloze-widget";
-        el.textContent = this.text;
-        return el;
-    }
-}
 
 export function createAnswerHighlighterExtension(
     parser: FlashcardParser,
@@ -50,7 +35,11 @@ export function createAnswerHighlighterExtension(
             decorations: DecorationSet;
 
             constructor(view: EditorView) {
-                this.decorations = buildDecorations(view, parser, getSettings);
+                this.decorations = safeBuildDecorations(
+                    view,
+                    parser,
+                    getSettings
+                );
             }
 
             update(update: ViewUpdate): void {
@@ -59,7 +48,7 @@ export function createAnswerHighlighterExtension(
                     update.viewportChanged ||
                     update.selectionSet
                 ) {
-                    this.decorations = buildDecorations(
+                    this.decorations = safeBuildDecorations(
                         update.view,
                         parser,
                         getSettings
@@ -73,6 +62,22 @@ export function createAnswerHighlighterExtension(
     );
 }
 
+function safeBuildDecorations(
+    view: EditorView,
+    parser: FlashcardParser,
+    getSettings: SettingsAccessor
+): DecorationSet {
+    try {
+        return buildDecorations(view, parser, getSettings);
+    } catch (error) {
+        console.error(
+            "[Flashcards] AnswerHighlighter build failed. Decorations are reset for safety.",
+            error
+        );
+        return Decoration.none;
+    }
+}
+
 function buildDecorations(
     view: EditorView,
     parser: FlashcardParser,
@@ -80,7 +85,9 @@ function buildDecorations(
 ): DecorationSet {
     const builder = new RangeSetBuilder<Decoration>();
     const scopes = new Set(getSettings().answerHighlightScopes);
-    const cursorPos = view.state.selection.main.head;
+    const cursorLineNumber = view.state.doc.lineAt(
+        view.state.selection.main.head
+    ).number;
 
     if (scopes.size === 0) {
         return builder.finish();
@@ -90,62 +97,59 @@ function buildDecorations(
 
     for (const { from, to } of view.visibleRanges) {
         let pos = from;
-
         while (pos <= to) {
             const line = view.state.doc.lineAt(pos);
             const lineNumber = line.number - 1;
-
-            const shouldUseClozeWidget = scopes.has("cloze");
-            const clozeTokenRanges = shouldUseClozeWidget
+            const isCursorLine = line.number === cursorLineNumber;
+            const clozeTokenRanges = scopes.has("cloze")
                 ? collectClozeTokenRanges({
                       line: line.text,
                       parser,
                   })
                 : [];
 
-            for (const clozeRange of clozeTokenRanges) {
-                const start = line.from + clozeRange.from;
-                const end = line.from + clozeRange.to;
-                const isCursorInsideToken =
-                    cursorPos >= start && cursorPos <= end;
-                if (isCursorInsideToken) {
-                    continue;
-                }
-                if (end > start) {
-                    builder.add(
-                        start,
-                        end,
-                        Decoration.replace({
-                            widget: new ClozeWidget(clozeRange.content),
-                        })
-                    );
-                }
+            if (!isCursorLine && clozeTokenRanges.length > 0) {
+                builder.add(line.from, line.from, CLOZE_LINE_HIGHLIGHT);
             }
 
-            const ranges = collectAnswerHighlightRanges({
-                lines,
-                lineNumber,
-                parser,
-                scopes,
-            });
+            if (!isCursorLine) {
+                const syntaxTokenRanges = collectFlashcardSyntaxTokenRanges({
+                    lines,
+                    lineNumber,
+                    parser,
+                });
+                for (const syntaxTokenRange of syntaxTokenRanges) {
+                    const start = line.from + syntaxTokenRange.from;
+                    const end = line.from + syntaxTokenRange.to;
+                    if (end > start) {
+                        builder.add(start, end, HIDE_FLASHCARD_SYNTAX);
+                    }
+                }
 
-            const filteredRanges =
-                clozeTokenRanges.length === 0
-                    ? ranges
-                    : ranges.filter(
-                          (range) =>
-                              !clozeTokenRanges.some(
-                                  (clozeRange) =>
-                                      clozeRange.from === range.from &&
-                                      clozeRange.to === range.to
-                              )
-                      );
+                const ranges = collectAnswerHighlightRanges({
+                    lines,
+                    lineNumber,
+                    parser,
+                    scopes,
+                });
+                const filteredRanges =
+                    clozeTokenRanges.length === 0
+                        ? ranges
+                        : ranges.filter(
+                              (range) =>
+                                  !clozeTokenRanges.some(
+                                      (clozeRange) =>
+                                          clozeRange.from === range.from &&
+                                          clozeRange.to === range.to
+                                  )
+                          );
 
-            for (const range of filteredRanges) {
-                const start = line.from + range.from;
-                const end = line.from + range.to;
-                if (end > start) {
-                    builder.add(start, end, ANSWER_HIGHLIGHT);
+                for (const range of filteredRanges) {
+                    const start = line.from + range.from;
+                    const end = line.from + range.to;
+                    if (end > start) {
+                        builder.add(start, end, ANSWER_HIGHLIGHT);
+                    }
                 }
             }
 
