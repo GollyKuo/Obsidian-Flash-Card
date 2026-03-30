@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import {
     collectAnswerHighlightRanges,
+    collectMultilineAnswerBlock,
     collectClozeTokenRanges,
     collectFlashcardSyntaxTokenRanges,
+    collectMultilineAnswerRange,
 } from "./answerHighlightRules";
 
 describe("collectAnswerHighlightRanges", () => {
@@ -163,5 +165,67 @@ describe("collectFlashcardSyntaxTokenRanges", () => {
         });
 
         expect(ranges).toEqual([{ from: 7, to: 9 }]);
+    });
+});
+
+describe("collectMultilineAnswerRange", () => {
+    const parser = new FlashcardParser();
+
+    it("returns range for answer lines in multiline cards", () => {
+        const lines = ["問題 ::", "    第一行答案", "    第二行答案", "下一段"];
+
+        expect(
+            collectMultilineAnswerRange({
+                lines,
+                lineNumber: 1,
+                parser,
+            })
+        ).toEqual({ from: 4, to: 9 });
+    });
+
+    it("returns null for non-answer lines", () => {
+        const lines = ["問題 ::", "    第一行答案", "下一段"];
+
+        expect(
+            collectMultilineAnswerRange({
+                lines,
+                lineNumber: 0,
+                parser,
+            })
+        ).toBeNull();
+        expect(
+            collectMultilineAnswerRange({
+                lines,
+                lineNumber: 2,
+                parser,
+            })
+        ).toBeNull();
+    });
+});
+
+describe("collectMultilineAnswerBlock", () => {
+    const parser = new FlashcardParser();
+
+    it("returns multiline block bounds for nested answer lines", () => {
+        const lines = [
+            "Prompt ::",
+            "    - First answer",
+            "        - Nested answer",
+            "Outside",
+        ];
+
+        expect(
+            collectMultilineAnswerBlock({
+                lines,
+                lineNumber: 2,
+                parser,
+            })
+        ).toEqual({
+            from: 8,
+            to: 23,
+            startLineNumber: 0,
+            endLineNumber: 2,
+            blockIndentColumns: 4,
+        });
     });
 });

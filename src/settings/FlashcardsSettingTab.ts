@@ -4,6 +4,10 @@ import {
     ANSWER_HIGHLIGHT_SCOPES,
     AnswerHighlightScope,
 } from "./answerHighlightScopes";
+import {
+    MULTI_LINE_ANSWER_RENDER_STYLES,
+    MULTI_LINE_ANSWER_RENDER_STYLE_LABELS,
+} from "./multiLineAnswerRenderStyles";
 import { DEFAULT_SETTINGS } from "./types";
 import type FlashcardsPlugin from "../main";
 
@@ -82,6 +86,33 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                     });
                 });
         }
+
+        new Setting(containerEl)
+            .setName("多行答案渲染樣式")
+            .setDesc("選擇多行/清單答案在編輯器中的高亮外觀")
+            .addDropdown((dropdown) => {
+                for (const style of MULTI_LINE_ANSWER_RENDER_STYLES) {
+                    dropdown.addOption(
+                        style,
+                        MULTI_LINE_ANSWER_RENDER_STYLE_LABELS[style]
+                    );
+                }
+
+                dropdown.setValue(this.plugin.settings.multiLineAnswerRenderStyle);
+                dropdown.onChange(async (value) => {
+                    if (
+                        !MULTI_LINE_ANSWER_RENDER_STYLES.includes(
+                            value as (typeof MULTI_LINE_ANSWER_RENDER_STYLES)[number]
+                        )
+                    ) {
+                        return;
+                    }
+
+                    this.plugin.settings.multiLineAnswerRenderStyle =
+                        value as (typeof MULTI_LINE_ANSWER_RENDER_STYLES)[number];
+                    await this.plugin.saveSettings();
+                });
+            });
 
         containerEl.createEl("h3", { text: "AI 設定（預留）" });
 

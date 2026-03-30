@@ -14,6 +14,90 @@
   vertical-align: baseline;
 }
 
+.cm-editor .fc-answer-multiline {
+  color: var(--text-normal);
+}
+
+.cm-editor .fc-answer-multiline-soft-band {
+  background: transparent;
+}
+
+.cm-editor .fc-answer-multiline-right-rail {
+  background: transparent;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line {
+  position: relative;
+  isolation: isolate;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-soft-band::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--fc-answer-block-indent) - 0.45rem);
+  right: 0.85rem;
+  background: color-mix(in srgb, var(--text-normal) 10%, transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-soft-band-start::before {
+  top: 0.12em;
+  border-radius: 0.55rem 0.55rem 0 0;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-soft-band-end::before {
+  bottom: 0.12em;
+  border-radius: 0 0 0.55rem 0.55rem;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-soft-band-single::before {
+  top: 0.12em;
+  bottom: 0.12em;
+  border-radius: 0.55rem;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-right-rail {
+  padding-right: 2.2rem;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-right-rail::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 1.05rem;
+  width: 2px;
+  background: color-mix(in srgb, var(--interactive-accent) 78%, white 22%);
+  pointer-events: none;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-right-rail-start::after {
+  top: 0.18em;
+  border-radius: 999px 999px 0 0;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-right-rail-end::after {
+  bottom: 0.18em;
+  border-radius: 0 0 999px 999px;
+}
+
+.cm-editor .cm-line.fc-answer-multiline-line-right-rail-single::after {
+  top: 0.18em;
+  bottom: 0.18em;
+  border-radius: 999px;
+}
+
+.cm-editor .fc-answer-multiline .cm-highlight,
+.cm-editor .fc-answer-multiline .cm-formatting-highlight {
+  background: transparent !important;
+  background-color: transparent !important;
+  --text-highlight-bg: transparent !important;
+  color: inherit !important;
+}
+
 .cm-editor .cm-line.fc-hidden-block-id-line {
   display: none;
 }

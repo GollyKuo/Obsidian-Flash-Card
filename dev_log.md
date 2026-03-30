@@ -1,359 +1,385 @@
-# 開發者日誌 (Developer Log)
+﻿# 開發者日誌 (Developer Log)
 
-本文件記錄專案所有的版本更動、架構調整與重要事件。
+## V0.1.14（正式版）— 高亮渲染策略重寫（2026-03-31）
+- 以 `v0.1.13` 為乾淨基線重寫多行答案渲染，保留重構後 `Manual.md`。
+- 多行/清單模式僅保留 `淡色背景帶` 與 `右側細線`，移除 `整段圓角容器` 全鏈路（設定、型別、渲染、CSS）。
+- `右側細線` 使用整塊答案共用導引線；`淡色背景帶` 使用整塊答案共用背景帶。
+- 驗證：`npx tsc --noEmit`、`npm test`、`npm run build` 全數通過。
+?祆?隞嗉???獢?????游??瑽矽?渲???鈭辣??
+## V0.1.14嚗葫閰虫葉嚗??函?皜脫?蝑 + 憭?璅???舫嚗?026-03-30嚗?
+### ?桃?
+- 撠?獢葡???乩?隤?憿???嚗??銵?皜蝑?憟?株? chip 敺?曆??芰憭???
+### 銝餉?隤踵
+- `src/editor/AnswerHighlighter.ts`嚗?  - 憭?/皜蝑??寧?函? mark decoration 皜脫???  - ?株?蝑???cloze 蝬剜? chip 皜脫???- `src/settings/multiLineAnswerRenderStyles.ts`嚗憓?嚗?  - 摰儔憭?蝑?皜脫?璅?????＊蝷箏?蝔晞?- `src/settings/types.ts`嚗?  - ?啣? `multiLineAnswerRenderStyle` 閮剖?甈?嚗?閮剔 `soft-band`??- `src/settings/FlashcardsSettingTab.ts`嚗?  - ?啣???銵?獢葡?見撘???殷??? `瘛∟?撣跆??喳蝝啁?`??湔挾??摰孵`??- `src/styles/editor.css`嚗?  - ?啣?銝車憭?璅??撠? class??  - `?喳蝝啁?` ?寧隞亙?銵?獢?憛?函???喳撠?蝺??橘?銝??舀?銝銵??芯?璇?  - `瘛∟?撣跆 ?寧隞亙?銵?獢?憛?刻??臬????橘?銝??舀?銝銵??芯?畾萄??脯?- `src/editor/answerHighlightRules.ts`嚗?  - ?臬 `collectMultilineAnswerRange`嚗?皜脫?蝑??雿輻??
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????- **皜祈岫**嚗npm test` ??嚗 39 ?葫閰艾?- **撱箇蔭**嚗npm run build` ??嚗蒂??銴ˊ??Vault 憭??桅???
+### ?酉
+- ?祉??箸葫閰阡?畾菔???撠?券?Git??
+---
 
-## V0.1.13 — 答案高亮膠囊化平整邊緣（2026-03-30）
-
-### 目的
-- 針對「答案高亮在符號附近邊緣破碎」問題，驗證是否可改為單一膠囊 chip 呈現。
-
-### 主要調整
-- `src/editor/AnswerHighlighter.ts`：
-  - 非游標行的答案區改為 `Decoration.replace + AnswerChipWidget` 渲染。
-  - 由單一 widget 承載整段答案文字，避免 CodeMirror 分詞切成多個圓角片段。
-- `src/editor/answerChipText.ts`：
-  - 新增答案文字顯示正規化，讓 `[[target|alias]]` 這類 Obsidian 內聯語法在 chip 中優先顯示 alias，而不是原始語法字串。
-  - 補上常見內聯語法顯示轉換（wikilink / markdown link / cloze），降低 chip 與原生閱讀視覺落差。
-- `src/styles/editor.css`：
-  - 新增 `.fc-answer-chip` 膠囊樣式（圓角、細邊框、低對比底色）。
-  - 移除舊版依賴 `.fc-answer-highlight` / `.cm-highlight` 分段高亮的樣式路徑。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 37 項測試。
-- **建置**：`npm run build` 通過，並成功複製到 Vault 外掛目錄。
+## ?辣?渡? ??Manual ???箔蝙?刻???2026-03-30嚗?
+### 隤踵?批捆
+- `Manual.md` ?晞??祈酉閮?+ ?銵?餈唳毽??箝蝙?刻?雿???瑽?
+- 鋆?敹恍?憪?瘜?靘身摰?隤芣??虜?典隞方?撣貉?????
+- 撠??芣迤撘?啁? AI enrich ?膩?寧????敺???牧???踹?隤文?雿輻??
 
 ---
 
-## V0.1.12（重做版）— v0.1.11 基線重建（2026-03-30）
+## V0.1.13 ??蝑?擃漁???像?湧?蝺??2026-03-30嚗?
 
-### 目的
-- 以 `v0.1.11` 的穩定邏輯為基線，移除後續試錯過程中證明無效或不穩定的作法。
-- 保留已驗證有效的功能行為，並以更乾淨、可維護的方式重新落地。
+### ?桃?
+- ????獢?鈭桀蝚西????楠?渡???憿?撽??臬?舀?箏銝?? chip ???
 
-### 正式採用的作法
-- **編輯器樣式分層**：新增 `src/styles/editor.css`，將 CodeMirror 專用規則自 `main.css` 拆分，避免與預覽/UI 樣式耦合。
-- **Build 分流**：`esbuild.config.mjs` 對 `editor.css` 停用 `#fc-plugin-root` prefix-wrap，保證 `.cm-editor` selector 可正確命中。
-- **答案高亮策略**：`AnswerHighlighter` 改為 decoration-only 流程，游標行不套高亮，離開游標後才套用，保留可編輯性。
-- **語法 token 隱藏**：新增 `:: / ;; / :::` token range 判定，游標離開時隱藏語法，回到該行時恢復原語法。
-- **Block ID 顯示邏輯**：`BlockIdHider` 同時支援行尾型與獨立行型 `^fc-...`，避免殘留空白陰影。
+### 銝餉?隤踵
+- `src/editor/AnswerHighlighter.ts`嚗?
+  - ?虜璅???獢??寧 `Decoration.replace + AnswerChipWidget` 皜脫???
+  - ?勗銝 widget ?輯??湔挾蝑???嚗??CodeMirror ????憭?閫?畾萸?
+- `src/editor/answerChipText.ts`嚗?
+  - ?啣?蝑???憿舐內甇????霈?`[[target|alias]]` ?? Obsidian ?扯隤???chip 銝剖?＊蝷?alias嚗??臬?憪?瘜?銝脯?
+  - 鋆?撣貉??扯隤?憿舐內頧?嚗ikilink / markdown link / cloze嚗??? chip ???霈閬死?賢榆??
+- `src/styles/editor.css`嚗?
+  - ?啣? `.fc-answer-chip` ??璅??嚗?閫敦????撠?摨嚗?
+  - 蝘駁??靘陷 `.fc-answer-highlight` / `.cm-highlight` ?挾擃漁?見撘楝敺?
 
-### 移除或淘汰的方向
-- 不再使用 cloze widget replace 作為主要渲染路徑。
-- 不再讓 CSS 與 decoration 同時控制同一個 block id 顯示責任。
-- 不再把 editor 規則與 `#fc-plugin-root` 預覽規則混放在同一個樣式責任層。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 33 項測試。
-- **建置**：`npm run build` 通過，並成功複製到 Vault 外掛目錄。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 37 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ??嚗蒂??銴ˊ??Vault 憭??桅???
 
 ---
 
-## V0.1.14 — 高亮診斷工具與設定防呆 (2026-03-30)
+## V0.1.12嚗???嚗?v0.1.11 ?箇??遣嚗?026-03-30嚗?
 
-### 新增
-- **答案高亮診斷指令**：在 `src/app/registerPluginUi.ts` 新增 `顯示答案高亮診斷` 指令，會回報目前游標行的 scopes、answer ranges、cloze ranges，並同步輸出詳細資料到開發者主控台。
+### ?桃?
+- 隞?`v0.1.11` ?帘摰?頛舐?箇?嚗宏?文?蝥岫?舫?蝔葉霅??⊥???蝛拙???瘜?
+- 靽?撌脤?霅????銵嚗蒂隞交銋暹楊?蝬剛風?撘??啗?啜?
 
-### 架構調整
-- **設定防呆**：`src/main.ts` 在 `loadSettings()` 會過濾不合法 scope，若 `answerHighlightScopes` 為空則自動回退為 `["cloze"]`，避免高亮系統被空設定關閉。
-- **版本可見性**：外掛啟動 Notice 顯示當前版本號，方便確認 Obsidian 載入的是否是最新 build。
+### 甇???∠??瘜?
+- **蝺刻摩?冽見撘?撅?*嚗憓?`src/styles/editor.css`嚗? CodeMirror 撠閬???`main.css` ??嚗???汗/UI 璅???血???
+- **Build ??**嚗esbuild.config.mjs` 撠?`editor.css` ? `#fc-plugin-root` prefix-wrap嚗?霅?`.cm-editor` selector ?舀迤蝣箏銝准?
+- **蝑?擃漁蝑**嚗AnswerHighlighter` ?寧 decoration-only 瘚?嚗虜璅?銝?擃漁嚗?虜璅????剁?靽??舐楊頛舀扼?
+- **隤? token ?梯?**嚗憓?`:: / ;; / :::` token range ?文?嚗虜璅???梯?隤?嚗??啗府銵??Ｗ儔??瘜?
+- **Block ID 憿舐內?摩**嚗BlockIdHider` ???舀銵偏???函?銵? `^fc-...`嚗???征?賡敶晞?
 
-### 文件同步
-- **Manual 更新**：補充「顯示答案高亮診斷」命令用途與版本註記（V0.1.14）。
+### 蝘駁??瘙啁??孵?
+- 銝?雿輻 cloze widget replace 雿銝餉?皜脫?頝臬???
+- 銝?霈?CSS ??decoration ???批????block id 憿舐內鞎砌遙??
+- 銝???editor 閬???`#fc-plugin-root` ?汗閬?瘛瑟?典?銝?見撘痊隞餃惜??
 
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 29 項測試。
-- **建置**：`npm run build` 通過。
-
----
-
-## V0.1.13 — Cloze Widget 顯示穩定性修正 (2026-03-30)
-
-### 修正
-- **游標判定改為 token 級別**：`src/editor/AnswerHighlighter.ts` 不再以整行是否 active 決定 cloze widget 顯示，而是僅在游標進入「該 cloze token 範圍」時還原原語法；避免整行都退回原生 `== ==` 高亮。
-- **樣式 fallback 補強**：`src/styles/main.css` 為 `.fc-answer-highlight` 與 `.fc-cloze-widget` 新增 `background: var(--background-modifier-hover)` fallback，若主題/環境對 `color-mix` 支援不完整，答案高亮仍可見。
-
-### 文件同步
-- **Manual 更新**：補充 cloze token 級別游標顯示規則與高亮 fallback 說明（V0.1.13）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 29 項測試。
-- **建置**：`npm run build` 通過。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 33 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ??嚗蒂??銴ˊ??Vault 憭??桅???
 
 ---
 
-## V0.1.12 — 高亮渲染重構第一階段（Cloze Widget 接管） (2026-03-30)
+## V0.1.14 ??擃漁閮箸撌亙?身摰??(2026-03-30)
 
-### 新增
-- **Cloze Token Range 抽取**：在 `src/editor/answerHighlightRules.ts` 新增 `collectClozeTokenRanges`，統一計算 `==填空==` 的完整 token 與內文範圍。
-- **Cloze 規則測試**：`answerHighlightRules.test.ts` 新增 cloze token 抽取測試，覆蓋單一與多段 cloze 情境。
+### ?啣?
+- **蝑?擃漁閮箸?誘**嚗 `src/app/registerPluginUi.ts` ?啣? `憿舐內蝑?擃漁閮箸` ?誘嚗???桀?皜豢?銵? scopes?nswer ranges?loze ranges嚗蒂?郊頛詨閰喟敦鞈??圈??潸蜓?批??
 
-### 架構調整
-- **編輯器渲染接管（第一階段）**：`src/editor/AnswerHighlighter.ts` 在非編輯行將 cloze token 以 `Decoration.replace + WidgetType` 方式渲染，避免直接依賴 Obsidian 原生 `.cm-highlight` 作為主要視覺來源。
-- **衝突隔離策略調整**：保留 `answerHighlightScopes` 功能不變，僅將 cloze 類型改為 plugin-owned editor rendering；其餘答案型態仍沿用既有 `fc-answer-highlight` decoration。
-- **樣式補充**：`src/styles/main.css` 新增 `.fc-cloze-widget`，讓 cloze widget 在編輯模式與既有答案高亮視覺一致。
-- **打包白名單同步**：`esbuild.config.mjs` 新增 `.cm-editor .fc-cloze-widget` ignored selector，避免被 `#fc-plugin-root` 前綴污染。
+### ?嗆?隤踵
+- **閮剖??脣?**嚗src/main.ts` ??`loadSettings()` ??瞈曆??? scope嚗 `answerHighlightScopes` ?箇征??????`["cloze"]`嚗??鈭桃頂蝯梯◤蝛箄身摰???
+- **??航???*嚗?????Notice 憿舐內?嗅?????嫣噶蝣箄? Obsidian 頛??行???build??
 
-### 文件同步
-- **RoadMap 更新**：Sprint F 標註「高亮渲染重構第一階段（Cloze Widget 接管）」已完成（V0.1.12）。
-- **Instruction 更新**：新增 `Cloze Editor Rendering Ownership` 原則與下一步行動。
-- **Manual 更新**：補充 `==填空==` 非編輯行由外掛接管渲染、編輯行保留原語法的行為說明。
+### ?辣?郊
+- **Manual ?湔**嚗??＊蝷箇?獢?鈭株那?瑯隞斤???閮餉?嚗0.1.14嚗?
 
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 29 項測試。
-- **建置**：`npm run build` 通過。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 29 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ????
 
 ---
 
-## V0.1.11 — 答案高亮範圍多選設定 (2026-03-29)
+## V0.1.13 ??Cloze Widget 憿舐內蝛拙??找耨甇?(2026-03-30)
 
-### 新增
-- **答案高亮範圍設定**：在 `src/settings/FlashcardsSettingTab.ts` 新增可重複多選的設定項目，支援 `填空`、`單行答案`、`多行答案`、`雙向卡`。
-- **高亮規則模組**：新增 `src/editor/answerHighlightRules.ts` 與對應測試 `answerHighlightRules.test.ts`，集中管理各類語法的答案區段判定。
-- **Editor 高亮 Extension**：新增 `src/editor/AnswerHighlighter.ts`，依設定範圍對答案區段加上 `fc-answer-highlight` decoration。
+### 靽格迤
+- **皜豢??文??寧 token 蝝**嚗src/editor/AnswerHighlighter.ts` 銝?隞交銵??active 瘙箏? cloze widget 憿舐內嚗?皜豢??脣?府 cloze token 蝭???????瘜??踹??渲??賡????`== ==` 擃漁??
+- **璅?? fallback 鋆撥**嚗src/styles/main.css` ??`.fc-answer-highlight` ??`.fc-cloze-widget` ?啣? `background: var(--background-modifier-hover)` fallback嚗銝駁?/?啣?撠?`color-mix` ?舀銝??湛?蝑?擃漁隞閬?
 
-### 架構調整
-- **設定模型擴充**：`FlashcardsPluginSettings` 新增 `answerHighlightScopes`，預設為 `["cloze"]`，維持現有體驗不突變。
-- **樣式責任收斂**：`src/styles/main.css` 不再直接依賴 `.cm-highlight`，改為插件專屬的 `.fc-answer-highlight` class，避免誤影響一般 Markdown highlight。
-- **設定即時生效**：`src/main.ts` 在儲存設定後呼叫 `workspace.updateOptions()`，讓 editor extension 可反映最新勾選項目。
+### ?辣?郊
+- **Manual ?湔**嚗???cloze token 蝝皜豢?憿舐內閬???鈭?fallback 隤芣?嚗0.1.13嚗?
 
-### 文件同步
-- **RoadMap 更新**：`Sprint F` 已納入答案高亮主題與套用範圍設定規劃。
-- **Instruction 更新**：新增 `Answer Highlight Theme` 原則，明確定義範圍選項。
-- **Manual 更新**：補充使用者可於設定頁多選答案高亮範圍（V0.1.11）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，新增答案高亮規則測試。
-- **建置**：`npm run build` 通過。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 29 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ????
 
 ---
 
-## V0.1.10 — 回到 V0.1.9 基線後重做視覺與觸發體驗 (2026-03-29)
+## V0.1.12 ??擃漁皜脫???蝚砌??挾嚗loze Widget ?亦恣嚗?(2026-03-30)
 
-### 架構調整
-- **版本基線回退**：先將 `V0.1.10 ~ V0.1.12` 以 revert 方式回到 `V0.1.9` 架構，再以最小變更重做需求，避免樣式試驗歷史持續疊加。
-- **Block ID 觸發即時化（保留）**：`src/blockid/BlockIdManager.ts` 移除 `500ms debounce`，改為下一個事件迴圈即時檢查游標離行（`setTimeout(..., 0)` + 防重入）。
-- **Cloze 樣式重做**：`src/styles/main.css` 新增低對比淺灰膠囊樣式（`mark` / `.cm-highlight`），降低刺眼感。
-- **樣式作用範圍修正**：`esbuild.config.mjs` 的 `PrefixWrap` 新增 `ignoredSelectors`，確保 cloze 樣式不被包進 `#fc-plugin-root` 而失效。
+### ?啣?
+- **Cloze Token Range ?賢?**嚗 `src/editor/answerHighlightRules.ts` ?啣? `collectClozeTokenRanges`嚗絞銝閮? `==憛怎征==` ????token ?????
+- **Cloze 閬?皜祈岫**嚗answerHighlightRules.test.ts` ?啣? cloze token ?賢?皜祈岫嚗??銝??畾?cloze ????
 
-### 文件同步
-- **Manual 更新**：新增 `==填空==` 低對比淺灰樣式說明，並註記 Block ID 即時附加行為（V0.1.10）。
+### ?嗆?隤踵
+- **蝺刻摩?冽葡?蝞∴?蝚砌??挾嚗?*嚗src/editor/AnswerHighlighter.ts` ?券?蝺刻摩銵? cloze token 隞?`Decoration.replace + WidgetType` ?孵?皜脫?嚗??乩?鞈?Obsidian ?? `.cm-highlight` 雿銝餉?閬死靘???
+- **銵??蝑隤踵**嚗???`answerHighlightScopes` ?銝?嚗?撠?cloze 憿??寧 plugin-owned editor rendering嚗擗?獢???瘝輻?Ｘ? `fc-answer-highlight` decoration??
+- **璅??鋆?**嚗src/styles/main.css` ?啣? `.fc-cloze-widget`嚗? cloze widget ?函楊頛舀芋撘??Ｘ?蝑?擃漁閬死銝?氬?
+- **???賢??桀?甇?*嚗esbuild.config.mjs` ?啣? `.cm-editor .fc-cloze-widget` ignored selector嚗?◤ `#fc-plugin-root` ?韌瘙⊥???
 
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 22 項測試。
-- **建置**：`npm run build` 通過。
+### ?辣?郊
+- **RoadMap ?湔**嚗print F 璅酉??鈭格葡??瑽洵銝?挾嚗loze Widget ?亦恣嚗歇摰?嚗0.1.12嚗?
+- **Instruction ?湔**嚗憓?`Cloze Editor Rendering Ownership` ????銝甇亥???
+- **Manual ?湔**嚗???`==憛怎征==` ?楊頛航??勗??蝞⊥葡?楊頛航?靽???瘜?銵隤芣???
 
----
-
-## V0.1.9 — Sprint D 第三階段：分片儲存與增量寫入 (2026-03-29)
-
-### 新增
-- **Sharded Storage Helper**：新增 `src/store/shardedStorage.ts` 與 `shardedStorage.test.ts`，統一定義 manifest 格式與 `Cards/<blockId>.json` 路徑規則。
-- **儲存基準測試補強**：新增 `FlashcardStorage.bench.ts`，比較「整包 `data.json` 重寫」與「單卡 + manifest 寫入」成本。
-
-### 架構調整
-- **Repository 分片落地**：`FlashcardRepository` 改為 `data.json` manifest + `Cards/*.json` 卡片分片讀寫模型。
-- **load 流程升級**：支援舊版整包資料自動遷移至分片儲存；若 manifest/card schema 需正規化，會自動重寫新格式。
-- **save 流程增量化**：僅寫入 dirty card 檔案、刪除已刪卡片檔案，再更新 manifest，避免每次小變更都重寫全量資料。
-- **一致性修正**：`removeCardsBySourcePath` / `removeMissingCardsFromSource` 改為走 `deleteCard` 流程，確保分片檔刪除與 manifest 更新一致。
-
-### 文件同步
-- **RoadMap 更新**：`Sprint D` 的「避免整包重寫」與「repository 分片 storage layout」標註為 `2026-03-29，V0.1.9` 已完成。
-- **Instruction 更新**：`Persistence Layer` 明確改為 sharded storage，並將當前行動切換至 Sprint E（Dashboard Workspace Cards 分區）。
-- **Manual 更新**：補充分片儲存結構說明（`data.json` manifest + `Cards/*.json`）。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 22 項測試。
-- **Benchmark**：`npm run benchmark:store` 通過；`sharded-single-card-plus-manifest-stringify-5k` 約為 `legacy-full-data-json-stringify-5k` 的 **24.75x**。
-- **建置**：`npm run build` 通過。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 29 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ????
 
 ---
 
-## V0.1.8 — Sprint D 第二階段：Save Queue 與 Benchmark (2026-03-29)
+## V0.1.11 ??蝑?擃漁蝭?憭閮剖? (2026-03-29)
 
-### 新增
-- **SaveQueue 抽象**：新增 `src/store/SaveQueue.ts`，提供 `queue` / `saveNow` / `flush` / `runInBatch`，作為儲存排程的共用機制。
-- **Benchmark 腳本與基準檔**：新增 `benchmark:store` 指令與 `FlashcardIndex.bench.ts`，可量測 1k / 5k 卡片下的 reindex 與 query workload。
-- **測試補強**：新增 `DataStoreSaveQueue.test.ts`（實際驗證 `SaveQueue` debounce 與 batch flush 行為）。
+### ?啣?
+- **蝑?擃漁蝭?閮剖?**嚗 `src/settings/FlashcardsSettingTab.ts` ?啣??舫?銴??貊?閮剖??嚗??`憛怎征`??株?蝑?`?憭?蝑?`????︶??
+- **擃漁閬?璅∠?**嚗憓?`src/editor/answerHighlightRules.ts` ???葫閰?`answerHighlightRules.test.ts`嚗?銝剔恣??憿?瘜?蝑??畾萄摰?
+- **Editor 擃漁 Extension**嚗憓?`src/editor/AnswerHighlighter.ts`嚗?閮剖?蝭?撠?獢?畾萄?銝?`fc-answer-highlight` decoration??
 
-### 架構調整
-- **DataStore 儲存流程重構**：`DataStore` 改由 `SaveQueue` 管理儲存節流與序列化寫入，`save()` 保留即時落盤語意，新增 `queueSave` / `flushQueuedSave` / `runInSaveBatch`。
-- **Sync 流程批次化**：`FlashcardSyncService` 在檔案修改、rename、delete 與 `syncVault()` 改用 queue/batch 儲存策略，降低高頻寫入成本。
-- **Unload 安全收尾**：`main.ts` 在 `onunload` 觸發 `flushQueuedSave()`，降低尚未落盤的風險。
+### ?嗆?隤踵
+- **閮剖?璅∪??游?**嚗FlashcardsPluginSettings` ?啣? `answerHighlightScopes`嚗?閮剔 `["cloze"]`嚗雁???撽?蝒???
+- **璅??鞎砌遙?嗆?**嚗src/styles/main.css` 銝??湔靘陷 `.cm-highlight`嚗?箸?隞嗅?撅祉? `.fc-answer-highlight` class嚗?炊敶梢銝??Markdown highlight??
+- **閮剖??單???**嚗src/main.ts` ?典摮身摰??澆 `workspace.updateOptions()`嚗? editor extension ?臬????啣?賊??柴?
 
-### 文件同步
-- **RoadMap 更新**：`Sprint D` 的 `sync/save queue or batch` 與 `benchmark/profiling` 標註為 `2026-03-29，V0.1.8` 已完成。
-- **Instruction 更新**：同步當前行動，明確聚焦 Sprint D 第二階段收尾與後續方向。
+### ?辣?郊
+- **RoadMap ?湔**嚗Sprint F` 撌脩??亦?獢?鈭桐蜓憿?憟蝭?閮剖?閬???
+- **Instruction ?湔**嚗憓?`Answer Highlight Theme` ??嚗?蝣箏?蝢拍????
+- **Manual ?湔**嚗??蝙?刻?潸身摰?憭蝑?擃漁蝭?嚗0.1.11嚗?
 
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 19 項測試。
-- **Benchmark**：`npm run benchmark:store` 通過（5k query workload 約 98 hz，mean 約 10.20ms）。
-- **建置**：`npm run build` 通過，並成功複製到 Obsidian Vault 外掛目錄。
-
----
-
-## V0.1.7 — Sprint D 第一階段：Migration 與索引基礎 (2026-03-29)
-
-### 新增
-- **Schema Migration**：新增 `src/store/migrations.ts`，在 repository `load()` 階段自動正規化舊資料、修補缺欄位並升級 schema version。
-- **In-Memory Index**：新增 `src/store/FlashcardIndex.ts`，建立 `sourcePath` 與 `due` 查詢索引，降低常用查詢的全量掃描成本。
-- **測試擴充**：新增 `migrations.test.ts` 與 `FlashcardIndex.test.ts`，驗證資料遷移與索引更新邏輯。
-
-### 架構調整
-- **資料版本升級**：`FLASHCARD_DATA_VERSION` 由 `1.0.0` 提升至 `1.1.0`，由 migration 機制統一管理升級。
-- **Repository 查詢加速**：`FlashcardRepository` 改為索引驅動查詢（`getCardsBySourcePath` / `getDueCards`），同步在 upsert/delete/rename/remove 流程維護索引一致性。
-- **DataStore due 查詢改走索引**：`DataStore.getDueCards()` 改為透過 repository due index 取值。
-
-### 文件同步
-- **RoadMap 更新**：`Sprint D` 狀態改為「進行中」，並將 migration 與 `sourcePath` / `due` in-memory index 標註為 `2026-03-29，V0.1.7` 已完成。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 17 項測試。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗憓?獢?鈭株??葫閰艾?
+- **撱箇蔭**嚗npm run build` ????
 
 ---
 
-## V0.1.6 — 維護工具與測試補強 (2026-03-29)
+## V0.1.10 ??? V0.1.9 ?箇?敺???閬箄?閫貊擃? (2026-03-29)
 
-### 新增
-- **Block ID 清理工具**：新增 `BlockIdCleanupService`，可批次移除 Vault 內所有 `^fc-xxxxxx`，並在清理後自動重建索引。
-- **清理入口**：新增 command / ribbon / settings button，提供一鍵清理 Block ID 的維護操作。
-- **AI 設定預留欄位**：於 settings schema 與設定頁新增 `aiEnabled`、`aiProvider`、`aiModel`、`aiApiKey`。
-- **測試補強**：新增 `blockIdRules.test.ts`、`blockIdCleanup.test.ts`，並擴充 `FlashcardSyncEngine` 測試覆蓋多行卡與填空卡同步一致性。
+### ?嗆?隤踵
+- **??箇??**嚗?撠?`V0.1.10 ~ V0.1.12` 隞?revert ?孵?? `V0.1.9` ?嗆?嚗?隞交?撠??湧???瘙??踹?璅??閰阡?甇瑕??????
+- **Block ID 閫貊?單???靽?嚗?*嚗src/blockid/BlockIdManager.ts` 蝘駁 `500ms debounce`嚗?箔?銝??隞嗉艘??炎?交虜璅銵?`setTimeout(..., 0)` + ?脤??伐???
+- **Cloze 璅????**嚗src/styles/main.css` ?啣?雿?瘥滓?啗??見撘?`mark` / `.cm-highlight`嚗????箇??
+- **璅??雿蝭?靽格迤**嚗esbuild.config.mjs` ??`PrefixWrap` ?啣? `ignoredSelectors`嚗Ⅱ靽?cloze 璅??銝◤??`#fc-plugin-root` ?仃??
 
-### 架構調整
-- **Block ID 決策邏輯抽離**：新增 `blockIdRules`，將 `hasBlockId`、`appendBlockId`、on-blur 附加判斷改為可獨立測試的純邏輯。
-- **清理邏輯抽離**：新增 `blockIdCleanup` 純函式模組，將 markdown 清理規則與 Obsidian I/O 解耦。
-- **Runtime 組裝擴充**：在 runtime 中註冊 `blockIdCleanupService`，供 UI 與設定頁共用，避免清理流程重複實作。
-- **前後測試流程明文化**：將「修改前確認基線、修改後執行回歸驗證」納入 `SKILL.md` 工作流程規則，作為固定品質守門步驟。
+### ?辣?郊
+- **Manual ?湔**嚗憓?`==憛怎征==` 雿?瘥滓?唳見撘牧??銝西酉閮?Block ID ?單???銵嚗0.1.10嚗?
 
-### 文件同步
-- **RoadMap 更新**：將 Sprint A/B/C 本次完成項目標註為 `2026-03-29，V0.1.6`（Block ID 測試、同步一致性、AI 設定預留、清理工具）。
-- **Manual 更新**：新增設定頁與維護工具章節，補充 `V0.1.6` 新增的 AI 預留設定與 Block ID 清理功能。
-- **Instruction 語系與規格重整**：將 `Instruction.md` 改為中文主體 + 專業英文術語版本，並明確定義 AI image/audio 資產路徑。
-- **使用者手冊正名**：將 `Mannual.md` 正名為 `Manual.md`，並同步修正專案內文件引用。
-- **Instruction / RoadMap 分工明文化**：新增規則，`Instruction.md` 專責產品方向、架構原則與功能規格，避免與 `RoadMap.md` 的時程與 sprint 狀態重複；未來若規劃方向變更，需同步更新 `Instruction.md`。
-- **Instruction milestone 同步規則補充**：新增規則，若 `Instruction.md` 的 milestones 有新增規劃、優先順序調整，或完成／未完成狀態修正，也必須同步更新。
-- **SKILL / Instruction 去重整理**：收斂 `SKILL.md` 中與 `Instruction.md` 重複的產品規格內容，改以 `Instruction.md` 作為產品方向與功能規格的單一主要來源，讓文件分工更清楚。
-
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 11 項測試。
-- **建置**：`npm run build` 通過，並成功複製到 Obsidian Vault 外掛目錄。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 22 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ????
 
 ---
 
-## V0.1.5 — 架構補強與同步層重整 (2026-03-29)
+## V0.1.9 ??Sprint D 蝚砌??挾嚗??摮?憓?撖怠 (2026-03-29)
 
-### 新增
-- **FlashcardSyncEngine / FlashcardSyncService**：建立獨立同步層，支援單檔同步、整庫重建索引、檔案修改後自動同步、檔案重新命名同步與刪除清理。
-- **Plugin Settings Tab**：新增外掛設定頁，提供資料目錄與自動同步開關。
-- **整庫重建指令與 Ribbon**：新增整個 Vault 的閃卡索引重建入口，方便維護與救援同步狀態。
-- **基礎測試**：新增 `FlashcardParser`、`FsrsScheduler`、`FlashcardSyncEngine` 的 Vitest 測試。
+### ?啣?
+- **Sharded Storage Helper**嚗憓?`src/store/shardedStorage.ts` ??`shardedStorage.test.ts`嚗絞銝摰儔 manifest ?澆???`Cards/<blockId>.json` 頝臬?閬???
+- **?脣??箸?皜祈岫鋆撥**嚗憓?`FlashcardStorage.bench.ts`嚗?頛??`data.json` ?神?????+ manifest 撖怠???研?
 
-### 架構調整
-- **DataStore 分責**：將資料讀寫拆到 `FlashcardRepository`，將複習排程拆到 `FsrsScheduler`，保留 `DataStore` 作為較薄的 facade。
-- **主程式瘦身**：`src/main.ts` 改為 composition root，將 UI 註冊、同步邏輯與設定入口交由獨立模組負責。
-- **Preview Block ID 清理拆模組**：將閱讀模式的 Block ID 清理邏輯抽出為獨立 register helper，降低主入口耦合。
-- **設定抽象化**：新增 `FlashcardsPluginSettings` 與預設值定義，避免資料目錄等配置散落在核心模組中。
-- **文件流程補充**：明確規範 `Manual.md` 需隨開發變更同步更新，與 `RoadMap.md`、`dev_log.md` 一起維持動態一致。
-- **Skill 演化理念明文化**：補充 `SKILL.md` 為可持續演化的專案規範，要求隨著專案優化與流程成熟持續完善。
-- **效率與整潔標準明文化**：補充 `SKILL.md`，明確要求程式碼需兼顧效能、乾淨分層、低耦合與可維護性。
-- **效能風險納入規劃**：將大量閃卡下的資料索引、整包寫入與同步成本風險正式納入 `RoadMap.md`，並提升為較前面的高優先規劃項目，暫不執行。
-- **Index 演化原則定案**：確認未來新增的查詢 index 應視為可重建的衍生結構，主資料 schema 維持穩定並預留 migration 機制，已同步補入 `RoadMap.md` 的 Sprint D。
-- **Dashboard 策略定案**：確認不採用 Obsidian Bases 作為卡片主管理來源，改採外掛內建單一 `Dashboard Workspace`，並在同一 UI 入口整合 `Cards`（管理）與 `Insights`（分析）分區，已同步納入 `RoadMap.md`。
-- **架構前置檢查流程明文化**：新增規則，未來每次推進下一個開發步驟前，都需先檢查目前架構是否足以承接；若有明顯缺口，應先補強再繼續開發，已同步寫入 `SKILL.md`。
+### ?嗆?隤踵
+- **Repository ???賢**嚗FlashcardRepository` ?寧 `data.json` manifest + `Cards/*.json` ?∠???霈撖急芋??
+- **load 瘚???**嚗?渲??????蝘餉???脣?嚗 manifest/card schema ?甇???????撖急?澆???
+- **save 瘚?憓???*嚗?撖怠 dirty card 瑼???文歇?芸??獢????manifest嚗??甈∪?霈?賡?撖怠????
+- **銝?湔找耨甇?*嚗removeCardsBySourcePath` / `removeMissingCardsFromSource` ?寧韏?`deleteCard` 瘚?嚗Ⅱ靽????芷??manifest ?湔銝?氬?
 
-### 驗證
-- **型別檢查**：`npx tsc --noEmit` 通過。
-- **測試**：`npm test` 通過，共 5 項測試。
-- **建置**：`npm run build` 通過，並成功複製到 Obsidian Vault 外掛目錄。
+### ?辣?郊
+- **RoadMap ?湔**嚗Sprint D` ????撖怒??epository ?? storage layout??閮餌 `2026-03-29嚗0.1.9` 撌脣???
+- **Instruction ?湔**嚗Persistence Layer` ?Ⅱ?寧 sharded storage嚗蒂撠????? Sprint E嚗ashboard Workspace Cards ??嚗?
+- **Manual ?湔**嚗????摮?瑽牧??`data.json` manifest + `Cards/*.json`嚗?
+
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 22 ?葫閰艾?
+- **Benchmark**嚗npm run benchmark:store` ??嚗sharded-single-card-plus-manifest-stringify-5k` 蝝 `legacy-full-data-json-stringify-5k` ??**24.75x**??
+- **撱箇蔭**嚗npm run build` ????
 
 ---
 
-## V0.1.4 — 開發交接紀錄 (2026-03-29)
+## V0.1.8 ??Sprint D 蝚砌??挾嚗ave Queue ??Benchmark (2026-03-29)
 
-### 事件
-- **文件理解確認**：已重新閱讀並確認 `Manual.md`、`Instruction.md`、`RoadMap.md`、`dev_log.md`、`manifest.json`、`package.json`，用於建立目前專案目標、里程碑與既有實作脈絡。
-- **開發權責交接**：先前階段由 Antigravity 的 Claude 4.6 Opus 協助處理；自本日（2026-03-29）起，後續開發與維護交由 Codex 接手。
-- **專案 Skill 正式化**：將 `.codex/skill/SKILL.txt` 升級整理為正式的 `.codex/skill/SKILL.md`，補上 YAML frontmatter、結構化規範與 `RoadMap.md` 的動態維護要求。
-- **專案 Skill 中文化**：將 `.codex/skill/SKILL.md` 改為中文主體撰寫，並保留關鍵技術詞英文，以提升可讀性且維持執行精準度。
-- **Skill 演化流程補充**：新增規則，當開發過程中出現對流程、品質、文件維護或交接非常關鍵的規則時，Codex 應主動提醒是否需要同步調整 `SKILL.md`。
+### ?啣?
+- **SaveQueue ?質情**嚗憓?`src/store/SaveQueue.ts`嚗?靘?`queue` / `saveNow` / `flush` / `runInBatch`嚗??箏摮?蝔??梁璈??
+- **Benchmark ?單?皞?**嚗憓?`benchmark:store` ?誘??`FlashcardIndex.bench.ts`嚗?葫 1k / 5k ?∠?銝? reindex ??query workload??
+- **皜祈岫鋆撥**嚗憓?`DataStoreSaveQueue.test.ts`嚗祕??霅?`SaveQueue` debounce ??batch flush 銵嚗?
 
-### 目前理解
-- **專案目標**：打造一套 Obsidian 外掛，將 Markdown 語法轉為可複習的閃卡系統，結合 Block ID、FSRS、AI 豐富化與嚴格 CSS 隔離。
-- **延續原則**：維持既有的「資料至上、樣式隔離、隱形標記、智慧觸發、Notion/RemNote 風格」方向持續推進。
+### ?嗆?隤踵
+- **DataStore ?脣?瘚???**嚗DataStore` ?寧 `SaveQueue` 蝞∠??脣?蝭瘚?摨??神?伐?`save()` 靽??單??賜隤?嚗憓?`queueSave` / `flushQueuedSave` / `runInSaveBatch`??
+- **Sync 瘚??寞活??*嚗FlashcardSyncService` ?冽?獢耨?嫘ename?elete ??`syncVault()` ?寧 queue/batch ?脣?蝑嚗?雿??餃神?交??研?
+- **Unload 摰?嗅偏**嚗main.ts` ??`onunload` 閫貊 `flushQueuedSave()`嚗?雿??芾?斤?憸券??
 
----
+### ?辣?郊
+- **RoadMap ?湔**嚗Sprint D` ??`sync/save queue or batch` ??`benchmark/profiling` 璅酉??`2026-03-29嚗0.1.8` 撌脣???
+- **Instruction ?湔**嚗?甇亦?????Ⅱ? Sprint D 蝚砌??挾?嗅偏??蝥??
 
-## V0.1.3 — 側邊欄捷徑按鈕 (2026-03-25)
-
-### 新增
-- **左側功能區 (Ribbon) 圖示**：新增三個按鈕，提供一鍵「掃描閃卡」、「開始複習」、「顯示統計」的快速操作。
-
----
-
-## V0.1.2 — 隱藏閱讀模式 Block ID (2026-03-25)
-
-### 修正
-- **閱讀模式 Block ID 隱藏**：註冊 Obsidian 的 `MarkdownPostProcessor`，精準過濾並隱藏渲染後的 `^fc-xxxxxx`（自動避開程式碼區塊）。
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 19 ?葫閰艾?
+- **Benchmark**嚗npm run benchmark:store` ??嚗?k query workload 蝝?98 hz嚗ean 蝝?10.20ms嚗?
+- **撱箇蔭**嚗npm run build` ??嚗蒂??銴ˊ??Obsidian Vault 憭??桅???
 
 ---
 
-## V0.1.1 — 隱藏 Block ID + 閃卡複習系統 (2026-03-25)
+## V0.1.7 ??Sprint D 蝚砌??挾嚗igration ?揣撘蝷?(2026-03-29)
 
-從 V0.1 乾淨重寫。解決了前幾次迭代中的 5 個已知問題。
+### ?啣?
+- **Schema Migration**嚗憓?`src/store/migrations.ts`嚗 repository `load()` ?挾?芸?甇????鞈??耨鋆撩甈?銝血?蝝?schema version??
+- **In-Memory Index**嚗憓?`src/store/FlashcardIndex.ts`嚗遣蝡?`sourcePath` ??`due` ?亥岷蝝Ｗ?嚗?雿虜?冽閰Ｙ??券??????
+- **皜祈岫?游?**嚗憓?`migrations.test.ts` ??`FlashcardIndex.test.ts`嚗?霅??蝘餉?蝝Ｗ??湔?摩??
 
-### 新增
-- **BlockIdHider** (`src/editor/BlockIdHider.ts`)：CM6 ViewPlugin，隱藏非游標行的 `^fc-xxxxxx`
-- **ReviewModal** (`src/ui/ReviewModal.tsx`)：React 複習介面，inline style，FSRS 四鍵評分
-- **ReviewModalContainer** (`src/ui/ReviewModalContainer.tsx`)：Obsidian Modal ↔ React 橋接
-- **指令**：「開始閃卡複習」（`start-review`），可透過 Ctrl+P 呼叫
-- **DataStore.reviewCard()**：整合 `ts-fsrs` 的 FSRS 排程演算法
+### ?嗆?隤踵
+- **鞈????**嚗FLASHCARD_DATA_VERSION` ??`1.0.0` ????`1.1.0`嚗 migration 璈蝯曹?蝞∠?????
+- **Repository ?亥岷??*嚗FlashcardRepository` ?寧蝝Ｗ?撽??亥岷嚗getCardsBySourcePath` / `getDueCards`嚗??郊??upsert/delete/rename/remove 瘚?蝬剛風蝝Ｗ?銝?湔扼?
+- **DataStore due ?亥岷?寡粥蝝Ｗ?**嚗DataStore.getDueCards()` ?寧?? repository due index ?潦?
 
-### 修正
-- **Folder already exists**：`ensureDirectory` 加入 try/catch 靜默處理
-- **File already exists**：`save()` 新增 `safeCreate` 方法，失敗時 fallback 到 `adapter.write`
-- **指令未註冊**：`onload()` 中先註冊所有指令/擴充，最後才 `await dataStore.load()`
-- **型別安全**：State 枚舉與字串之間使用顯式映射表（stateMap / stateRevMap）
+### ?辣?郊
+- **RoadMap ?湔**嚗Sprint D` ???箝脰?銝准?銝血? migration ??`sourcePath` / `due` in-memory index 璅酉??`2026-03-29嚗0.1.7` 撌脣???
 
-### 架構改進
-- 共用 `isAlreadyExistsError()` 工具方法
-- `FSRSState` 新增 `lastReview?` 欄位
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 17 ?葫閰艾?
 
 ---
 
-## V0.1 — 首個可用版本 (2026-03-25)
+## V0.1.6 ??蝬剛風撌亙?葫閰西?撘?(2026-03-29)
 
-### 新增
-- **FlashcardParser**：支援 `::` 正向 / `;;` 反向 / `:::` 雙向 / `==填空==` 四種語法 + 多行模式
-- **BlockIdManager**：On Blur 觸發 + `vault.process()` 原子寫入 + 防抖邏輯 + 競態條件防護
-- **DataStore**：`_Flashcards/data.json` 讀寫管理 + FSRS 狀態結構定義
-- **CSS 隔離**：Tailwind `fc-` 前綴 + PostCSS `#fc-plugin-root` 包裹 + Preflight 禁用
-- **esbuild 流水線**：自動編譯 + 自動複製到 Obsidian Vault 外掛目錄
-- **指令**：「掃描當前文件的閃卡」與「顯示閃卡統計」
-- **版本控制**：初始化 git + `.gitignore` + `dev_log.md`
+### ?啣?
+- **Block ID 皜?撌亙**嚗憓?`BlockIdCleanupService`嚗?寞活蝘駁 Vault ?扳???`^fc-xxxxxx`嚗蒂?冽????芸??遣蝝Ｗ???
+- **皜??亙**嚗憓?command / ribbon / settings button嚗?靘??菜???Block ID ?雁霅瑟?雿?
+- **AI 閮剖???甈?**嚗 settings schema ?身摰??啣? `aiEnabled`?aiProvider`?aiModel`?aiApiKey`??
+- **皜祈岫鋆撥**嚗憓?`blockIdRules.test.ts`?blockIdCleanup.test.ts`嚗蒂?游? `FlashcardSyncEngine` 皜祈岫閬?憭??∟?憛怎征?∪?甇乩??湔扼?
 
-### 修正
-- 修正 Block ID 在閱讀模式的 CSS 選擇器（改用屬性選擇器匹配 Obsidian 渲染方式）
-- 強化 `BlockIdManager` 安全性：增加檔案存在驗證、null 防護、vault.process 內部競態條件防護
-- 修正 `editor-change` 回呼未使用參數的問題
+### ?嗆?隤踵
+- **Block ID 瘙箇??摩?賡**嚗憓?`blockIdRules`嚗? `hasBlockId`?appendBlockId`?n-blur ???斗?寧?舐蝡葫閰衣?蝝?頛胯?
+- **皜??摩?賡**嚗憓?`blockIdCleanup` 蝝撘芋蝯?撠?markdown 皜?閬???Obsidian I/O 閫?艾?
+- **Runtime 蝯??游?**嚗 runtime 銝剛酉??`blockIdCleanupService`嚗? UI ?身摰??梁嚗????蝔?銴祕雿?
+- **??皜祈岫瘚?????*嚗??耨?孵?蝣箄??箇??耨?孵??瑁??飛撽?????`SKILL.md` 撌乩?瘚?閬?嚗??箏摰?鞈芸??甇仿???
 
-### 技術架構
+### ?辣?郊
+- **RoadMap ?湔**嚗? Sprint A/B/C ?祆活摰??璅酉??`2026-03-29嚗0.1.6`嚗lock ID 皜祈岫??甇乩??湔扼I 閮剖??????極?瘀???
+- **Manual ?湔**嚗憓身摰??雁霅瑕極?瑞?蝭嚗???`V0.1.6` ?啣???AI ??閮剖???Block ID 皜????
+- **Instruction 隤頂???潮???*嚗? `Instruction.md` ?寧銝剜?銝駁? + 撠平?望?銵??嚗蒂?Ⅱ摰儔 AI image/audio 鞈頝臬???
+- **雿輻???迤??*嚗? `Mannual.md` 甇????`Manual.md`嚗蒂?郊靽格迤撠??扳?隞嗅??具?
+- **Instruction / RoadMap ?極????*嚗憓???`Instruction.md` 撠痊?Ｗ??孵??瑽????閬嚗?? `RoadMap.md` ??蝔? sprint ???銴??芯??亥?????湛???郊?湔 `Instruction.md`??
+- **Instruction milestone ?郊閬?鋆?**嚗憓?????`Instruction.md` ??milestones ?憓????摨矽?湛??????芸????耨甇??銋???甇交?啜?
+- **SKILL / Instruction ?駁??渡?**嚗??`SKILL.md` 銝剛? `Instruction.md` ??????澆摰對??嫣誑 `Instruction.md` 雿?Ｗ??孵????質??潛??桐?銝餉?靘?嚗??辣?極?湔?璆?
+
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 11 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ??嚗蒂??銴ˊ??Obsidian Vault 憭??桅???
+
+---
+
+## V0.1.5 ???嗆?鋆撥??甇亙惜? (2026-03-29)
+
+### ?啣?
+- **FlashcardSyncEngine / FlashcardSyncService**嚗遣蝡蝡?甇亙惜嚗?游瑼?甇乓摨恍?撱箇揣撘?獢耨?孵??芸??郊??獢??啣??甇亥??芷皜???
+- **Plugin Settings Tab**嚗憓??身摰?嚗?靘?????芸??郊????
+- **?游澈?遣?誘??Ribbon**嚗憓??Vault ???∠揣撘?撱箏????嫣噶蝬剛風???游?甇亦???
+- **?箇?皜祈岫**嚗憓?`FlashcardParser`?FsrsScheduler`?FlashcardSyncEngine` ??Vitest 皜祈岫??
+
+### ?嗆?隤踵
+- **DataStore ?痊**嚗?鞈?霈撖急???`FlashcardRepository`嚗?銴???? `FsrsScheduler`嚗???`DataStore` 雿頛???facade??
+- **銝餌?撘頨?*嚗src/main.ts` ?寧 composition root嚗? UI 閮餃???甇仿?頛航?閮剖??亙鈭斤?函?璅∠?鞎痊??
+- **Preview Block ID 皜??芋蝯?*嚗??梯?璅∪???Block ID 皜??摩?賢?箇蝡?register helper嚗?雿蜓?亙?血???
+- **閮剖??質情??*嚗憓?`FlashcardsPluginSettings` ??閮剖澆?蝢抬??踹?鞈??桅?蝑?蝵格?賢?詨?璅∠?銝准?
+- **?辣瘚?鋆?**嚗?蝣箄?蝭?`Manual.md` ??券??潸??游?甇交?堆???`RoadMap.md`?dev_log.md` 銝韏瑞雁?????氬?
+- **Skill 瞍??艙????*嚗???`SKILL.md` ?箏??瞍???獢?蝭?閬??刻?撠??芸???蝔???蝥???
+- **???瞏?皞???**嚗???`SKILL.md`嚗?蝣箄?瘙?撘Ⅳ??潮“??嗾瘛典?撅扎??血??蝬剛風?扼?
+- **?憸券蝝閬?**嚗?憭折??銝?鞈?蝝Ｗ???神?亥??郊?憸券甇??蝝 `RoadMap.md`嚗蒂???箄?????芸?閬??嚗銝銵?
+- **Index 瞍???摰?**嚗Ⅱ隤靘憓??亥岷 index ???箏?遣????瑽?銝餉???schema 蝬剜?蝛拙?銝阡???migration 璈嚗歇?郊鋆 `RoadMap.md` ??Sprint D??
+- **Dashboard 蝑摰?**嚗Ⅱ隤??∠ Obsidian Bases 雿?∠?銝餌恣??皞??寞憭??批遣?桐? `Dashboard Workspace`嚗蒂?典?銝 UI ?亙?游? `Cards`嚗恣????`Insights`嚗?????嚗歇?郊蝝 `RoadMap.md`??
+- **?嗆??蔭瑼Ｘ瘚?????*嚗憓????芯?瘥活?券脖?銝???潭郊撽?嚗??炎?亦?瑽?西雲隞交?伐??交??＊蝻箏嚗???撘瑕?蝜潛??嚗歇?郊撖怠 `SKILL.md`??
+
+### 撽?
+- **?瑼Ｘ**嚗npx tsc --noEmit` ????
+- **皜祈岫**嚗npm test` ??嚗 5 ?葫閰艾?
+- **撱箇蔭**嚗npm run build` ??嚗蒂??銴ˊ??Obsidian Vault 憭??桅???
+
+---
+
+## V0.1.4 ???鈭斗蝝??(2026-03-29)
+
+### 鈭辣
+- **?辣?圾蝣箄?**嚗歇??梯?銝衣Ⅱ隤?`Manual.md`?Instruction.md`?RoadMap.md`?dev_log.md`?manifest.json`?package.json`嚗?澆遣蝡??獢璅?蝔???祕雿?蝯～?
+- **?甈痊鈭斗**嚗???畾萇 Antigravity ??Claude 4.6 Opus ???嚗?祆嚗?026-03-29嚗絲嚗?蝥??潸?蝬剛風鈭斤 Codex ?交???
+- **撠? Skill 甇????*嚗? `.codex/skill/SKILL.txt` ???渡??箸迤撘? `.codex/skill/SKILL.md`嚗?銝?YAML frontmatter??瑽?閬???`RoadMap.md` ???雁霅瑁?瘙?
+- **撠? Skill 銝剜???*嚗? `.codex/skill/SKILL.md` ?寧銝剜?銝駁??啣神嚗蒂靽???銵??望?嚗誑???航??找?蝬剜??瑁?蝎暹?摨艾?
+- **Skill 瞍?瘚?鋆?**嚗憓????園??潮?蝔葉?箇撠?蝔?鞈芥?隞嗥雁霅瑟?鈭斗?虜?????嚗odex ?蜓????阡?閬?甇亥矽??`SKILL.md`??
+
+### ?桀??圾
+- **撠??格?**嚗???憟?Obsidian 憭?嚗? Markdown 隤?頧?航?蝧??蝟餌絞嚗???Block ID?SRS?I 鞊????湔 CSS ???
+- **撱嗥???**嚗雁??????銝見撘??Ｕ敶Ｘ?閮?扯孛?潦otion/RemNote 憸冽???蝥?脯?
+
+---
+
+## V0.1.3 ???湧?甈敺???(2026-03-25)
+
+### ?啣?
+- **撌血?? (Ribbon) ?內**嚗憓???????銝?萸????～?憪?蝧＊蝷箇絞閮?敹恍?雿?
+
+---
+
+## V0.1.2 ???梯??梯?璅∪? Block ID (2026-03-25)
+
+### 靽格迤
+- **?梯?璅∪? Block ID ?梯?**嚗酉??Obsidian ??`MarkdownPostProcessor`嚗移皞?瞈曆蒂?梯?皜脫?敺? `^fc-xxxxxx`嚗???撘Ⅳ?憛???
+
+---
+
+## V0.1.1 ???梯? Block ID + ?銴?蝟餌絞 (2026-03-25)
+
+敺?V0.1 銋暹楊?神?圾瘙箔??嗾甈∟翮隞?葉??5 ?歇?亙?憿?
+
+### ?啣?
+- **BlockIdHider** (`src/editor/BlockIdHider.ts`)嚗M6 ViewPlugin嚗??皜豢?銵? `^fc-xxxxxx`
+- **ReviewModal** (`src/ui/ReviewModal.tsx`)嚗eact 銴?隞嚗nline style嚗SRS ?閰?
+- **ReviewModalContainer** (`src/ui/ReviewModalContainer.tsx`)嚗bsidian Modal ??React 璈
+- **?誘**嚗?憪??∟?蝧?`start-review`嚗??舫? Ctrl+P ?澆
+- **DataStore.reviewCard()**嚗??`ts-fsrs` ??FSRS ??瞍?瘜?
+
+### 靽格迤
+- **Folder already exists**嚗ensureDirectory` ? try/catch ????
+- **File already exists**嚗save()` ?啣? `safeCreate` ?寞?嚗仃?? fallback ??`adapter.write`
+- **?誘?芾酉??*嚗onload()` 銝剖?閮餃????隞??游?嚗?敺? `await dataStore.load()`
+- **?摰**嚗tate ????銝脖??蝙?券＊撘?撠”嚗tateMap / stateRevMap嚗?
+
+### ?嗆??寥?
+- ?梁 `isAlreadyExistsError()` 撌亙?寞?
+- `FSRSState` ?啣? `lastReview?` 甈?
+
+---
+
+## V0.1 ??擐?函???(2026-03-25)
+
+### ?啣?
+- **FlashcardParser**嚗??`::` 甇?? / `;;` ?? / `:::` ?? / `==憛怎征==` ?車隤? + 憭?璅∪?
+- **BlockIdManager**嚗n Blur 閫貊 + `vault.process()` ??撖怠 + ?脫??摩 + 蝡嗆?璇辣?脰風
+- **DataStore**嚗_Flashcards/data.json` 霈撖怎恣??+ FSRS ???瑽?蝢?
+- **CSS ?**嚗ailwind `fc-` ?韌 + PostCSS `#fc-plugin-root` ?ㄨ + Preflight 蝳
+- **esbuild 瘚偌蝺?*嚗?楊霅?+ ?芸?銴ˊ??Obsidian Vault 憭??桅?
+- **?誘**嚗????隞嗥?????＊蝷粹??∠絞閮?
+- **??批**嚗?憪? git + `.gitignore` + `dev_log.md`
+
+### 靽格迤
+- 靽格迤 Block ID ?券霈璅∪???CSS ?豢??剁??寧撅祆折??寥? Obsidian 皜脫??孵?嚗?
+- 撘瑕? `BlockIdManager` 摰?改?憓?瑼?摮撽??ull ?脰風?ault.process ?折蝡嗆?璇辣?脰風
+- 靽格迤 `editor-change` ??芯蝙?典??貊???
+
+### ?銵瑽?
 - TypeScript + React 18 + Tailwind CSS 3 (fc- prefix)
-- esbuild 打包 → `dist/main.js` + `styles.css`
-- 自動部署到 Obsidian Test Vault
+- esbuild ?? ??`dist/main.js` + `styles.css`
+- ?芸??函蔡??Obsidian Test Vault
 
 ---
 
 ## [Initial Setup] - 2026-03-25
-- 初始化專案，定義 AI 閃卡外掛之開發架構
-- 確認專案核心守則：資料至上、樣式絕對隔離、隱形標記、智慧觸發、Notion 美學、效能防線
+- ????獢?摰儔 AI ?憭?銋??潭瑽?
+- 蝣箄?撠??詨?摰?嚗??銝見撘?撠??Ｕ敶Ｘ?閮?扯孛?潦otion 蝢飛???賡蝺?
+
+
+

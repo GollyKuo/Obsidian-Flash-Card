@@ -28,6 +28,14 @@ export interface FlashcardSyntaxTokenRange {
     to: number;
 }
 
+export interface MultilineAnswerBlock {
+    from: number;
+    to: number;
+    startLineNumber: number;
+    endLineNumber: number;
+    blockIndentColumns: number;
+}
+
 export function collectAnswerHighlightRanges(params: {
     lines: string[];
     lineNumber: number;
@@ -88,13 +96,16 @@ export function collectAnswerHighlightRanges(params: {
     }
 
     if (scopes.has("multi-line")) {
-        const multiLineRange = findMultilineAnswerRange(
+        const multiLineRange = findMultilineAnswerBlock(
             lines,
             lineNumber,
             parser
         );
         if (multiLineRange) {
-            ranges.push(multiLineRange);
+            ranges.push({
+                from: multiLineRange.from,
+                to: multiLineRange.to,
+            });
         }
     }
 
@@ -169,11 +180,30 @@ export function collectFlashcardSyntaxTokenRanges(params: {
     return [];
 }
 
-function findMultilineAnswerRange(
+export function collectMultilineAnswerRange(params: {
+    lines: string[];
+    lineNumber: number;
+    parser: FlashcardParser;
+}): AnswerHighlightRange | null {
+    const { lines, lineNumber, parser } = params;
+    const block = findMultilineAnswerBlock(lines, lineNumber, parser);
+    return block ? { from: block.from, to: block.to } : null;
+}
+
+export function collectMultilineAnswerBlock(params: {
+    lines: string[];
+    lineNumber: number;
+    parser: FlashcardParser;
+}): MultilineAnswerBlock | null {
+    const { lines, lineNumber, parser } = params;
+    return findMultilineAnswerBlock(lines, lineNumber, parser);
+}
+
+function findMultilineAnswerBlock(
     lines: string[],
     lineNumber: number,
     parser: FlashcardParser
-): AnswerHighlightRange | null {
+): MultilineAnswerBlock | null {
     const currentLine = lines[lineNumber];
     if (!currentLine || !/^\s+/.test(currentLine) || !currentLine.trim()) {
         return null;
@@ -184,7 +214,17 @@ function findMultilineAnswerRange(
         if (card?.endLineNumber !== undefined && lineNumber <= card.endLineNumber) {
             const start = currentLine.match(/^\s*/)?.[0].length ?? 0;
             const end = currentLine.trimEnd().length;
-            return end > start ? { from: start, to: end } : null;
+            return end > start
+                ? {
+                      from: start,
+                      to: end,
+                      startLineNumber: i,
+                      endLineNumber: card.endLineNumber,
+                      blockIndentColumns: countLeadingIndentColumns(
+                          lines[i + 1] ?? currentLine
+                      ),
+                  }
+                : null;
         }
 
         if (lines[i]?.trim() && !/^\s/.test(lines[i])) {
@@ -216,6 +256,22 @@ function mergeRanges(ranges: AnswerHighlightRange[]): AnswerHighlightRange[] {
     }
 
     return merged;
+}
+
+function countLeadingIndentColumns(line: string): number {
+    let columns = 0;
+    for (const char of line) {
+        if (char === " ") {
+            columns += 1;
+            continue;
+        }
+        if (char === "\t") {
+            columns += 4;
+            continue;
+        }
+        break;
+    }
+    return columns;
 }
 
 function extractTokenRange(
