@@ -2,9 +2,9 @@
 
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 
-## Current Context Snapshot（更新：2026-03-31，V0.1.15）
+## Current Context Snapshot（更新：2026-03-31，V0.1.16）
 
-- 當前版本：`v0.1.15`（文件與流程規範更新）
+- 當前版本：`v0.1.16`（流程規範正式納入，準備依此節奏推進 Sprint E）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -14,7 +14,26 @@
   - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
 - 下一步優先：
   - 以 `RoadMap.md` 的 Sprint E 為主，先落地 `Cards` 管理分區骨架。
+- 開發節奏：
+  - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 交接調閱順序：`dev_log.md`（本快照） -> `RoadMap.md` -> `Instruction.md` -> `Retrospective.md`
+
+---
+
+## V0.1.16 — 三段式開發節奏正式納入（2026-03-31）
+
+### 目標
+- 降低試錯造成的重工與 tokens 浪費，將試驗與發版責任分流。
+
+### 主要調整
+- `SKILL.md`：新增重大功能三段式流程
+  - `試驗階段`：本地 spike 驗證，不升版不推送。
+  - `正式階段`：以穩定版為基線重寫，僅保留可行方案。
+  - `發版階段`：版本號、文件同步與驗證完成後再 commit / push。
+- `dev_log.md`：Current Context Snapshot 同步標記三段式開發節奏。
+
+### 驗證
+- 文件一致性檢查完成：`SKILL.md` 與 `dev_log.md` 規則一致。
 
 ---
 

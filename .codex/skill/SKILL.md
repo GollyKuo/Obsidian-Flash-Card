@@ -43,6 +43,10 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 - 遇到除錯、渲染異常、樣式衝突或反覆嘗試未果的問題時，先查閱 `Retrospective.md`，優先沿用已驗證的排查順序與教訓，避免重複走錯方向。
 - 每次推進下一個開發步驟前，先檢查目前架構是否足以承接該功能；若存在明顯缺口，應先提出並優先補強，再繼續往下實作。
 - 進行程式碼修改時，應先做修改前驗證（至少確認當前 build/test 基線），完成後再做修改後驗證，確保變更未引入回歸。
+- 重大功能開發採三段式流程：
+  1. `試驗階段`：先做本地 spike 驗證方向，不升正式版本、不推送遠端。
+  2. `正式階段`：以最近穩定版為基線，僅保留已驗證可行方案，乾淨重寫並同步文件。
+  3. `發版階段`：版本號、RoadMap/Instruction/Manual/dev_log 同步完成後，再 commit 與 push。
 - 優先採用 incremental delivery，避免一次做大型、推測性過高的重寫。
 - 除非使用者明確要求，否則不得回滾 worktree 中既有的使用者修改。
 - 將 buildability、note safety、sync correctness 的優先級放在炫目新功能之前。
