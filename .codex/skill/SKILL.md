@@ -38,6 +38,8 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 ## 工作流程規則
 
 - 進行重大修改前，如需要脈絡，先閱讀 `Manual.md`、`Instruction.md`、`RoadMap.md`、`dev_log.md`。
+- 每次開始新一輪開發前，先閱讀 `dev_log.md` 最上方的 `Current Context Snapshot`，以最新快照作為當前工作脈絡起點。
+- 若對話脈絡接近額度上限，應將高訊號狀態摘要回寫至 `Current Context Snapshot`（當前主軸、已知風險、下一步優先），避免資訊流失。
 - 遇到除錯、渲染異常、樣式衝突或反覆嘗試未果的問題時，先查閱 `Retrospective.md`，優先沿用已驗證的排查順序與教訓，避免重複走錯方向。
 - 每次推進下一個開發步驟前，先檢查目前架構是否足以承接該功能；若存在明顯缺口，應先提出並優先補強，再繼續往下實作。
 - 進行程式碼修改時，應先做修改前驗證（至少確認當前 build/test 基線），完成後再做修改後驗證，確保變更未引入回歸。
@@ -49,6 +51,7 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 
 - 將 `SKILL.md` 視為可持續演化的專案規範；隨著專案優化、流程成熟與經驗累積，應持續檢討並完善 skill，讓其與專案一起進化。
 - 每次有具意義的版本變更、架構調整或重要專案事件時，都要同步更新 `dev_log.md`。
+- 每個里程碑完成後，若當前優先事項或風險有變化，必須同步更新 `dev_log.md` 頂部的 `Current Context Snapshot`。
 - 將 `Instruction.md` 視為產品方向、架構原則與功能規格文件；內容應避免與 `RoadMap.md` 的時程、sprint 排序與完成狀態重複。
 - 當專案開發規劃方向、產品設計方向或核心實作原則發生變更時，必須同步更新 `Instruction.md`。
 - 若 `Instruction.md` 中的 milestones 有新增規劃、優先順序調整，或完成／未完成狀態需要修正，也必須同步更新該文件內容。
