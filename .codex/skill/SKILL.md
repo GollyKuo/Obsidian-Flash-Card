@@ -79,3 +79,12 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 3. 再確保 review scheduling 與 sync 行為可靠。
 4. 再維持 CSS isolation 與 Obsidian compatibility。
 5. 核心穩定後，再擴充 UX、HUD、dashboard 與 AI enrichment。
+
+## 編碼安全防護規範（2026-04-01）
+
+- 受保護文件：`Manual.md`、`RoadMap.md`、`Instruction.md`、`Retrospective.md`、`dev_log.md`、`.codex/skill/SKILL.md`、`manifest.json`。
+- 以上文件優先使用 `apply_patch` 修改，避免整檔讀出後再整檔覆寫。
+- 禁止使用未明確指定編碼的批次改寫流程（例如 `Get-Content` -> 轉換 -> `Set-Content`）。
+- 每次 commit / push 前，固定執行 `npm run check:docs-encoding`。
+- 若編碼檢查失敗，必須先停止發版流程，並先回復到最近的乾淨版本再繼續。
+

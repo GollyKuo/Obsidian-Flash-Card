@@ -197,3 +197,27 @@ pm run build，並檢查與文件規格一致。
 1. 同一行會產生多種 decoration 時，不可邊算邊 `builder.add`。
 2. 一律採用 collect -> sort -> add。
 3. 每次改內嵌語法，必測「同一行同時有 syntax-hide 與 answer-chip」的整合情境。
+
+---
+
+## Case 004（2026-04-01）：文件編碼污染（Manual / RoadMap 亂碼）
+
+### 現象
+- `Manual.md`、`RoadMap.md` 在 `release: v0.1.23` 後出現大量亂碼。
+- 檔案仍可被 UTF-8 讀取，但內容包含大量私用區字元（PUA），屬於「錯誤轉碼後再存檔」。
+
+### 根因
+- 進行文件批次改寫時，流程未鎖定 UTF-8 安全路徑，導致文字先被錯誤解碼，再以 UTF-8 寫回。
+- 這類錯誤一旦寫回，屬內容層污染，不是 Vault 路徑或 Obsidian 設定問題。
+
+### 防再發規則
+1. 文件改寫優先使用 `apply_patch`，避免整檔讀出後再寫回。
+2. 禁止使用未明確指定編碼的整檔轉寫流程。
+3. 提交前固定執行：`npm run check:docs-encoding`。
+4. `check:docs-encoding` 若失敗，先修復文件再允許 commit / push。
+
+### 已落地防呆
+- 新增 `scripts/check-docs-encoding.js`。
+- 新增 npm script：`check:docs-encoding`。
+- `check:docs-encoding` 納入 `Instruction.md`、`Retrospective.md`、`.codex/skill/SKILL.md`、`manifest.json`。
+- `check:docs-encoding` 增加 JSON 合法性檢查（`manifest.json` / `package.json` / `package-lock.json`）。
