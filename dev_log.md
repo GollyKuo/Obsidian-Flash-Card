@@ -1,318 +1,183 @@
-# 開發者日誌 (Developer Log)
+# ??隤?(Developer Log)
 
-本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
-自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
-
-## Current Context Snapshot（更新：2026-03-31 18:54，V0.1.22）
-
-- 當前版本：`v0.1.22`（本地定版，未推送）
-- 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
-- 已知穩定做法：
-  - 單行答案／cloze 使用 chip 渲染。
-  - 多行答案僅保留 `淡色背景帶` 與 `右側線條` 兩種模式。
-- 已知風險：
-  - CodeMirror decoration 建構順序錯誤會導致整體高亮失效。
-  - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
-- 下一步優先：
-  - 以 `RoadMap.md` 的 Sprint E 為主，先落地 `Cards` 管理分區骨架。
-- 開發節奏：
-  - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
-- 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+?祆?隞嗉???獢??祈??氬瑽矽?氬?霅????辣?郊????芸?亥絲嚗憓?摰?????唳?????蝣??銝敺蝙??`YYYY-MM-DD HH:mm`嚗?4 撠??塚?嚗?風?脩???餈賣滲靽格??
+## Current Context Snapshot嚗?堆?2026-03-31 18:54嚗0.1.22嚗?
+- ?嗅??嚗v0.1.22`嚗?啣????芣??
+- ?桀?銝餉遘嚗雁??鈭格葡?帘摰???`RoadMap` ?券?Sprint E ??Dashboard `Cards` ??撉冽??- 撌脩蝛拙???嚗?  - ?株?蝑?嚗loze 雿輻 chip 皜脫???  - 憭?蝑?????`瘛∟?撣跆 ??`?喳蝺?` ?拍車璅∪???- 撌脩憸券嚗?  - CodeMirror decoration 撱箸????航炊???湔擃?鈭桀仃??  - Editor CSS ??UI CSS 敹?蝬剜??惜嚗??selector 瘙???- 銝?甇亙??
+  - 隞?`RoadMap.md` ??Sprint E ?箔蜓嚗??賢 `Cards` 蝞∠???撉冽??- ?蝭憟?
+  - ?∩?畾萄?瘚?嚗閰阡??挾嚗?圈?霅?` -> `甇???挾嚗帘摰??箇??神嚗 -> `?潛??挾嚗?隞嗅?甇亙????`??- ?啣?閰勗???瑼?摨?`SKILL.md` -> `dev_log.md`嚗敹怎嚗?-> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
 
 ---
 
-## V0.1.22（本地定版）— `fc` 快速輸入教學與路線補強（2026-03-31 18:54）
-
-### 目標
-- 將 `fc` 包裹語法的快速輸入方式補進使用者文件，降低手打成本。
-- 將「選取文字一鍵包裝」納入 RoadMap 的語法實作路線。
-
-### 主要調整
+## V0.1.22嚗?啣?????`fc` 敹恍撓?交?摮貉?頝舐?鋆撥嚗?026-03-31 18:54嚗?
+### ?格?
+- 撠?`fc` ?ㄨ隤??翰?撓?交撘??脖蝙?刻?隞塚????????- 撠??摮??萄?鋆???RoadMap ??瘜祕雿楝蝺?
+### 銝餉?隤踵
 - `Manual.md`
-  - 新增「`fc` 語法快速輸入方式（建議）」三種工作方式：
-    - 方式 1：模板片段快速插入
-    - 方式 2：選取文字後一鍵包裝（規劃中）
-    - 方式 3：文字縮寫自動展開
-- `RoadMap.md`
-  - 在「語法實作路線（建議）」新增 `P1.5`：
-    - `Wrap selection as flashcard` 命令，支援將選取內容一鍵包裝為 `{{fc:: ... /fc}}`，且可綁定快捷鍵。
-- 版本同步
-  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.22`。
-
-### 驗證
-- 文件與版本欄位一致性檢查：通過
-- 備註：本次僅文件與版本定義調整，未執行 build/test
+  - ?啣??fc` 隤?敹恍撓?交撘?撱箄降嚗?蝔桀極雿撘?
+    - ?孵? 1嚗芋?輻?畾萄翰????    - ?孵? 2嚗??摮?銝?萄?鋆?閬?銝哨?
+    - ?孵? 3嚗?摮葬撖怨????- `RoadMap.md`
+  - ?具?瘜祕雿楝蝺?撱箄降嚗憓?`P1.5`嚗?    - `Wrap selection as flashcard` ?賭誘嚗?游??詨??批捆銝?萄?鋆 `{{fc... :: .../fc}}`嚗??舐?摰翰?琿??- ??郊
+  - `manifest.json` / `package.json` / `package-lock.json` ????`0.1.22`??
+### 撽?
+- ?辣???祆?雿??湔扳炎?伐???
+- ?酉嚗甈∪??辣???砍?蝢抵矽?湛??芸銵?build/test
 
 ---
 
-## V0.1.21（正式版）— 答案高亮點擊觸發編輯顯示修正（2026-03-31 14:12）
-
-### 目標
-- 將編輯顯示觸發改為「點擊答案高亮區塊才 reveal」，避免一般點擊行內位置就顯示卡片語法與 Block ID。
-- 修正多行/清單答案在點擊高亮區時未能顯示對應 Block ID 的問題。
-
-### 主要調整
+## V0.1.21嚗迤撘?嚗?蝑?擃漁暺?閫貊蝺刻摩憿舐內靽格迤嚗?026-03-31 14:12嚗?
+### ?格?
+- 撠楊頛舫＊蝷箄孛?潭?箝???獢?鈭桀?憛? reveal???踹?銝?祇????找?蝵桀停憿舐內?∠?隤???Block ID??- 靽格迤憭?/皜蝑??券???鈭桀???賡＊蝷箏???Block ID ??憿?
+### 銝餉?隤踵
 - `src/editor/revealState.ts`
-  - 新增 editor reveal 狀態管理，支援 reveal 行與作用範圍（多行卡可維持在同一張卡內有效）。
-- `src/editor/AnswerHighlighter.ts`
-  - 新增點擊高亮區塊觸發 reveal 的互動邏輯（`fc-answer-chip` 與多行答案樣式區塊）。
-  - reveal 目標改為對齊卡片起始行，並保留多行卡的有效範圍。
-- `src/editor/BlockIdHider.ts`
-  - Block ID 顯示條件改為依 reveal 狀態，而非單純以游標行判斷。
-- 版本同步
-  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.21`。
-- 文件同步
-  - `RoadMap.md`、`Instruction.md`、`Manual.md`、`dev_log.md`。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（40 tests）
-- `npm run build`：通過
+  - ?啣? editor reveal ??恣???舀 reveal 銵?雿蝭?嚗?銵?舐雁???撘萄?扳?????- `src/editor/AnswerHighlighter.ts`
+  - ?啣?暺?擃漁?憛孛??reveal ????頛荔?`fc-answer-chip` ??銵?獢見撘?憛???  - reveal ?格??寧撠??∠?韏瑕?銵?銝虫???銵??????- `src/editor/BlockIdHider.ts`
+  - Block ID 憿舐內璇辣?寧靘?reveal ??????桃?隞交虜璅??斗??- ??郊
+  - `manifest.json` / `package.json` / `package-lock.json` ????`0.1.21`??- ?辣?郊
+  - `RoadMap.md`?Instruction.md`?Manual.md`?dev_log.md`??
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?0 tests嚗?- `npm run build`嚗?
 
 ---
 
-## V0.1.20（正式版）— 架構規劃整理與時間戳規範（2026-03-31 13:49）
-
-### 目標
-- 在 Sprint E 前降低 UI 與資料流程耦合，並補上可觀測的同步狀態層。
-
-### 主要調整
+## V0.1.20嚗迤撘?嚗??嗆?閬??渡????閬?嚗?026-03-31 13:49嚗?
+### ?格?
+- ??Sprint E ??雿?UI ????蝔血?嚗蒂鋆??航?皜祉??郊??惜??
+### 銝餉?隤踵
 - `.codex/skill/SKILL.md`
-  - 新增文件時間戳規則：之後 `RoadMap.md` 與 `dev_log.md` 的新增完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制），既有歷史紀錄不追溯修改。
-- `RoadMap.md`
-  - 補齊卡片管理的 V0.2 開發框架：Cards Query Layer、來源健康度、分組/列表檢視切換、`inheritedTags / cardTags / effectiveTags`、單卡標籤主儲存策略。
-  - 新增大規模卡片量下的性能與延遲控制規劃（derived indexes、job coalescing、增量同步、背景重建、虛擬清單）。
-- `dev_log.md`
-  - 同步寫入時間戳規則，並將本次文件/規劃整理收斂為 `V0.1.20` 正式版紀錄。
-- `src/app/FlashcardsAppService.ts`
-  - 新增 app-level action service，集中掃描、統計、清理與高亮診斷邏輯。
-- `src/app/registerPluginUi.ts`
-  - command/ribbon 改為呼叫 app service，移除重複業務邏輯，UI 只保留觸發與 Notice 呈現。
-- `src/sync/types.ts`
-  - 新增 `SyncPhase`、`SyncStatusState`、`SyncStatusListener` 型別。
-- `src/sync/FlashcardSyncService.ts`
-  - 新增 sync status state（`idle/syncing/error` + `activeJobs` + `lastSyncedAt` + `lastError`）。
-  - 新增狀態訂閱 API：`getSyncStatus()`、`onSyncStatusChange()`。
-  - 以 `runTrackedSync()` 包裝 sync 流程，讓手動掃描與檔案事件都能更新同步狀態。
-- `RoadMap.md`
-  - 補入兩步驟（Action Layer / Sync State Layer）並同步收斂到 `V0.1.20` 發版內容。
-- 版本同步
-  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.20`。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（40 tests）
-- `npm run build`：通過
+  - ?啣??辣???唾???銋? `RoadMap.md` ??`dev_log.md` ?憓?????唳?????蝣??銝敺蝙??`YYYY-MM-DD HH:mm`嚗?4 撠??塚?嚗?風?脩???餈賣滲靽格??- `RoadMap.md`
+  - 鋆??∠?蝞∠???V0.2 ?獢嚗ards Query Layer??皞摨瑕漲??蝯??”瑼Ｚ????inheritedTags / cardTags / effectiveTags`??⊥?蝐支蜓?脣?蝑??  - ?啣?憭扯?璅∪??銝??扯?辣?脫?嗉???derived indexes?ob coalescing????甇乓??舫?撱箝??祆??殷???- `dev_log.md`
+  - ?郊撖怠???唾???銝血??祆活?辣/閬??渡??嗆???`V0.1.20` 甇??????- `src/app/FlashcardsAppService.ts`
+  - ?啣? app-level action service嚗?銝剜??絞閮???擃漁閮箸?摩??- `src/app/registerPluginUi.ts`
+  - command/ribbon ?寧?澆 app service嚗宏?日?銴平??頛荔?UI ?芯??孛?潸? Notice ???- `src/sync/types.ts`
+  - ?啣? `SyncPhase`?SyncStatusState`?SyncStatusListener` ???- `src/sync/FlashcardSyncService.ts`
+  - ?啣? sync status state嚗idle/syncing/error` + `activeJobs` + `lastSyncedAt` + `lastError`嚗?  - ?啣??????API嚗getSyncStatus()`?onSyncStatusChange()`??  - 隞?`runTrackedSync()` ?? sync 瘚?嚗???????獢?隞園?賣?啣?甇亦???- `RoadMap.md`
+  - 鋆?拇郊撽?Action Layer / Sync State Layer嚗蒂?郊?嗆???`V0.1.20` ?潛??批捆??- ??郊
+  - `manifest.json` / `package.json` / `package-lock.json` ????`0.1.20`??
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?0 tests嚗?- `npm run build`嚗?
 
 ---
 
-## V0.1.19（正式版）— 設定頁分頁化與編碼治理（2026-03-31）
-
-### 目標
-- 讓設定頁具備可持續擴充的分頁架構，降低未來新增設定時的耦合與改動成本。
-
-### 主要調整
+## V0.1.19嚗迤撘?嚗?閮剖??????楊蝣潭祥??2026-03-31嚗?
+### ?格?
+- 霈身摰??瑕??舀?蝥?????嗆?嚗?雿靘憓身摰??血?????研?
+### 銝餉?隤踵
 - `src/settings/FlashcardsSettingTab.ts`
-  - 將單一 `display()` 大函式改為分頁式架構：`一般`、`答案高亮`、`AI`、`維護工具`。
-  - 新增 tab definition 與 section renderer，後續可用新增 tab 的方式擴展設定頁，不需重寫整頁。
-  - 設定頁改掛載於 `#fc-plugin-root`，維持樣式隔離一致性。
-- 編碼治理（encoding hygiene）
-  - 新增 `.editorconfig`，統一 UTF-8、行尾 LF 與檔案格式基準。
-  - 新增 `.gitattributes`，固定文字檔 EOL 策略並標註常見二進位副檔名。
-  - 將先前混用 UTF-8 BOM 的檔案（`dev_log.md`、`src/settings/FlashcardsSettingTab.ts`、`src/settings/multiLineAnswerRenderStyles.ts`）統一為 UTF-8 無 BOM。
-- `src/styles/main.css`
-  - 新增設定分頁樣式（tab list、button、active state、panel）。
-- `src/main.ts`
-  - `saveSettings()` 新增可選參數 `reloadDataStore`，避免每次設定變更都強制 reload datastore。
-  - `資料目錄` 變更時才觸發 datastore reload，其餘設定改為輕量儲存流程。
-- `Manual.md`
-  - 同步更新設定頁為分頁式介面操作說明。
-- 版本同步
-  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.19`。
-- 文件同步
-  - `RoadMap.md`、`Instruction.md`、`Manual.md`、`dev_log.md`。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（40 tests）
-- `npm run build`：通過
+  - 撠銝 `display()` 憭批撘?箏????嗆?嚗銝?柄?蝑?擃漁`?AI`?蝬剛風撌亙`??  - ?啣? tab definition ??section renderer嚗?蝥?冽憓?tab ?撘撅身摰?嚗???神?湧???  - 閮剖??????`#fc-plugin-root`嚗雁?見撘??Ｖ??湔扼?- 蝺函Ⅳ瘝餌?嚗ncoding hygiene嚗?  - ?啣? `.editorconfig`嚗絞銝 UTF-8??撠?LF ??獢撘皞?  - ?啣? `.gitattributes`嚗摰?摮? EOL 蝑銝行?閮餃虜閬??脖??舀???  - 撠??毽??UTF-8 BOM ??獢?`dev_log.md`?src/settings/FlashcardsSettingTab.ts`?src/settings/multiLineAnswerRenderStyles.ts`嚗絞銝??UTF-8 ??BOM??- `src/styles/main.css`
+  - ?啣?閮剖???璅??嚗ab list?utton?ctive state?anel嚗?- `src/main.ts`
+  - `saveSettings()` ?啣??舫? `reloadDataStore`嚗??甈∟身摰??湧撘瑕 reload datastore??  - `鞈??桅?` 霈??閫貊 datastore reload嚗擗身摰?箄??摮?蝔?- `Manual.md`
+  - ?郊?湔閮剖????撘??Ｘ?雿牧??- ??郊
+  - `manifest.json` / `package.json` / `package-lock.json` ????`0.1.19`??- ?辣?郊
+  - `RoadMap.md`?Instruction.md`?Manual.md`?dev_log.md`??
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?0 tests嚗?- `npm run build`嚗?
 
 ---
 
-## V0.1.181（正式版）— 啟動讀檔順序納入 SKILL（2026-03-31）
-
-### 目標
-- 固化新對話開工流程，降低 context 轉場遺漏風險。
-
-### 主要調整
+## V0.1.181嚗迤撘?嚗???霈瑼?摨???SKILL嚗?026-03-31嚗?
+### ?格?
+- ?箏??啣?閰梢?撌交?蝔??? context 頧?箸?憸券??
+### 銝餉?隤踵
 - `.codex/skill/SKILL.md`
-  - 新增「每次開啟新對話並開始開發前」必讀順序：
-    `SKILL.md` → `dev_log.md`（Current Context Snapshot）→ `Instruction.md` → `RoadMap.md` → `Retrospective.md`。
-- 版本同步
-  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.181`。
-- 文件同步
-  - `dev_log.md` 快照與版本紀錄同步更新。
-
-### 驗證
-- 流程文件一致性檢查：通過（`SKILL.md` 與 `dev_log.md` 一致）。
-
+  - ?啣???甈⊿??撠店銝阡?憪??澆???霈??嚗?    `SKILL.md` ??`dev_log.md`嚗urrent Context Snapshot嚗? `Instruction.md` ??`RoadMap.md` ??`Retrospective.md`??- ??郊
+  - `manifest.json` / `package.json` / `package-lock.json` ????`0.1.181`??- ?辣?郊
+  - `dev_log.md` 敹怎???祉???甇交?啜?
+### 撽?
+- 瘚??辣銝?湔扳炎?伐???嚗SKILL.md` ??`dev_log.md` 銝?湛???
 ---
 
-## V0.1.18（正式版）— 以 v0.1.17 基線重寫並發版（2026-03-31）
-
-### 目標
-- 回到 `v0.1.17` 乾淨基線，僅保留最終正確方案。
-- 發布正式版 `v0.1.18` 並同步文件與版本資訊。
-
-### 主要調整
+## V0.1.18嚗迤撘?嚗?隞?v0.1.17 ?箇??神銝衣??2026-03-31嚗?
+### ?格?
+- ? `v0.1.17` 銋暹楊?箇?嚗?靽??蝯迤蝣箸獢?- ?澆?甇????`v0.1.18` 銝血?甇交?隞嗉??鞈???
+### 銝餉?隤踵
 - `src/settings/FlashcardsSettingTab.ts`
-  - 保留主題色/透明度/樣式獨立顏色設定。
-  - 主次標題改為 class-based 控制（移除試驗過程的 inline style）。
-- `src/styles/main.css` + `esbuild.config.mjs`
-  - 設定頁主次標題對齊規則固定化。
-  - `PrefixWrap` 透過 `ignoredSelectors` 確保設定頁樣式命中。
-- 版本同步
-  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.18`。
-- 文件同步
-  - `RoadMap.md`、`Instruction.md`、`Manual.md`、`Retrospective.md`、`dev_log.md`。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（40 tests）
-- `npm run build`：通過（已同步至 Vault 外掛目錄）
-
+  - 靽?銝駁?????摨?璅???函?憿閮剖???  - 銝餅活璅??寧 class-based ?批嚗宏?方岫撽?蝔? inline style嚗?- `src/styles/main.css` + `esbuild.config.mjs`
+  - 閮剖??蜓甈⊥?憿?朣??摰???  - `PrefixWrap` ?? `ignoredSelectors` 蝣箔?閮剖??見撘銝准?- ??郊
+  - `manifest.json` / `package.json` / `package-lock.json` ????`0.1.18`??- ?辣?郊
+  - `RoadMap.md`?Instruction.md`?Manual.md`?Retrospective.md`?dev_log.md`??
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?0 tests嚗?- `npm run build`嚗?嚗歇?郊??Vault 憭??桅?嚗?
 ---
 
-## V0.1.17（試驗 -> 完成）— 答案高亮主題自訂（2026-03-31）
-
-### 目標
-- 新增答案高亮主題設定：可自訂顏色與透明度。
-- 預設維持低對比深色半透明風格。
-- 新增「各樣式獨立顏色」勾選欄位，保留進階自訂空間。
-
-### 主要調整
+## V0.1.17嚗岫撽?-> 摰?嚗?蝑?擃漁銝駁??芾?嚗?026-03-31嚗?
+### ?格?
+- ?啣?蝑?擃漁銝駁?閮剖?嚗?芾?憿??摨艾?- ?身蝬剜?雿?瘥楛?脣???憸冽??- ?啣???璅???函?憿??豢?雿?靽??脤??芾?蝛粹???
+### 銝餉?隤踵
 - `src/settings/types.ts`
-  - 新增高亮主題相關設定欄位（主題色、透明度、樣式獨立顏色開關與色彩欄位）。
-- `src/settings/FlashcardsSettingTab.ts`
-  - 新增 `答案高亮主題` 設定區（主題色、透明度、獨立顏色勾選與展開色票）。
-- `src/main.ts`
-  - 新增高亮主題設定驗證與 CSS 變數套用流程。
-- `src/styles/editor.css`
-  - `chip`、`淡色背景帶`、`右側線條` 改用主題變數渲染，支援即時主題調整。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（40 tests）
-- `npm run build`：通過
+  - ?啣?擃漁銝駁??賊?閮剖?甈?嚗蜓憿??摨艾見撘蝡??脤????脣蔗甈?嚗?- `src/settings/FlashcardsSettingTab.ts`
+  - ?啣? `蝑?擃漁銝駁?` 閮剖??嚗蜓憿??摨艾蝡??脣?貉?撅??脩巨嚗?- `src/main.ts`
+  - ?啣?擃漁銝駁?閮剖?撽???CSS 霈憟瘚???- `src/styles/editor.css`
+  - `chip`?瘛∟?撣跆??喳蝺?` ?寧銝駁?霈皜脫?嚗?游?蜓憿矽?氬?
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?0 tests嚗?- `npm run build`嚗?
 
 ---
 
-## V0.1.16 — 三段式開發節奏正式納入（2026-03-31）
-
-### 目標
-- 降低試錯造成的重工與 tokens 浪費，將試驗與發版責任分流。
-
-### 主要調整
-- `SKILL.md`：新增重大功能三段式流程
-  - `試驗階段`：本地 spike 驗證，不升版不推送。
-  - `正式階段`：以穩定版為基線重寫，僅保留可行方案。
-  - `發版階段`：版本號、文件同步與驗證完成後再 commit / push。
-- `dev_log.md`：Current Context Snapshot 同步標記三段式開發節奏。
-
-### 驗證
-- 文件一致性檢查完成：`SKILL.md` 與 `dev_log.md` 規則一致。
-
+## V0.1.16 ??銝挾撘??潛?憟迤撘??伐?2026-03-31嚗?
+### ?格?
+- ??閰阡????撌亥? tokens 瘚芾祥嚗?閰阡???痊隞餃?瘚?
+### 銝餉?隤踵
+- `SKILL.md`嚗憓?憭批??賭?畾萄?瘚?
+  - `閰阡??挾`嚗??spike 撽?嚗???銝??  - `甇???挾`嚗誑蝛拙???箇??神嚗?靽??航??寞???  - `?潛??挾`嚗??祈???隞嗅?甇亥?撽?摰?敺? commit / push??- `dev_log.md`嚗urrent Context Snapshot ?郊璅?銝挾撘??潛?憟?
+### 撽?
+- ?辣銝?湔扳炎?亙???`SKILL.md` ??`dev_log.md` 閬?銝?氬?
 ---
 
-## V0.1.15 — Context Snapshot 流程落地（2026-03-31）
-
-### 目標
-- 建立可長期沿用的 context 壓縮與調閱流程，降低長對話下的脈絡遺失風險。
-
-### 主要調整
-- 在 `dev_log.md` 最上方新增 `Current Context Snapshot` 固定區塊。
-- 將「開工先讀 snapshot、里程碑後更新 snapshot」規範寫入 `SKILL.md`。
-
-### 驗證
-- 文件一致性檢查完成：`dev_log.md`、`SKILL.md` 規則對齊。
-
+## V0.1.15 ??Context Snapshot 瘚??賢嚗?026-03-31嚗?
+### ?格?
+- 撱箇??舫?窒?函? context 憯葬?矽?望?蝔????瑕?閰曹???蝯⊿憭梢◢?芥?
+### 銝餉?隤踵
+- ??`dev_log.md` ?銝?啣? `Current Context Snapshot` ?箏??憛?- 撠?撌亙?霈 snapshot??蝔?敺??snapshot??蝭神??`SKILL.md`??
+### 撽?
+- ?辣銝?湔扳炎?亙???`dev_log.md`?SKILL.md` 閬?撠???
 ---
 
-## V0.1.14（正式版）— 高亮渲染策略重寫（2026-03-31）
-
-### 目標
-- 以 `v0.1.13` 為乾淨基線重寫多行答案渲染。
-- 保留重構後 `Manual.md` 的使用者導向內容。
-- 多行/清單模式僅保留 `淡色背景帶` 與 `右側線條`。
-
-### 主要調整
+## V0.1.14嚗迤撘?嚗?擃漁皜脫?蝑?神嚗?026-03-31嚗?
+### ?格?
+- 隞?`v0.1.13` ?箔嗾瘛典蝺?撖怠?銵?獢葡??- 靽???敺?`Manual.md` ?蝙?刻??摰嫘?- 憭?/皜璅∪?????`瘛∟?撣跆 ??`?喳蝺?`??
+### 銝餉?隤踵
 - `src/settings/multiLineAnswerRenderStyles.ts`
-  - 僅保留 `soft-band` / `right-rail` 兩種模式。
+  - ????`soft-band` / `right-rail` ?拍車璅∪???- `src/editor/AnswerHighlighter.ts`
+  - 蝘駁 `rounded-container` 皜脫????  - 憭?蝑??∪?憛? line decoration??  - `?喳蝺?` ??`瘛∟?撣跆 ?賣?箸憛????湔葡??- `src/styles/editor.css`
+  - 蝘駁 `rounded-container` 璅????  - 靽?銝血??`soft-band` / `right-rail` ??憛?????
+### ?辣?郊
+- `Manual.md`嚗?銵見撘牧??箏??拍車璅∪???- `Instruction.md`嚗?鈭格葡??瑽洵銝?畾菜?閮 `V0.1.14` 撌脣???- `RoadMap.md`嚗print F ?郊??`V0.1.14` 摰???
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?0 tests嚗?- `npm run build`嚗?嚗歇?郊??Vault 憭??桅?嚗?
+---
+
+## V0.1.13 ??蝑?擃漁????憿舐內隤?甇????2026-03-30嚗?
+### ?格?
+- 閫?捱蝑?擃漁?函泵??餈?蝺?蝣?憿?- 霈?chip 憿舐內蝚血? Obsidian ?扯隤??梯?隤???
+### 銝餉?隤踵
 - `src/editor/AnswerHighlighter.ts`
-  - 移除 `rounded-container` 渲染分支。
-  - 多行答案採區塊式 line decoration。
-  - `右側線條` 與 `淡色背景帶` 都改為整塊區域一致渲染。
-- `src/styles/editor.css`
-  - 移除 `rounded-container` 樣式。
-  - 保留並優化 `soft-band` / `right-rail` 的區塊式效果。
-
-### 文件同步
-- `Manual.md`：多行樣式說明改為僅兩種模式。
-- `Instruction.md`：高亮渲染重構第三階段標記為 `V0.1.14` 已完成。
-- `RoadMap.md`：Sprint F 同步為 `V0.1.14` 完成。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（40 tests）
-- `npm run build`：通過（已同步至 Vault 外掛目錄）
+  - ?虜璅?蝑??寧?桐? `AnswerChipWidget` ???- `src/editor/answerChipText.ts`
+  - ?啣?憿舐內??甇????`[[target|alias]]` 憿舐內 alias??  - ?舀撣貉??扯隤?憿舐內頧?嚗ikilink / markdown link / cloze嚗?- `src/styles/editor.css`
+  - ?啣? `.fc-answer-chip` ??璅????
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?7 tests嚗?- `npm run build`嚗?
 
 ---
 
-## V0.1.13 — 答案高亮膠囊化與顯示語意正規化（2026-03-30）
-
-### 目標
-- 解決答案高亮在符號附近邊緣破碎問題。
-- 讓 chip 顯示符合 Obsidian 內聯語法閱讀語意。
-
-### 主要調整
-- `src/editor/AnswerHighlighter.ts`
-  - 非游標行答案改為單一 `AnswerChipWidget` 呈現。
-- `src/editor/answerChipText.ts`
-  - 新增顯示文字正規化：`[[target|alias]]` 顯示 alias。
-  - 支援常見內聯語法顯示轉換（wikilink / markdown link / cloze）。
-- `src/styles/editor.css`
-  - 新增 `.fc-answer-chip` 膠囊樣式。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（37 tests）
-- `npm run build`：通過
+## V0.1.12嚗???嚗?? v0.1.11 蝛拙??箇?嚗?026-03-30嚗?
+### ?格?
+- 蝘駁閰阡??銝凋?蝛拙?雿?嚗??撽??寞???- 撘瑕?蝺刻摩?冽葡?帘摰扯??舐雁霅瑟扼?
+### 甇???∠雿?
+- `src/styles/editor.css` ??`src/styles/main.css` ?惜??- `esbuild.config.mjs` 撠?`editor.css` ? `#fc-plugin-root` prefix-wrap??- `AnswerHighlighter` ??decoration-only 瘚???- `BlockIdHider` ???舀銵偏???函?銵? `^fc-...`??- `:: / ;; / :::` 隤? token ?冽虜璅???梯?嚗虜璅??啗府銵敺押?
+### 撽?
+- `npx tsc --noEmit`嚗?
+- `npm test`嚗?嚗?3 tests嚗?- `npm run build`嚗?
 
 ---
 
-## V0.1.12（重做版）— 回到 v0.1.11 穩定基線（2026-03-30）
+## ?辣蝬剛風??
 
-### 目標
-- 移除試錯過程中不穩定作法，保留可驗證方案。
-- 強化編輯器渲染穩定性與可維護性。
-
-### 正式採用作法
-- `src/styles/editor.css` 與 `src/styles/main.css` 分層。
-- `esbuild.config.mjs` 對 `editor.css` 停用 `#fc-plugin-root` prefix-wrap。
-- `AnswerHighlighter` 採 decoration-only 流程。
-- `BlockIdHider` 同時支援行尾型與獨立行型 `^fc-...`。
-- `:: / ;; / :::` 語法 token 在游標離開後隱藏，游標回到該行恢復。
-
-### 驗證
-- `npx tsc --noEmit`：通過
-- `npm test`：通過（33 tests）
-- `npm run build`：通過
-
----
-
-## 文件維護原則
-
-- `dev_log.md`：記錄「做了什麼、為何這樣做、如何驗證」。
-- `RoadMap.md`：記錄「接下來要做什麼、優先級、完成狀態」。
-- `Instruction.md`：記錄「開發方向、架構原則、當前行動」。
-- `Manual.md`：記錄「使用者如何使用目前功能」。
+- `dev_log.md`嚗???鈭?暻潦雿見??雿?霅?- `RoadMap.md`嚗??銝?閬?隞暻潦????????- `Instruction.md`嚗????潭?瑽??????- `Manual.md`嚗??蝙?刻?雿蝙?函???賬?

@@ -43,8 +43,40 @@ describe("blockIdRules", () => {
             allLines: ["Just a normal note line"],
         });
 
+        const inlineNoSpace = shouldAttachBlockIdOnBlur({
+            parser,
+            lineContent: "Read {{fcwriting :: critical thinking/fc}} now",
+            lineNumber: 0,
+            allLines: ["Read {{fcwriting :: critical thinking/fc}} now"],
+        });
+
+        const inlineWithSpace = shouldAttachBlockIdOnBlur({
+            parser,
+            lineContent: "Read {{fc writing :: critical thinking /fc}} now",
+            lineNumber: 0,
+            allLines: ["Read {{fc writing :: critical thinking /fc}} now"],
+        });
+
+        const inlineClozeWrapper = shouldAttachBlockIdOnBlur({
+            parser,
+            lineContent: "Read {{fc writing, ==critical thinking==, judgement /fc}} now",
+            lineNumber: 0,
+            allLines: ["Read {{fc writing, ==critical thinking==, judgement /fc}} now"],
+        });
+
+        const deprecatedInline = shouldAttachBlockIdOnBlur({
+            parser,
+            lineContent: "Read {{fc: writing :: critical thinking/fc}} now",
+            lineNumber: 0,
+            allLines: ["Read {{fc: writing :: critical thinking/fc}} now"],
+        });
+
         expect(single).toBe(true);
         expect(multiline).toBe(true);
         expect(plainText).toBe(false);
+        expect(inlineNoSpace).toBe(true);
+        expect(inlineWithSpace).toBe(true);
+        expect(inlineClozeWrapper).toBe(true);
+        expect(deprecatedInline).toBe(false);
     });
 });

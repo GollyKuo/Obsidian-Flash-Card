@@ -1,4 +1,9 @@
 import { FlashcardParser } from "../parser/FlashcardParser";
+import {
+    hasInlineFlashcardMarkers,
+    matchInlineClozeCard,
+    matchInlineForwardCard,
+} from "../parser/inlineFlashcardSyntax";
 import { AnswerHighlightScope } from "../settings/answerHighlightScopes";
 
 const BIDIRECTIONAL_PATTERN = /^(.+?)\s*:::\s*(.+)$/;
@@ -57,6 +62,16 @@ export function collectAnswerHighlightRanges(params: {
         return [];
     }
 
+    const inlineForwardMatch = matchInlineForwardCard(cleanLine);
+    const inlineClozeMatch = matchInlineClozeCard(cleanLine);
+    const hasMalformedInlineSyntax =
+        hasInlineFlashcardMarkers(cleanLine) &&
+        !inlineForwardMatch &&
+        !inlineClozeMatch;
+    if (hasMalformedInlineSyntax) {
+        return [];
+    }
+
     const ranges: AnswerHighlightRange[] = [];
 
     if (scopes.has("cloze")) {
@@ -80,6 +95,22 @@ export function collectAnswerHighlightRanges(params: {
     }
 
     if (scopes.has("single-line")) {
+        if (inlineForwardMatch) {
+            const hasClozeInBack = ranges.some(
+                (range) =>
+                    range.from >= inlineForwardMatch.backFrom &&
+                    range.to <= inlineForwardMatch.backTo
+            );
+
+            if (!hasClozeInBack) {
+                ranges.push({
+                    from: inlineForwardMatch.backFrom,
+                    to: inlineForwardMatch.backTo,
+                });
+            }
+            return mergeRanges(ranges);
+        }
+
         const forwardMatch = cleanLine.match(FORWARD_PATTERN);
         if (forwardMatch) {
             const start = cleanLine.length - forwardMatch[2].length;
@@ -96,15 +127,11 @@ export function collectAnswerHighlightRanges(params: {
     }
 
     if (scopes.has("multi-line")) {
-        const multiLineRange = findMultilineAnswerBlock(
-            lines,
-            lineNumber,
-            parser
-        );
-        if (multiLineRange) {
+        const multilineRange = findMultilineAnswerBlock(lines, lineNumber, parser);
+        if (multilineRange) {
             ranges.push({
-                from: multiLineRange.from,
-                to: multiLineRange.to,
+                from: multilineRange.from,
+                to: multilineRange.to,
             });
         }
     }
@@ -118,6 +145,16 @@ export function collectClozeTokenRanges(params: {
 }): ClozeTokenRange[] {
     const cleanLine = params.parser.stripBlockId(params.line).trimEnd();
     if (!cleanLine.trim()) {
+        return [];
+    }
+
+    const inlineForwardMatch = matchInlineForwardCard(cleanLine);
+    const inlineClozeMatch = matchInlineClozeCard(cleanLine);
+    const hasMalformedInlineSyntax =
+        hasInlineFlashcardMarkers(cleanLine) &&
+        !inlineForwardMatch &&
+        !inlineClozeMatch;
+    if (hasMalformedInlineSyntax) {
         return [];
     }
 
@@ -155,6 +192,31 @@ export function collectFlashcardSyntaxTokenRanges(params: {
     const cleanLine = parser.stripBlockId(line).trimEnd();
     if (!cleanLine.trim()) {
         return [];
+    }
+
+    const inlineForwardMatch = matchInlineForwardCard(cleanLine);
+    const inlineClozeMatch = matchInlineClozeCard(cleanLine);
+    const hasMalformedInlineSyntax =
+        hasInlineFlashcardMarkers(cleanLine) &&
+        !inlineForwardMatch &&
+        !inlineClozeMatch;
+    if (hasMalformedInlineSyntax) {
+        return [];
+    }
+
+    if (inlineForwardMatch) {
+        return [
+            toSyntaxRange(inlineForwardMatch.openTokenFrom, inlineForwardMatch.openTokenTo),
+            toSyntaxRange(inlineForwardMatch.delimiterFrom, inlineForwardMatch.delimiterTo),
+            toSyntaxRange(inlineForwardMatch.closeTokenFrom, inlineForwardMatch.closeTokenTo),
+        ].filter((range): range is FlashcardSyntaxTokenRange => range !== null);
+    }
+
+    if (inlineClozeMatch) {
+        return [
+            toSyntaxRange(inlineClozeMatch.openTokenFrom, inlineClozeMatch.openTokenTo),
+            toSyntaxRange(inlineClozeMatch.closeTokenFrom, inlineClozeMatch.closeTokenTo),
+        ].filter((range): range is FlashcardSyntaxTokenRange => range !== null);
     }
 
     const bidirectionalMatch = cleanLine.match(BIDIRECTIONAL_TOKEN_PATTERN);
@@ -209,22 +271,22 @@ function findMultilineAnswerBlock(
         return null;
     }
 
-    for (let i = lineNumber - 1; i >= 0; i--) {
+    for (let i = lineNumber - 1; i >= 0; i -= 1) {
         const card = parser.parseMultiLine(lines, i);
         if (card?.endLineNumber !== undefined && lineNumber <= card.endLineNumber) {
             const start = currentLine.match(/^\s*/)?.[0].length ?? 0;
             const end = currentLine.trimEnd().length;
-            return end > start
-                ? {
-                      from: start,
-                      to: end,
-                      startLineNumber: i,
-                      endLineNumber: card.endLineNumber,
-                      blockIndentColumns: countLeadingIndentColumns(
-                          lines[i + 1] ?? currentLine
-                      ),
-                  }
-                : null;
+            if (end <= start) {
+                return null;
+            }
+
+            return {
+                from: start,
+                to: end,
+                startLineNumber: i,
+                endLineNumber: card.endLineNumber,
+                blockIndentColumns: countLeadingIndentColumns(lines[i + 1] ?? currentLine),
+            };
         }
 
         if (lines[i]?.trim() && !/^\s/.test(lines[i])) {
@@ -243,7 +305,7 @@ function mergeRanges(ranges: AnswerHighlightRange[]): AnswerHighlightRange[] {
     const sorted = [...ranges].sort((a, b) => a.from - b.from);
     const merged: AnswerHighlightRange[] = [sorted[0]];
 
-    for (let i = 1; i < sorted.length; i++) {
+    for (let i = 1; i < sorted.length; i += 1) {
         const previous = merged[merged.length - 1];
         const current = sorted[i];
 
@@ -265,13 +327,26 @@ function countLeadingIndentColumns(line: string): number {
             columns += 1;
             continue;
         }
+
         if (char === "\t") {
             columns += 4;
             continue;
         }
+
         break;
     }
     return columns;
+}
+
+function toSyntaxRange(
+    from: number,
+    to: number
+): FlashcardSyntaxTokenRange | null {
+    if (to <= from) {
+        return null;
+    }
+
+    return { from, to };
 }
 
 function extractTokenRange(

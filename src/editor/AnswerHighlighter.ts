@@ -15,6 +15,7 @@ import { toAnswerChipText } from "./answerChipText";
 import {
     clearRevealLine,
     getActiveRevealLine,
+    getActiveRevealState,
     setRevealLine,
 } from "./revealState";
 import {
@@ -177,11 +178,20 @@ function buildDecorations(
                     lineNumber,
                     parser,
                 });
+                const lineDecorations: Array<{
+                    from: number;
+                    to: number;
+                    decoration: Decoration;
+                }> = [];
                 for (const syntaxTokenRange of syntaxTokenRanges) {
                     const start = line.from + syntaxTokenRange.from;
                     const end = line.from + syntaxTokenRange.to;
                     if (end > start) {
-                        builder.add(start, end, HIDE_FLASHCARD_SYNTAX);
+                        lineDecorations.push({
+                            from: start,
+                            to: end,
+                            decoration: HIDE_FLASHCARD_SYNTAX,
+                        });
                     }
                 }
 
@@ -224,6 +234,17 @@ function buildDecorations(
                         builder.add(start, end, multilineDecoration);
                     }
 
+                    lineDecorations.sort((a, b) =>
+                        a.from === b.from ? a.to - b.to : a.from - b.from
+                    );
+                    for (const decoration of lineDecorations) {
+                        builder.add(
+                            decoration.from,
+                            decoration.to,
+                            decoration.decoration
+                        );
+                    }
+
                     pos = line.to + 1;
                     continue;
                 }
@@ -242,15 +263,26 @@ function buildDecorations(
                         const rawText = cleanLine.slice(range.from, range.to);
                         const displayText = toAnswerChipText(rawText);
                         if (displayText) {
-                            builder.add(
-                                start,
-                                end,
-                                Decoration.replace({
+                            lineDecorations.push({
+                                from: start,
+                                to: end,
+                                decoration: Decoration.replace({
                                     widget: new AnswerChipWidget(displayText),
-                                })
-                            );
+                                }),
+                            });
                         }
                     }
+                }
+
+                lineDecorations.sort((a, b) =>
+                    a.from === b.from ? a.to - b.to : a.from - b.from
+                );
+                for (const decoration of lineDecorations) {
+                    builder.add(
+                        decoration.from,
+                        decoration.to,
+                        decoration.decoration
+                    );
                 }
             }
 
@@ -283,6 +315,29 @@ function handleAnswerHighlightMouseDown(
         ".fc-answer-chip, .fc-answer-multiline, .fc-answer-multiline-line"
     );
     if (!highlightNode) {
+        const activeRevealState = getActiveRevealState(view);
+        if (!activeRevealState) {
+            clearRevealLine(view);
+            return;
+        }
+
+        const clickedPos = view.posAtCoords({
+            x: event.clientX,
+            y: event.clientY,
+        });
+        if (clickedPos === null) {
+            clearRevealLine(view);
+            return;
+        }
+
+        const clickedLineNumber = view.state.doc.lineAt(clickedPos).number;
+        if (
+            clickedLineNumber >= activeRevealState.activeStartLineNumber &&
+            clickedLineNumber <= activeRevealState.activeEndLineNumber
+        ) {
+            return;
+        }
+
         clearRevealLine(view);
         return;
     }

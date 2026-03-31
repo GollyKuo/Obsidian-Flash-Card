@@ -33,7 +33,7 @@ export function clearRevealLine(view: EditorView): void {
     revealStateByView.delete(view);
 }
 
-export function getActiveRevealLine(view: EditorView): number | null {
+export function getActiveRevealState(view: EditorView): Readonly<RevealState> | null {
     const state = revealStateByView.get(view);
     if (!state) {
         return null;
@@ -48,5 +48,10 @@ export function getActiveRevealLine(view: EditorView): number | null {
         return null;
     }
 
-    return state.revealLineNumber;
+    return state;
+}
+
+export function getActiveRevealLine(view: EditorView): number | null {
+    const state = getActiveRevealState(view);
+    return state ? state.revealLineNumber : null;
 }
