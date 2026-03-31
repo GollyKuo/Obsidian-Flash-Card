@@ -1,4 +1,4 @@
-﻿export const MULTI_LINE_ANSWER_RENDER_STYLES = [
+export const MULTI_LINE_ANSWER_RENDER_STYLES = [
     "soft-band",
     "right-rail",
 ] as const;

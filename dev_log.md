@@ -1,10 +1,10 @@
-﻿# 開發者日誌 (Developer Log)
+# 開發者日誌 (Developer Log)
 
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 
-## Current Context Snapshot（更新：2026-03-31，V0.1.181）
+## Current Context Snapshot（更新：2026-03-31，V0.1.19）
 
-- 當前版本：`v0.1.181`（流程版：新對話啟動讀檔順序納入 SKILL）
+- 當前版本：`v0.1.19`（設定頁分頁化與編碼治理）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -17,6 +17,39 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.19（正式版）— 設定頁分頁化與編碼治理（2026-03-31）
+
+### 目標
+- 讓設定頁具備可持續擴充的分頁架構，降低未來新增設定時的耦合與改動成本。
+
+### 主要調整
+- `src/settings/FlashcardsSettingTab.ts`
+  - 將單一 `display()` 大函式改為分頁式架構：`一般`、`答案高亮`、`AI`、`維護工具`。
+  - 新增 tab definition 與 section renderer，後續可用新增 tab 的方式擴展設定頁，不需重寫整頁。
+  - 設定頁改掛載於 `#fc-plugin-root`，維持樣式隔離一致性。
+- 編碼治理（encoding hygiene）
+  - 新增 `.editorconfig`，統一 UTF-8、行尾 LF 與檔案格式基準。
+  - 新增 `.gitattributes`，固定文字檔 EOL 策略並標註常見二進位副檔名。
+  - 將先前混用 UTF-8 BOM 的檔案（`dev_log.md`、`src/settings/FlashcardsSettingTab.ts`、`src/settings/multiLineAnswerRenderStyles.ts`）統一為 UTF-8 無 BOM。
+- `src/styles/main.css`
+  - 新增設定分頁樣式（tab list、button、active state、panel）。
+- `src/main.ts`
+  - `saveSettings()` 新增可選參數 `reloadDataStore`，避免每次設定變更都強制 reload datastore。
+  - `資料目錄` 變更時才觸發 datastore reload，其餘設定改為輕量儲存流程。
+- `Manual.md`
+  - 同步更新設定頁為分頁式介面操作說明。
+- 版本同步
+  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.19`。
+- 文件同步
+  - `RoadMap.md`、`Instruction.md`、`Manual.md`、`dev_log.md`。
+
+### 驗證
+- `npx tsc --noEmit`：通過
+- `npm test`：通過（40 tests）
+- `npm run build`：通過
 
 ---
 

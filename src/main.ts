@@ -105,13 +105,14 @@ export default class FlashcardsPlugin extends Plugin {
         );
     }
 
-    async saveSettings(): Promise<void> {
+    async saveSettings(options?: { reloadDataStore?: boolean }): Promise<void> {
+        const shouldReloadDataStore = options?.reloadDataStore ?? false;
         await this.saveData(this.settings);
         this.applyAnswerHighlightScopeClasses();
         this.applyAnswerHighlightThemeVars();
         this.app.workspace.updateOptions();
 
-        if (this.runtime) {
+        if (shouldReloadDataStore && this.runtime) {
             await this.runtime.dataStore.load();
         }
     }

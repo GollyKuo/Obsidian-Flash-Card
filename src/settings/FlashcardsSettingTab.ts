@@ -11,8 +11,17 @@ import {
 import { DEFAULT_SETTINGS } from "./types";
 import type FlashcardsPlugin from "../main";
 
+type SettingsTabId = "general" | "highlight" | "ai" | "maintenance";
+
+interface SettingsTabDefinition {
+    id: SettingsTabId;
+    label: string;
+    render: (containerEl: HTMLElement) => void;
+}
+
 export class FlashcardsSettingTab extends PluginSettingTab {
     private plugin: FlashcardsPlugin;
+    private activeTab: SettingsTabId = "general";
 
     constructor(app: App, plugin: FlashcardsPlugin) {
         super(app, plugin);
@@ -23,8 +32,69 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl("h2", { text: "AI-Enriched Flashcards 設定" });
+        const rootEl = containerEl.createDiv({
+            attr: { id: "fc-plugin-root" },
+        });
+        rootEl.addClass("fc-settings-root");
 
+        rootEl.createEl("h2", { text: "AI-Enriched Flashcards 設定" });
+
+        const tabListEl = rootEl.createDiv({ cls: "fc-settings-tab-list" });
+        const tabPanelEl = rootEl.createDiv({ cls: "fc-settings-tab-panel" });
+        const tabs = this.getTabs();
+
+        for (const tab of tabs) {
+            const buttonEl = tabListEl.createEl("button", {
+                text: tab.label,
+                cls: "fc-settings-tab-button",
+            });
+
+            if (this.activeTab === tab.id) {
+                buttonEl.addClass("is-active");
+            }
+
+            buttonEl.addEventListener("click", () => {
+                if (this.activeTab === tab.id) {
+                    return;
+                }
+                this.activeTab = tab.id;
+                this.display();
+            });
+        }
+
+        const activeTab =
+            tabs.find((tab) => tab.id === this.activeTab) ?? tabs[0];
+        activeTab.render(tabPanelEl);
+    }
+
+    private getTabs(): SettingsTabDefinition[] {
+        return [
+            {
+                id: "general",
+                label: "一般",
+                render: (containerEl) => this.renderGeneralSettings(containerEl),
+            },
+            {
+                id: "highlight",
+                label: "答案高亮",
+                render: (containerEl) =>
+                    this.renderAnswerHighlightSettings(containerEl),
+            },
+            {
+                id: "ai",
+                label: "AI",
+                render: (containerEl) => this.renderAiSettings(containerEl),
+            },
+            {
+                id: "maintenance",
+                label: "維護工具",
+                render: (containerEl) =>
+                    this.renderMaintenanceSettings(containerEl),
+            },
+        ];
+    }
+
+    private renderGeneralSettings(containerEl: HTMLElement): void {
         new Setting(containerEl)
             .setName("資料目錄")
             .setDesc("flashcard 狀態與資產資料夾位置，預設為 _Flashcards")
@@ -36,7 +106,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                         value.trim() || DEFAULT_SETTINGS.dataDirectory;
                 });
                 text.inputEl.addEventListener("change", async () => {
-                    await this.plugin.saveSettings();
+                    await this.plugin.saveSettings({ reloadDataStore: true });
                 });
             });
 
@@ -54,11 +124,14 @@ export class FlashcardsSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName("目前資料檔路徑")
             .setDesc(this.plugin.dataStore.getDataFilePath());
+    }
 
+    private renderAnswerHighlightSettings(containerEl: HTMLElement): void {
         const answerHighlightTitleEl = containerEl.createEl("h3", {
             text: "答案高亮設定",
         });
         answerHighlightTitleEl.addClass("fc-settings-section-title");
+
         const answerHighlightSubtitleEl = containerEl.createEl("p", {
             text: "可重複多選要套用背景色的答案類型。填空會同時影響閱讀模式與編輯模式，其餘類型目前以編輯模式為主。",
         });
@@ -122,6 +195,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
             text: "答案高亮主題",
         });
         answerThemeTitleEl.addClass("fc-settings-section-title");
+
         const answerThemeSubtitleEl = containerEl.createEl("p", {
             text: "設定答案高亮主題的顏色與透明度",
         });
@@ -140,9 +214,7 @@ export class FlashcardsSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName("透明度")
-            .setDesc(
-                `目前：${this.plugin.settings.answerHighlightThemeOpacity}%`
-            )
+            .setDesc(`目前：${this.plugin.settings.answerHighlightThemeOpacity}%`)
             .addSlider((slider) => {
                 slider.setLimits(8, 60, 1);
                 slider.setValue(this.plugin.settings.answerHighlightThemeOpacity);
@@ -208,7 +280,9 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                     });
                 });
         }
+    }
 
+    private renderAiSettings(containerEl: HTMLElement): void {
         containerEl.createEl("h3", { text: "AI 設定（預留）" });
 
         new Setting(containerEl)
@@ -259,7 +333,9 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 });
             });
+    }
 
+    private renderMaintenanceSettings(containerEl: HTMLElement): void {
         containerEl.createEl("h3", { text: "維護工具" });
 
         new Setting(containerEl)
@@ -298,7 +374,8 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 return "套用於 `問題 ::` 後方縮排的多行答案";
             case "bidirectional":
                 return "套用於 `:::` 雙向卡右側內容";
+            default:
+                return "";
         }
     }
-
 }

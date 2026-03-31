@@ -18,6 +18,46 @@
   font-family: var(--font-interface);
 }
 
+.fc-settings-root {
+  max-width: 900px;
+}
+
+.fc-settings-tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  padding: 0 0 10px 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.fc-settings-tab-button {
+  appearance: none;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 4px 11px;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.fc-settings-tab-button:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.fc-settings-tab-button.is-active {
+  border-color: color-mix(in srgb, var(--interactive-accent) 70%, var(--background-modifier-border) 30%);
+  background: color-mix(in srgb, var(--interactive-accent) 14%, var(--background-secondary) 86%);
+  color: var(--text-normal);
+}
+
+.fc-settings-tab-panel {
+  min-height: 320px;
+}
+
 .fc-settings-section-title {
   margin: 1.2rem 0 0.35rem 0 !important;
   padding-left: 0 !important;
