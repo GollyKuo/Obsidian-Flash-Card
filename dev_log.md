@@ -2,9 +2,9 @@
 
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 
-## Current Context Snapshot（更新：2026-03-31，V0.1.19）
+## Current Context Snapshot（更新：2026-03-31，V0.1.19 + Unreleased 架構補強）
 
-- 當前版本：`v0.1.19`（設定頁分頁化與編碼治理）
+- 當前版本：`v0.1.19`（已發版）+ `Unreleased`（Action Layer / Sync State Layer）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -17,6 +17,32 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## Unreleased（2026-03-31）— Action Layer 與 Sync State Layer
+
+### 目標
+- 在 Sprint E 前降低 UI 與資料流程耦合，並補上可觀測的同步狀態層。
+
+### 主要調整
+- `src/app/FlashcardsAppService.ts`
+  - 新增 app-level action service，集中掃描、統計、清理與高亮診斷邏輯。
+- `src/app/registerPluginUi.ts`
+  - command/ribbon 改為呼叫 app service，移除重複業務邏輯，UI 只保留觸發與 Notice 呈現。
+- `src/sync/types.ts`
+  - 新增 `SyncPhase`、`SyncStatusState`、`SyncStatusListener` 型別。
+- `src/sync/FlashcardSyncService.ts`
+  - 新增 sync status state（`idle/syncing/error` + `activeJobs` + `lastSyncedAt` + `lastError`）。
+  - 新增狀態訂閱 API：`getSyncStatus()`、`onSyncStatusChange()`。
+  - 以 `runTrackedSync()` 包裝 sync 流程，讓手動掃描與檔案事件都能更新同步狀態。
+- `RoadMap.md`
+  - 補入兩步驟（Action Layer / Sync State Layer）並標記已完成（Unreleased）。
+
+### 驗證
+- `npx tsc --noEmit`：通過
+- `npm test`：通過（40 tests）
+- `npm run build`：通過
 
 ---
 

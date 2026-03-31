@@ -1,11 +1,7 @@
 import { MarkdownView, Notice, Plugin } from "obsidian";
 import { FlashcardsRuntime } from "./createFlashcardsRuntime";
-import {
-    collectAnswerHighlightRanges,
-    collectClozeTokenRanges,
-} from "../editor/answerHighlightRules";
+import { FlashcardsAppService, UiActionResult } from "./FlashcardsAppService";
 import { FlashcardsPluginSettings } from "../settings/types";
-import { ReviewModalContainer } from "../ui/ReviewModalContainer";
 
 type SettingsAccessor = () => FlashcardsPluginSettings;
 
@@ -14,202 +10,84 @@ export function registerPluginUi(
     runtime: FlashcardsRuntime,
     getSettings: SettingsAccessor
 ): void {
-    const openReview = () => {
-        new ReviewModalContainer(plugin.app, runtime.dataStore).open();
+    const appService = new FlashcardsAppService(plugin, runtime, getSettings);
+
+    const showNotice = (result: UiActionResult): void => {
+        if (result.logTag && result.logPayload) {
+            console.log(result.logTag, result.logPayload);
+        }
+
+        new Notice(result.message, result.timeout);
+    };
+
+    const scanCurrentFile = async (): Promise<void> => {
+        const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+        showNotice(await appService.scanCurrentView(view));
+    };
+
+    const scanVault = async (): Promise<void> => {
+        showNotice(await appService.scanVault());
+    };
+
+    const stripAllBlockIds = async (): Promise<void> => {
+        showNotice(await appService.stripAllBlockIds());
+    };
+
+    const showStats = (): void => {
+        showNotice(appService.createStatsResult(false));
+    };
+
+    const showCompactStats = (): void => {
+        showNotice(appService.createStatsResult(true));
+    };
+
+    const showAnswerHighlightDebug = (): void => {
+        const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+        const result = appService.buildAnswerHighlightDebugResult(view);
+        showNotice(result);
     };
 
     plugin.addCommand({
         id: "scan-current-file",
         name: "掃描目前文件中的閃卡",
-        callback: async () => {
-            const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-            const result = await runtime.syncService.syncCurrentView(view);
-
-            if (!result) {
-                new Notice("目前沒有開啟可掃描的 Markdown 文件");
-                return;
-            }
-
-            new Notice(formatSyncNotice(result), 6000);
-        },
+        callback: scanCurrentFile,
     });
 
     plugin.addCommand({
         id: "scan-all-files",
         name: "重建整個 Vault 的閃卡索引",
-        callback: async () => {
-            const summary = await runtime.syncService.syncVault();
-            new Notice(
-                `整庫掃描完成：${summary.filesScanned} 個檔案，${summary.withBlockId} 張已編號卡片，新增 ${summary.newCount}，更新 ${summary.updatedCount}，移除 ${summary.removedCount}`,
-                8000
-            );
-        },
+        callback: scanVault,
     });
 
     plugin.addCommand({
         id: "strip-all-block-ids",
         name: "移除 Vault 內所有閃卡 Block ID",
-        callback: async () => {
-            const summary =
-                await runtime.blockIdCleanupService.stripAllBlockIdsFromVault();
-            new Notice(formatCleanupNotice(summary), 8000);
-        },
+        callback: stripAllBlockIds,
     });
 
     plugin.addCommand({
         id: "show-stats",
         name: "顯示閃卡統計",
-        callback: () => {
-            const allCards = runtime.dataStore.getAllCards();
-            const dueCards = runtime.dataStore.getDueCards();
-
-            const learning = allCards.filter(
-                (card) => card.fsrs.state === "learning"
-            ).length;
-            const review = allCards.filter(
-                (card) => card.fsrs.state === "review"
-            ).length;
-            const relearning = allCards.filter(
-                (card) => card.fsrs.state === "relearning"
-            ).length;
-
-            new Notice(
-                `閃卡統計\n總數：${allCards.length}\n到期：${dueCards.length}\n新卡：${allCards.filter((card) => card.fsrs.state === "new").length} | 學習中：${learning} | 複習中：${review} | 重新學習：${relearning}`,
-                8000
-            );
-        },
+        callback: showStats,
     });
 
     plugin.addCommand({
         id: "start-review",
         name: "開始閃卡複習",
-        callback: openReview,
+        callback: () => appService.openReviewModal(),
     });
 
     plugin.addCommand({
         id: "debug-answer-highlight",
         name: "顯示答案高亮診斷",
-        callback: () => {
-            const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-            if (!view) {
-                new Notice("目前沒有開啟可診斷的 Markdown 文件");
-                return;
-            }
-
-            const cursor = view.editor.getCursor();
-            const lineText = view.editor.getLine(cursor.line);
-            const lines = view.editor.getValue().split("\n");
-            const settings = getSettings();
-            const scopes = new Set(settings.answerHighlightScopes);
-            const highlightRanges = collectAnswerHighlightRanges({
-                lines,
-                lineNumber: cursor.line,
-                parser: runtime.parser,
-                scopes,
-            });
-            const clozeRanges = collectClozeTokenRanges({
-                line: lineText,
-                parser: runtime.parser,
-            });
-
-            const payload = {
-                version: plugin.manifest.version,
-                file: view.file?.path ?? "(unknown)",
-                lineNumber: cursor.line + 1,
-                scopes: settings.answerHighlightScopes,
-                highlightRanges,
-                clozeRanges,
-                lineText,
-            };
-
-            console.log("[Flashcards][AnswerHighlightDebug]", payload);
-            new Notice(
-                `高亮診斷 v${payload.version}\n行 ${payload.lineNumber}\nscopes: ${payload.scopes.join(", ") || "(empty)"}\nanswers: ${payload.highlightRanges.length}\ncloze: ${payload.clozeRanges.length}\n詳情請看開發者主控台`,
-                12000
-            );
-        },
+        callback: showAnswerHighlightDebug,
     });
 
-    plugin.addRibbonIcon("scan", "掃描目前文件中的閃卡", async () => {
-        const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-        const result = await runtime.syncService.syncCurrentView(view);
-
-        if (!result) {
-            new Notice("目前沒有開啟可掃描的 Markdown 文件");
-            return;
-        }
-
-        new Notice(formatSyncNotice(result), 6000);
-    });
-
-    plugin.addRibbonIcon("refresh-cw", "重建整個 Vault 的閃卡索引", async () => {
-        const summary = await runtime.syncService.syncVault();
-        new Notice(
-            `整庫掃描完成：${summary.filesScanned} 個檔案，${summary.withBlockId} 張已編號卡片，新增 ${summary.newCount}，更新 ${summary.updatedCount}，移除 ${summary.removedCount}`,
-            8000
-        );
-    });
-
-    plugin.addRibbonIcon("eraser", "移除 Vault 內所有閃卡 Block ID", async () => {
-        const summary =
-            await runtime.blockIdCleanupService.stripAllBlockIdsFromVault();
-        new Notice(formatCleanupNotice(summary), 8000);
-    });
-
-    plugin.addRibbonIcon("graduation-cap", "開始閃卡複習", openReview);
-
-    plugin.addRibbonIcon("bar-chart", "顯示閃卡統計", () => {
-        const allCards = runtime.dataStore.getAllCards();
-        const dueCards = runtime.dataStore.getDueCards();
-
-        new Notice(
-            `閃卡統計\n總數：${allCards.length}\n到期：${dueCards.length}`,
-            6000
-        );
-    });
-}
-
-function formatSyncNotice(result: {
-    totalCards: number;
-    withBlockId: number;
-    noIdCount: number;
-    newCount: number;
-    updatedCount: number;
-    removedCount: number;
-}): string {
-    const lines = [
-        `掃描完成：共解析 ${result.totalCards} 張卡片`,
-        `已編號：${result.withBlockId} 張`,
-    ];
-
-    if (result.newCount > 0) {
-        lines.push(`新增：${result.newCount} 張`);
-    }
-
-    if (result.updatedCount > 0) {
-        lines.push(`更新：${result.updatedCount} 張`);
-    }
-
-    if (result.removedCount > 0) {
-        lines.push(`移除：${result.removedCount} 張`);
-    }
-
-    if (result.noIdCount > 0) {
-        lines.push(`待補 Block ID：${result.noIdCount} 張`);
-    }
-
-    return lines.join("\n");
-}
-
-function formatCleanupNotice(summary: {
-    filesScanned: number;
-    filesChanged: number;
-    idsRemoved: number;
-    cardsRemoved: number;
-}): string {
-    if (summary.idsRemoved === 0) {
-        return `清理完成：掃描 ${summary.filesScanned} 個檔案，未發現可移除的 Block ID`;
-    }
-
-    return `清理完成：掃描 ${summary.filesScanned} 個檔案，修改 ${summary.filesChanged} 個檔案，移除 ${summary.idsRemoved} 個 Block ID，刪除 ${summary.cardsRemoved} 筆卡片索引`;
+    plugin.addRibbonIcon("scan", "掃描目前文件中的閃卡", scanCurrentFile);
+    plugin.addRibbonIcon("refresh-cw", "重建整個 Vault 的閃卡索引", scanVault);
+    plugin.addRibbonIcon("eraser", "移除 Vault 內所有閃卡 Block ID", stripAllBlockIds);
+    plugin.addRibbonIcon("graduation-cap", "開始閃卡複習", () =>
+        appService.openReviewModal()
+    );
+    plugin.addRibbonIcon("bar-chart", "顯示閃卡統計", showCompactStats);
 }

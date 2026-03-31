@@ -66,6 +66,13 @@
 - repository 分片儲存落地（`data.json` manifest + `Cards/<blockId>.json`）（已完成：2026-03-29，V0.1.9）
 - 規劃已納入：2026-03-29，V0.1.5
 
+### Sprint D.5: 架構補強（Sprint E 前置）（進行中）
+
+目標：在 Dashboard Workspace 進場前，先降低 UI 與資料流程耦合，並補上同步狀態層，避免後續擴充時回頭拆大樑。
+
+- Step 1：抽離 Action Layer（`FlashcardsAppService`），將 command/ribbon 的業務流程集中管理（已完成：2026-03-31，Unreleased）
+- Step 2：新增 Sync State Layer（`idle/syncing/error` + activeJobs + lastSyncedAt/lastError + listener），提供後續 Dashboard/HUD 狀態來源（已完成：2026-03-31，Unreleased）
+
 ---
 
 ## 中期計畫
