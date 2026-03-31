@@ -2,9 +2,9 @@
 
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 
-## Current Context Snapshot（更新：2026-03-31，V0.1.18）
+## Current Context Snapshot（更新：2026-03-31，V0.1.181）
 
-- 當前版本：`v0.1.18`（正式版：答案高亮主題自訂完成 + 設定頁主次標題對齊修正）
+- 當前版本：`v0.1.181`（流程版：新對話啟動讀檔順序納入 SKILL）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -16,7 +16,26 @@
   - 以 `RoadMap.md` 的 Sprint E 為主，先落地 `Cards` 管理分區骨架。
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
-- 交接調閱順序：`dev_log.md`（本快照） -> `RoadMap.md` -> `Instruction.md` -> `Retrospective.md`
+- 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.181（正式版）— 啟動讀檔順序納入 SKILL（2026-03-31）
+
+### 目標
+- 固化新對話開工流程，降低 context 轉場遺漏風險。
+
+### 主要調整
+- `.codex/skill/SKILL.md`
+  - 新增「每次開啟新對話並開始開發前」必讀順序：
+    `SKILL.md` → `dev_log.md`（Current Context Snapshot）→ `Instruction.md` → `RoadMap.md` → `Retrospective.md`。
+- 版本同步
+  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.181`。
+- 文件同步
+  - `dev_log.md` 快照與版本紀錄同步更新。
+
+### 驗證
+- 流程文件一致性檢查：通過（`SKILL.md` 與 `dev_log.md` 一致）。
 
 ---
 
