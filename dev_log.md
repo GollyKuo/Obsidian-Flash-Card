@@ -1,10 +1,11 @@
 # 開發者日誌 (Developer Log)
 
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
+自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-03-31，V0.1.19 + Unreleased 架構補強）
+## Current Context Snapshot（更新：2026-03-31 13:49，V0.1.20）
 
-- 當前版本：`v0.1.19`（已發版）+ `Unreleased`（Action Layer / Sync State Layer）
+- 當前版本：`v0.1.20`（已發版）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -20,12 +21,19 @@
 
 ---
 
-## Unreleased（2026-03-31）— Action Layer 與 Sync State Layer
+## V0.1.20（正式版）— 架構規劃整理與時間戳規範（2026-03-31 13:49）
 
 ### 目標
 - 在 Sprint E 前降低 UI 與資料流程耦合，並補上可觀測的同步狀態層。
 
 ### 主要調整
+- `.codex/skill/SKILL.md`
+  - 新增文件時間戳規則：之後 `RoadMap.md` 與 `dev_log.md` 的新增完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制），既有歷史紀錄不追溯修改。
+- `RoadMap.md`
+  - 補齊卡片管理的 V0.2 開發框架：Cards Query Layer、來源健康度、分組/列表檢視切換、`inheritedTags / cardTags / effectiveTags`、單卡標籤主儲存策略。
+  - 新增大規模卡片量下的性能與延遲控制規劃（derived indexes、job coalescing、增量同步、背景重建、虛擬清單）。
+- `dev_log.md`
+  - 同步寫入時間戳規則，並將本次文件/規劃整理收斂為 `V0.1.20` 正式版紀錄。
 - `src/app/FlashcardsAppService.ts`
   - 新增 app-level action service，集中掃描、統計、清理與高亮診斷邏輯。
 - `src/app/registerPluginUi.ts`
@@ -37,7 +45,9 @@
   - 新增狀態訂閱 API：`getSyncStatus()`、`onSyncStatusChange()`。
   - 以 `runTrackedSync()` 包裝 sync 流程，讓手動掃描與檔案事件都能更新同步狀態。
 - `RoadMap.md`
-  - 補入兩步驟（Action Layer / Sync State Layer）並標記已完成（Unreleased）。
+  - 補入兩步驟（Action Layer / Sync State Layer）並同步收斂到 `V0.1.20` 發版內容。
+- 版本同步
+  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.20`。
 
 ### 驗證
 - `npx tsc --noEmit`：通過

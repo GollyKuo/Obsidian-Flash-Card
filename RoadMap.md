@@ -1,6 +1,7 @@
 # RoadMap
 
 ## 目前狀態
+> 記錄規則：自即日起，新增的完成時間一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
 目前專案已完成可用原型，已有下列基礎能力：
 
@@ -52,6 +53,7 @@
 - 加入手動重掃 / 重建資料的維護操作（已完成：2026-03-29，V0.1.5）
 - 設定頁改為分頁式介面（一般 / 答案高亮 / AI / 維護工具）（已完成：2026-03-31，V0.1.19）
 - 建立編碼治理基線（`.editorconfig`、`.gitattributes`、UTF-8 無 BOM 一致化）（已完成：2026-03-31，V0.1.19）
+- 後續補強：抽離 Settings / Plugin State Layer，將設定正規化、DOM class 套用、theme variable 套用從 `main.ts` 分離（規劃中）
 
 ### Sprint D: 效能與儲存縮放優化（高優先，進行中）
 
@@ -70,8 +72,12 @@
 
 目標：在 Dashboard Workspace 進場前，先降低 UI 與資料流程耦合，並補上同步狀態層，避免後續擴充時回頭拆大樑。
 
-- Step 1：抽離 Action Layer（`FlashcardsAppService`），將 command/ribbon 的業務流程集中管理（已完成：2026-03-31，Unreleased）
-- Step 2：新增 Sync State Layer（`idle/syncing/error` + activeJobs + lastSyncedAt/lastError + listener），提供後續 Dashboard/HUD 狀態來源（已完成：2026-03-31，Unreleased）
+- Step 1：抽離 Action Layer（`FlashcardsAppService`），將 command/ribbon 的業務流程集中管理（已完成：2026-03-31 13:49，V0.1.20）
+- Step 2：新增 Sync State Layer（`idle/syncing/error` + activeJobs + lastSyncedAt/lastError + listener），提供後續 Dashboard/HUD 狀態來源（已完成：2026-03-31 13:49，V0.1.20）
+- Step 3：建立 Cards Query Layer，提供 Dashboard `Cards` 分區所需的搜尋、篩選、排序、來源分組與 due/sync 衍生查詢（規劃中）
+- Step 4：補強 Settings / Plugin State Layer，避免 `main.ts` 持續承擔設定驗證與副作用套用（規劃中）
+- Step 5：為 derived indexes 預留擴充點，讓來源健康度、標籤、群組摘要、到期統計可在不改 primary schema 的前提下逐步加入（規劃中）
+- Step 6：補強 sync orchestration，逐步加入 job coalescing、增量更新、背景索引重建入口，避免大量檔案變動時同步壅塞（規劃中）
 
 ---
 
@@ -83,15 +89,75 @@
 
 - 建立統一 Dashboard Workspace（單一入口）
 - 第一階段優先完成 `Cards` 分區（列表、搜尋、篩選、排序、來源跳轉、due / sync 狀態）
+- 以獨立的 Cards Query Layer 支撐 `Cards` 分區，避免 UI 直接耦合 `DataStore` / `FlashcardRepository`
+- 第一版卡片管理以「卡片為主、來源為輔」：
+  - 預設支援依來源筆記、來源資料夾、卡片類型、學習狀態進行分組與篩選
+  - 原始筆記作為來源容器與追溯依據，而不是唯一管理單位
+- 提供檢視模式切換功能，至少包含 `分組檢視` 與 `列表檢視`，且第一版預設為 `分組檢視`
+- 在 `Cards` 分區提供來源健康度可見性，例如：來源筆記已移動、已遺失、已失聯等狀態提示
+- 保留標籤系統擴充彈性：
+  - 後續可接入筆記 tag 或卡片管理標籤，作為進階分組 / 篩選條件
+  - 第一版不以標籤作為唯一核心分組依據，避免管理模型過度依賴使用者先整理 tag
+- 卡片管理的標籤系統遵守「不污染原始筆記」原則：
+  - 不新增會干擾閱讀的單卡標籤 Markdown 語法到使用者筆記
+  - 筆記層標籤來自 Obsidian 原生 tag／frontmatter tag，作為卡片的 `inheritedTags`
+  - 單卡標籤作為 plugin metadata 管理，不寫回原始筆記內容
+- 標籤資料模型採雙來源、單一查詢視圖：
+  - `inheritedTags`：由來源筆記同步而來，可因筆記 tag 變更而重建
+  - `cardTags`：只屬於單張卡片，由卡片管理 UI 維護
+  - `effectiveTags`：`inheritedTags + cardTags` 去重後的查詢／分組／篩選結果
+- 單卡標籤的主儲存先落在 `_Flashcards/Cards/<blockId>.json`：
+  - 讓卡片內容、FSRS 狀態、AI enrichment、單卡標籤維持同一張 card shard 作為 primary record
+  - 避免過早抽出獨立標籤檔，降低同步複雜度與一致性風險
+  - 若未來卡片量增大、標籤查詢需要加速，再考慮新增 derived tag index，而不是改用獨立標籤檔作為 primary schema
+- 標籤同步規則：
+  - 筆記 tag 變更時，重新同步受影響卡片的 `inheritedTags`
+  - 單卡標籤 `cardTags` 不應被筆記重掃覆寫
+  - `effectiveTags` 永遠由讀取層或索引層生成，不作為唯一事實來源
+- `Cards` 分區的標籤互動：
+  - 支援以 `繼承標籤`、`單卡標籤`、`合併標籤` 三種角度搜尋與篩選
+  - UI 應能看出標籤來源，避免使用者誤以為所有 tag 都來自原始筆記
+- V0.2 卡片管理框架先以 `_Flashcards/Cards/<blockId>.json` 承載單卡標籤，後續實作若有規模或效能新需求，再同步修正 RoadMap / Instruction / Manual
+- V0.2 開發順序優先級建議：
+  - P0：先完成 `Cards Query Layer`、來源健康度模型、`inheritedTags / cardTags / effectiveTags` 資料模型與查詢出口
+  - P1：完成 `Cards` 分區第一版 UI（分組檢視預設、列表檢視切換、搜尋、篩選、排序、來源跳轉）
+  - P2：補齊批次標籤操作、群組統計、細節抽屜或卡片詳情面板
+  - P3：視資料量與實測結果，導入虛擬清單、延遲載入、群組 lazy expand 與 derived tag / source indexes
 - 第二階段擴充 `Insights` 分區（熱點圖、趨勢、streak、到期量分析）
 - 保持資料層分責：UI 可整合，但管理查詢與分析查詢維持模組邊界
 - 規劃已納入：2026-03-29，V0.1.5（先加入 RoadMap，尚未執行）
+
+### Sprint E.5: 大規模卡片量性能與延遲控制（高優先，規劃中）
+
+目標：在大量筆記與大量卡片情境下，維持 `Cards` 分區、同步與複習流程的可用性與低延遲，避免 V0.2 之後再進行高成本回補。
+
+- 以 `primary record + derived index` 為性能策略：
+  - `_Flashcards/Cards/<blockId>.json` 持續作為單一卡片事實來源
+  - 來源健康度、標籤查詢、群組摘要、到期統計可追加 derived index，不直接改寫 primary schema
+- 查詢性能補強：
+  - `Cards Query Layer` 應支援快取 view model、群組計數、排序 key 預先計算
+  - 避免每次打開 `Cards` 分區都全量掃描所有 card shard 重新計算
+- UI 響應補強：
+  - `列表檢視` 預留 virtualization / windowing 能力
+  - `分組檢視` 預留 lazy expand / 延遲載入群組內容
+  - 卡片詳細資料與進階操作採按需載入，避免首屏載入過重
+- 同步與索引補強：
+  - 在 modify / rename / delete 流程中逐步改為增量更新索引
+  - 對高頻變更導入 debounce + job coalescing，減少重複同步
+  - 預留背景重建 derived indexes 的入口，避免前台操作卡頓
+- 標籤性能策略：
+  - 初期以 `Cards/<blockId>.json` 內的 `cardTags` 為主
+  - 當標籤查詢、群組或批次操作成本上升時，再新增 derived tag index
+- 驗證與門檻：
+  - 建立 benchmark / profiling 基線，持續觀察 `Cards` 首次開啟、群組切換、搜尋篩選、整庫同步的延遲
+  - 若實測顯示 UI 或同步延遲開始上升，再依序導入 derived indexes、虛擬清單、背景重建
 
 ### Sprint F: 學習體驗強化
 
 目標：讓複習流程更接近真正可日用的學習工具。
 
 - 強化 Review Modal 的資訊密度
+- 補強 Review UI Layer：將單一元件拆成較穩定的 container / presentational 結構，逐步移除過度集中的 inline style
 - 顯示預估下次間隔 / due 資訊
 - 支援鍵盤快捷鍵
 - 補上複習結束摘要

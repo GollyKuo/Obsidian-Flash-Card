@@ -55,6 +55,7 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 - 將 `SKILL.md` 視為可持續演化的專案規範；隨著專案優化、流程成熟與經驗累積，應持續檢討並完善 skill，讓其與專案一起進化。
 - 每次有具意義的版本變更、架構調整或重要專案事件時，都要同步更新 `dev_log.md`。
 - 每個里程碑完成後，若當前優先事項或風險有變化，必須同步更新 `dev_log.md` 頂部的 `Current Context Snapshot`。
+- 自即日起，`RoadMap.md` 與 `dev_log.md` 的新增完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 - 將 `Instruction.md` 視為產品方向、架構原則與功能規格文件；內容應避免與 `RoadMap.md` 的時程、sprint 排序與完成狀態重複。
 - 當專案開發規劃方向、產品設計方向或核心實作原則發生變更時，必須同步更新 `Instruction.md`。
 - 若 `Instruction.md` 中的 milestones 有新增規劃、優先順序調整，或完成／未完成狀態需要修正，也必須同步更新該文件內容。
