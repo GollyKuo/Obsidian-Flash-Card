@@ -3,9 +3,9 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-03-31 13:49，V0.1.20）
+## Current Context Snapshot（更新：2026-03-31 14:12，V0.1.21）
 
-- 當前版本：`v0.1.20`（已發版）
+- 當前版本：`v0.1.21`（已發版）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -18,6 +18,32 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.21（正式版）— 答案高亮點擊觸發編輯顯示修正（2026-03-31 14:12）
+
+### 目標
+- 將編輯顯示觸發改為「點擊答案高亮區塊才 reveal」，避免一般點擊行內位置就顯示卡片語法與 Block ID。
+- 修正多行/清單答案在點擊高亮區時未能顯示對應 Block ID 的問題。
+
+### 主要調整
+- `src/editor/revealState.ts`
+  - 新增 editor reveal 狀態管理，支援 reveal 行與作用範圍（多行卡可維持在同一張卡內有效）。
+- `src/editor/AnswerHighlighter.ts`
+  - 新增點擊高亮區塊觸發 reveal 的互動邏輯（`fc-answer-chip` 與多行答案樣式區塊）。
+  - reveal 目標改為對齊卡片起始行，並保留多行卡的有效範圍。
+- `src/editor/BlockIdHider.ts`
+  - Block ID 顯示條件改為依 reveal 狀態，而非單純以游標行判斷。
+- 版本同步
+  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.21`。
+- 文件同步
+  - `RoadMap.md`、`Instruction.md`、`Manual.md`、`dev_log.md`。
+
+### 驗證
+- `npx tsc --noEmit`：通過
+- `npm test`：通過（40 tests）
+- `npm run build`：通過
 
 ---
 

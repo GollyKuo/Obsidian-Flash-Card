@@ -13,6 +13,11 @@ import { MultiLineAnswerRenderStyle } from "../settings/multiLineAnswerRenderSty
 import { FlashcardsPluginSettings } from "../settings/types";
 import { toAnswerChipText } from "./answerChipText";
 import {
+    clearRevealLine,
+    getActiveRevealLine,
+    setRevealLine,
+} from "./revealState";
+import {
     collectAnswerHighlightRanges,
     collectMultilineAnswerBlock,
     collectFlashcardSyntaxTokenRanges,
@@ -65,6 +70,10 @@ class AnswerChipWidget extends WidgetType {
         el.textContent = this.text;
         return el;
     }
+
+    ignoreEvent(): boolean {
+        return false;
+    }
 }
 
 export function createAnswerHighlighterExtension(
@@ -74,8 +83,15 @@ export function createAnswerHighlighterExtension(
     return ViewPlugin.fromClass(
         class implements PluginValue {
             decorations: DecorationSet;
+            readonly view: EditorView;
+            readonly onMouseDown: (event: MouseEvent) => void;
 
             constructor(view: EditorView) {
+                this.view = view;
+                this.onMouseDown = (event: MouseEvent) => {
+                    handleAnswerHighlightMouseDown(view, parser, event);
+                };
+                view.dom.addEventListener("mousedown", this.onMouseDown);
                 this.decorations = safeBuildDecorations(
                     view,
                     parser,
@@ -95,6 +111,15 @@ export function createAnswerHighlighterExtension(
                         getSettings
                     );
                 }
+            }
+
+            destroy(): void {
+                // Detach listener and reset reveal state for this editor view.
+                clearRevealLine(this.view);
+                this.view.dom.removeEventListener(
+                    "mousedown",
+                    this.onMouseDown
+                );
             }
         },
         {
@@ -130,9 +155,7 @@ function buildDecorations(
     const multilineDecoration = getMultilineDecoration(
         settings.multiLineAnswerRenderStyle
     );
-    const cursorLineNumber = view.state.doc.lineAt(
-        view.state.selection.main.head
-    ).number;
+    const revealLineNumber = getActiveRevealLine(view);
 
     if (scopes.size === 0) {
         return builder.finish();
@@ -145,10 +168,10 @@ function buildDecorations(
         while (pos <= to) {
             const line = view.state.doc.lineAt(pos);
             const lineNumber = line.number - 1;
-            const isCursorLine = line.number === cursorLineNumber;
+            const isRevealLine = line.number === revealLineNumber;
             const cleanLine = parser.stripBlockId(line.text).trimEnd();
 
-            if (!isCursorLine) {
+            if (!isRevealLine) {
                 const syntaxTokenRanges = collectFlashcardSyntaxTokenRanges({
                     lines,
                     lineNumber,
@@ -236,6 +259,85 @@ function buildDecorations(
     }
 
     return builder.finish();
+}
+
+function handleAnswerHighlightMouseDown(
+    view: EditorView,
+    parser: FlashcardParser,
+    event: MouseEvent
+): void {
+    const rawTarget = event.target;
+    const targetElement =
+        rawTarget instanceof HTMLElement
+            ? rawTarget
+            : rawTarget instanceof Node
+              ? rawTarget.parentElement
+              : null;
+
+    if (!targetElement) {
+        clearRevealLine(view);
+        return;
+    }
+
+    const highlightNode = targetElement.closest(
+        ".fc-answer-chip, .fc-answer-multiline, .fc-answer-multiline-line"
+    );
+    if (!highlightNode) {
+        clearRevealLine(view);
+        return;
+    }
+
+    let pos: number;
+    try {
+        pos = view.posAtDOM(highlightNode, 0);
+    } catch {
+        return;
+    }
+
+    const clickedLineNumber = view.state.doc.lineAt(pos).number;
+    const revealTarget = resolveRevealTarget(
+        view,
+        parser,
+        clickedLineNumber
+    );
+    setRevealLine(
+        view,
+        revealTarget.revealLineNumber,
+        revealTarget.activeStartLineNumber,
+        revealTarget.activeEndLineNumber
+    );
+}
+
+function resolveRevealTarget(
+    view: EditorView,
+    parser: FlashcardParser,
+    clickedLineNumber: number
+): {
+    revealLineNumber: number;
+    activeStartLineNumber: number;
+    activeEndLineNumber: number;
+} {
+    const clickedLineZeroIndexed = clickedLineNumber - 1;
+    const cards = parser.parseDocument(view.state.doc.toString());
+    for (const card of cards) {
+        const endLineNumber = card.endLineNumber ?? card.lineNumber;
+        if (
+            clickedLineZeroIndexed >= card.lineNumber &&
+            clickedLineZeroIndexed <= endLineNumber
+        ) {
+            return {
+                revealLineNumber: card.lineNumber + 1,
+                activeStartLineNumber: card.lineNumber + 1,
+                activeEndLineNumber: endLineNumber + 1,
+            };
+        }
+    }
+
+    return {
+        revealLineNumber: clickedLineNumber,
+        activeStartLineNumber: clickedLineNumber,
+        activeEndLineNumber: clickedLineNumber,
+    };
 }
 
 function getMultilineDecoration(style: MultiLineAnswerRenderStyle): Decoration {

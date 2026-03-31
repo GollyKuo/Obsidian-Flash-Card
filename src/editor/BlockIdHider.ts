@@ -14,6 +14,7 @@ import {
     ViewUpdate,
     PluginValue,
 } from "@codemirror/view";
+import { getActiveRevealLine } from "./revealState";
 
 /** 匹配行末 Block ID 的正則表達式（含前方空白） */
 const INLINE_BLOCK_ID_RE = /\s+\^fc-[a-zA-Z0-9_-]+\s*$/;
@@ -46,7 +47,7 @@ class BlockIdHiderPlugin implements PluginValue {
     /** 建構隱藏裝飾集合 */
     private build(view: EditorView): DecorationSet {
         const builder = new RangeSetBuilder<Decoration>();
-        const cursorLine = view.state.doc.lineAt(view.state.selection.main.head);
+        const revealLine = getActiveRevealLine(view);
 
         for (const { from, to } of view.visibleRanges) {
             let pos = from;
@@ -54,14 +55,15 @@ class BlockIdHiderPlugin implements PluginValue {
                 const line = view.state.doc.lineAt(pos);
 
                 // 僅隱藏非游標行的 Block ID
-                const isCursorLine = line.number === cursorLine.number;
-                const isAdjacentToCursor =
-                    Math.abs(line.number - cursorLine.number) <= 1;
+                const isRevealLine =
+                    revealLine !== null && line.number === revealLine;
+                const isAdjacentToReveal =
+                    revealLine !== null && Math.abs(line.number - revealLine) <= 1;
                 const isStandaloneBlockIdLine = STANDALONE_BLOCK_ID_RE.test(
                     line.text
                 );
 
-                if (!isCursorLine) {
+                if (!isRevealLine) {
                     const m = line.text.match(INLINE_BLOCK_ID_RE);
                     if (m && m.index !== undefined) {
                         const start = line.from + m.index;
@@ -71,7 +73,7 @@ class BlockIdHiderPlugin implements PluginValue {
                     }
                 }
 
-                if (isStandaloneBlockIdLine && !isAdjacentToCursor) {
+                if (isStandaloneBlockIdLine && !isAdjacentToReveal) {
                     builder.add(line.from, line.from, HIDE_STANDALONE_LINE);
                     if (line.from < line.to) {
                         builder.add(line.from, line.to, HIDE);

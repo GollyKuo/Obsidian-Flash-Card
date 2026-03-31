@@ -87,4 +87,5 @@
 - 已完成高亮渲染重構第三階段（V0.1.14）：單行答案與多行/清單答案已拆分渲染策略，並新增多行樣式選單（`淡色背景帶` / `右側線條`）；下一步銜接 Sprint E 的 Dashboard `Cards` 分區骨架
 - 已完成（V0.1.18）：新增答案高亮主題自訂（主題色/透明度），並加入「各樣式獨立顏色」勾選欄位；同步完成設定頁主次標題對齊修正
 - 已完成（V0.1.19）：設定頁改為分頁式結構（一般/答案高亮/AI/維護工具），並完成編碼治理（`.editorconfig`、`.gitattributes`、UTF-8 無 BOM 一致化）
-- 已完成（Unreleased）：抽離 `FlashcardsAppService` 作為 Action Layer，並為 `FlashcardSyncService` 補上 Sync State Layer（`idle/syncing/error`、`activeJobs`、`lastSyncedAt`、`lastError` 與 listener API）
+- 已完成（V0.1.20）：抽離 `FlashcardsAppService` 作為 Action Layer，並為 `FlashcardSyncService` 補上 Sync State Layer（`idle/syncing/error`、`activeJobs`、`lastSyncedAt`、`lastError` 與 listener API）
+- 已完成（V0.1.21）：高亮編輯顯示觸發改為「僅點擊答案高亮區塊才 reveal」，並修正多行/清單答案點擊高亮後未顯示 Block ID。
