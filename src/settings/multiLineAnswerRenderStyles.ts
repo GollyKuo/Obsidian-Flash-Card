@@ -11,5 +11,5 @@ export const MULTI_LINE_ANSWER_RENDER_STYLE_LABELS: Record<
     string
 > = {
     "soft-band": "淡色背景帶",
-    "right-rail": "右側細線",
+    "right-rail": "右側線條",
 };

@@ -81,3 +81,41 @@
   - `src`
   - `dist`
   - Vault 內實際載入的 `styles.css`
+
+---
+
+## Case 002：V0.1.18 設定頁主次標題對齊失敗
+
+### 症狀
+
+- 設定頁主標題（`h3`）與次標題（`p`）視覺上無法左對齊
+- 反覆調整 `margin-left` 後，畫面仍看起來「沒有改變」
+
+### 最關鍵的問題點
+
+1. 設定頁不在 `#fc-plugin-root` 內  
+   `main.css` 經 `PrefixWrap("#fc-plugin-root")` 後，若 selector 沒被排除，設定頁規則不會命中。
+
+2. Obsidian / 主題對 `h3` 可能有預設偏移  
+   只調整次標題不足以保證對齊，主標題也必須一併納入控制。
+
+### 這次證明是錯誤方向的做法
+
+- 先用 inline style 強行修正（可暫時解，但不夠乾淨）
+- 只改次標題，不同步控制主標題樣式
+
+### 最後有效的做法
+
+1. 回收 inline style，改回 class-based 樣式
+2. 在 `esbuild.config.mjs` 的 `ignoredSelectors` 加入：
+   - `^\\.fc-settings-section-title\\b`
+   - `^\\.fc-settings-subtitle\\b`
+3. 主標題與次標題分別套專用 class，統一左側定位規則
+4. 對齊場景加上保險（必要時 `!important`）避免被主題覆蓋
+
+### 下次遇到類似問題的排查順序
+
+1. 先看 selector 是否被 prefix-wrap 包住
+2. 檢查 `dist/main.css` 是否出現未包前綴的目標規則
+3. 同時檢查主標題與次標題的實際 computed style
+4. 最後才做視覺微調（字距、行高、間距）

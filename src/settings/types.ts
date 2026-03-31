@@ -6,6 +6,12 @@ export interface FlashcardsPluginSettings {
     autoSyncOnModify: boolean;
     answerHighlightScopes: AnswerHighlightScope[];
     multiLineAnswerRenderStyle: MultiLineAnswerRenderStyle;
+    answerHighlightThemeColor: string;
+    answerHighlightThemeOpacity: number;
+    answerHighlightEnablePerStyleColors: boolean;
+    answerHighlightChipColor: string;
+    answerHighlightSoftBandColor: string;
+    answerHighlightRightRailColor: string;
     aiEnabled: boolean;
     aiProvider: "gemini";
     aiModel: string;
@@ -17,6 +23,12 @@ export const DEFAULT_SETTINGS: FlashcardsPluginSettings = {
     autoSyncOnModify: true,
     answerHighlightScopes: ["cloze"],
     multiLineAnswerRenderStyle: "soft-band",
+    answerHighlightThemeColor: "#3a3f47",
+    answerHighlightThemeOpacity: 28,
+    answerHighlightEnablePerStyleColors: false,
+    answerHighlightChipColor: "#3a3f47",
+    answerHighlightSoftBandColor: "#3a3f47",
+    answerHighlightRightRailColor: "#4f6ea6",
     aiEnabled: false,
     aiProvider: "gemini",
     aiModel: "gemini-3-flash",

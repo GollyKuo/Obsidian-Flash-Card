@@ -55,10 +55,14 @@ export class FlashcardsSettingTab extends PluginSettingTab {
             .setName("目前資料檔路徑")
             .setDesc(this.plugin.dataStore.getDataFilePath());
 
-        containerEl.createEl("h3", { text: "答案高亮設定" });
-        containerEl.createEl("p", {
+        const answerHighlightTitleEl = containerEl.createEl("h3", {
+            text: "答案高亮設定",
+        });
+        answerHighlightTitleEl.addClass("fc-settings-section-title");
+        const answerHighlightSubtitleEl = containerEl.createEl("p", {
             text: "可重複多選要套用背景色的答案類型。填空會同時影響閱讀模式與編輯模式，其餘類型目前以編輯模式為主。",
         });
+        answerHighlightSubtitleEl.addClass("fc-settings-subtitle");
 
         for (const scope of ANSWER_HIGHLIGHT_SCOPES) {
             new Setting(containerEl)
@@ -113,6 +117,97 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 });
             });
+
+        const answerThemeTitleEl = containerEl.createEl("h3", {
+            text: "答案高亮主題",
+        });
+        answerThemeTitleEl.addClass("fc-settings-section-title");
+        const answerThemeSubtitleEl = containerEl.createEl("p", {
+            text: "設定答案高亮主題的顏色與透明度",
+        });
+        answerThemeSubtitleEl.addClass("fc-settings-subtitle");
+
+        new Setting(containerEl)
+            .setName("主題色")
+            .setDesc("套用於答案高亮主題的基礎顏色")
+            .addColorPicker((picker) => {
+                picker.setValue(this.plugin.settings.answerHighlightThemeColor);
+                picker.onChange(async (value) => {
+                    this.plugin.settings.answerHighlightThemeColor = value;
+                    await this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName("透明度")
+            .setDesc(
+                `目前：${this.plugin.settings.answerHighlightThemeOpacity}%`
+            )
+            .addSlider((slider) => {
+                slider.setLimits(8, 60, 1);
+                slider.setValue(this.plugin.settings.answerHighlightThemeOpacity);
+                slider.setDynamicTooltip();
+                slider.onChange(async (value) => {
+                    this.plugin.settings.answerHighlightThemeOpacity = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName("啟用各樣式獨立顏色")
+            .setDesc("保留各答案樣式可自訂不同顏色的擴充空間")
+            .addToggle((toggle) => {
+                toggle.setValue(
+                    this.plugin.settings.answerHighlightEnablePerStyleColors
+                );
+                toggle.onChange(async (value) => {
+                    this.plugin.settings.answerHighlightEnablePerStyleColors =
+                        value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                });
+            });
+
+        if (this.plugin.settings.answerHighlightEnablePerStyleColors) {
+            new Setting(containerEl)
+                .setName("單行答案 顏色")
+                .setDesc("正向、反向、雙向與填充問答卡")
+                .addColorPicker((picker) => {
+                    picker.setValue(this.plugin.settings.answerHighlightChipColor);
+                    picker.onChange(async (value) => {
+                        this.plugin.settings.answerHighlightChipColor = value;
+                        await this.plugin.saveSettings();
+                    });
+                });
+
+            new Setting(containerEl)
+                .setName("淡色背景帶 顏色")
+                .setDesc("多行答案（淡色背景帶）主題色")
+                .addColorPicker((picker) => {
+                    picker.setValue(
+                        this.plugin.settings.answerHighlightSoftBandColor
+                    );
+                    picker.onChange(async (value) => {
+                        this.plugin.settings.answerHighlightSoftBandColor = value;
+                        await this.plugin.saveSettings();
+                    });
+                });
+
+            new Setting(containerEl)
+                .setName("右側線條 顏色")
+                .setDesc("多行答案（右側線條）主題色")
+                .addColorPicker((picker) => {
+                    picker.setValue(
+                        this.plugin.settings.answerHighlightRightRailColor
+                    );
+                    picker.onChange(async (value) => {
+                        this.plugin.settings.answerHighlightRightRailColor =
+                            value;
+                        await this.plugin.saveSettings();
+                    });
+                });
+        }
 
         containerEl.createEl("h3", { text: "AI 設定（預留）" });
 
@@ -205,4 +300,5 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                 return "套用於 `:::` 雙向卡右側內容";
         }
     }
+
 }

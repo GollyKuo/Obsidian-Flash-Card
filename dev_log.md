@@ -2,13 +2,13 @@
 
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 
-## Current Context Snapshot（更新：2026-03-31，V0.1.16）
+## Current Context Snapshot（更新：2026-03-31，V0.1.18）
 
-- 當前版本：`v0.1.16`（流程規範正式納入，準備依此節奏推進 Sprint E）
+- 當前版本：`v0.1.18`（正式版：答案高亮主題自訂完成 + 設定頁主次標題對齊修正）
 - 目前主軸：維持高亮渲染穩定，按 `RoadMap` 推進 Sprint E 的 Dashboard `Cards` 分區骨架。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
-  - 多行答案僅保留 `淡色背景帶` 與 `右側細線` 兩種模式。
+  - 多行答案僅保留 `淡色背景帶` 與 `右側線條` 兩種模式。
 - 已知風險：
   - CodeMirror decoration 建構順序錯誤會導致整體高亮失效。
   - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
@@ -17,6 +17,55 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 交接調閱順序：`dev_log.md`（本快照） -> `RoadMap.md` -> `Instruction.md` -> `Retrospective.md`
+
+---
+
+## V0.1.18（正式版）— 以 v0.1.17 基線重寫並發版（2026-03-31）
+
+### 目標
+- 回到 `v0.1.17` 乾淨基線，僅保留最終正確方案。
+- 發布正式版 `v0.1.18` 並同步文件與版本資訊。
+
+### 主要調整
+- `src/settings/FlashcardsSettingTab.ts`
+  - 保留主題色/透明度/樣式獨立顏色設定。
+  - 主次標題改為 class-based 控制（移除試驗過程的 inline style）。
+- `src/styles/main.css` + `esbuild.config.mjs`
+  - 設定頁主次標題對齊規則固定化。
+  - `PrefixWrap` 透過 `ignoredSelectors` 確保設定頁樣式命中。
+- 版本同步
+  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.18`。
+- 文件同步
+  - `RoadMap.md`、`Instruction.md`、`Manual.md`、`Retrospective.md`、`dev_log.md`。
+
+### 驗證
+- `npx tsc --noEmit`：通過
+- `npm test`：通過（40 tests）
+- `npm run build`：通過（已同步至 Vault 外掛目錄）
+
+---
+
+## V0.1.17（試驗 -> 完成）— 答案高亮主題自訂（2026-03-31）
+
+### 目標
+- 新增答案高亮主題設定：可自訂顏色與透明度。
+- 預設維持低對比深色半透明風格。
+- 新增「各樣式獨立顏色」勾選欄位，保留進階自訂空間。
+
+### 主要調整
+- `src/settings/types.ts`
+  - 新增高亮主題相關設定欄位（主題色、透明度、樣式獨立顏色開關與色彩欄位）。
+- `src/settings/FlashcardsSettingTab.ts`
+  - 新增 `答案高亮主題` 設定區（主題色、透明度、獨立顏色勾選與展開色票）。
+- `src/main.ts`
+  - 新增高亮主題設定驗證與 CSS 變數套用流程。
+- `src/styles/editor.css`
+  - `chip`、`淡色背景帶`、`右側線條` 改用主題變數渲染，支援即時主題調整。
+
+### 驗證
+- `npx tsc --noEmit`：通過
+- `npm test`：通過（40 tests）
+- `npm run build`：通過
 
 ---
 
@@ -56,7 +105,7 @@
 ### 目標
 - 以 `v0.1.13` 為乾淨基線重寫多行答案渲染。
 - 保留重構後 `Manual.md` 的使用者導向內容。
-- 多行/清單模式僅保留 `淡色背景帶` 與 `右側細線`。
+- 多行/清單模式僅保留 `淡色背景帶` 與 `右側線條`。
 
 ### 主要調整
 - `src/settings/multiLineAnswerRenderStyles.ts`
@@ -64,7 +113,7 @@
 - `src/editor/AnswerHighlighter.ts`
   - 移除 `rounded-container` 渲染分支。
   - 多行答案採區塊式 line decoration。
-  - `右側細線` 與 `淡色背景帶` 都改為整塊區域一致渲染。
+  - `右側線條` 與 `淡色背景帶` 都改為整塊區域一致渲染。
 - `src/styles/editor.css`
   - 移除 `rounded-container` 樣式。
   - 保留並優化 `soft-band` / `right-rail` 的區塊式效果。

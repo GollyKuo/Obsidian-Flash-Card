@@ -7,8 +7,8 @@
   border-radius: 999px;
   padding: 0.04em 0.5em;
   line-height: 1.35;
-  background: color-mix(in srgb, var(--text-normal) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text-normal) 16%, transparent);
+  background: var(--fc-answer-chip-bg, rgba(58, 63, 71, 0.280));
+  border: 1px solid var(--fc-answer-chip-border, rgba(58, 63, 71, 0.360));
   color: color-mix(in srgb, var(--text-normal) 90%, var(--text-muted) 10%);
   white-space: pre-wrap;
   vertical-align: baseline;
@@ -38,7 +38,7 @@
   bottom: 0;
   left: calc(var(--fc-answer-block-indent) - 0.45rem);
   right: 0.85rem;
-  background: color-mix(in srgb, var(--text-normal) 10%, transparent);
+  background: var(--fc-answer-soft-band-bg, rgba(58, 63, 71, 0.280));
   pointer-events: none;
   z-index: -1;
 }
@@ -69,8 +69,12 @@
   top: 0;
   bottom: 0;
   right: 1.05rem;
-  width: 2px;
-  background: color-mix(in srgb, var(--interactive-accent) 78%, white 22%);
+  width: 4px;
+  background: color-mix(
+    in srgb,
+    var(--fc-answer-right-rail-color, #4f6ea6) 76%,
+    white 24%
+  );
   pointer-events: none;
 }
 

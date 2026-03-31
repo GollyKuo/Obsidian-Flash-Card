@@ -35,6 +35,8 @@ const postcssPlugin = {
                               ":root",
                               /^@keyframes/,
                               /^\.cm-editor\b/,
+                              /^\.fc-settings-section-title\b/,
+                              /^\.fc-settings-subtitle\b/,
                               /^body\.fc-answer-highlight-scope-cloze \.markdown-preview-view mark$/,
                               /^body\.fc-answer-highlight-scope-cloze \.markdown-rendered mark$/,
                           ],
