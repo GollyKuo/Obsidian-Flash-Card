@@ -6,12 +6,10 @@ import {
     PluginValue,
     ViewPlugin,
     ViewUpdate,
-    WidgetType,
 } from "@codemirror/view";
 import { FlashcardParser } from "../parser/FlashcardParser";
 import { MultiLineAnswerRenderStyle } from "../settings/multiLineAnswerRenderStyles";
 import { FlashcardsPluginSettings } from "../settings/types";
-import { toAnswerChipText } from "./answerChipText";
 import {
     clearRevealLine,
     getActiveRevealLine,
@@ -26,6 +24,7 @@ import {
     collectFlashcardSyntaxTokenRanges,
 } from "./answerHighlightRules";
 import { FlashcardRaw } from "../parser/types";
+import { createSingleLineAnswerDecoration } from "./singleLineAnswerRenderStrategy";
 
 const HIDE_FLASHCARD_SYNTAX = Decoration.replace({});
 const MULTILINE_SOFT_BAND = Decoration.mark({
@@ -55,30 +54,6 @@ const MULTILINE_SOFT_BAND_LINE_SINGLE =
     "fc-answer-multiline-line fc-answer-multiline-line-soft-band fc-answer-multiline-line-soft-band-single";
 
 type SettingsAccessor = () => FlashcardsPluginSettings;
-
-class AnswerChipWidget extends WidgetType {
-    private readonly text: string;
-
-    constructor(text: string) {
-        super();
-        this.text = text;
-    }
-
-    eq(other: AnswerChipWidget): boolean {
-        return other.text === this.text;
-    }
-
-    toDOM(): HTMLElement {
-        const el = document.createElement("span");
-        el.className = "fc-answer-chip";
-        el.textContent = this.text;
-        return el;
-    }
-
-    ignoreEvent(): boolean {
-        return false;
-    }
-}
 
 export function createAnswerHighlighterExtension(
     parser: FlashcardParser,
@@ -288,14 +263,15 @@ function buildDecorations(
                     const end = line.from + range.to;
                     if (end > start) {
                         const rawText = cleanLine.slice(range.from, range.to);
-                        const displayText = toAnswerChipText(rawText);
-                        if (displayText) {
+                        const decoration = createSingleLineAnswerDecoration({
+                            style: settings.singleLineAnswerRenderStyle,
+                            rawText,
+                        });
+                        if (decoration) {
                             lineDecorations.push({
                                 from: start,
                                 to: end,
-                                decoration: Decoration.replace({
-                                    widget: new AnswerChipWidget(displayText),
-                                }),
+                                decoration,
                             });
                         }
                     }
@@ -339,7 +315,7 @@ function handleAnswerHighlightMouseDown(
     }
 
     const highlightNode = targetElement.closest(
-        ".fc-answer-chip, .fc-answer-multiline, .fc-answer-multiline-line"
+        ".fc-answer-chip, .fc-answer-inline-text, .fc-answer-multiline, .fc-answer-multiline-line"
     );
     if (!highlightNode) {
         const activeRevealState = getActiveRevealState(view);

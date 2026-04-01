@@ -1,10 +1,12 @@
 import { AnswerHighlightScope } from "./answerHighlightScopes";
 import { MultiLineAnswerRenderStyle } from "./multiLineAnswerRenderStyles";
+import { SingleLineAnswerRenderStyle } from "./singleLineAnswerRenderStyles";
 
 export interface FlashcardsPluginSettings {
     dataDirectory: string;
     autoSyncOnModify: boolean;
     answerHighlightScopes: AnswerHighlightScope[];
+    singleLineAnswerRenderStyle: SingleLineAnswerRenderStyle;
     multiLineAnswerRenderStyle: MultiLineAnswerRenderStyle;
     answerHighlightThemeColor: string;
     answerHighlightThemeOpacity: number;
@@ -22,6 +24,7 @@ export const DEFAULT_SETTINGS: FlashcardsPluginSettings = {
     dataDirectory: "_Flashcards",
     autoSyncOnModify: true,
     answerHighlightScopes: ["cloze"],
+    singleLineAnswerRenderStyle: "chip",
     multiLineAnswerRenderStyle: "soft-band",
     answerHighlightThemeColor: "#3a3f47",
     answerHighlightThemeOpacity: 28,

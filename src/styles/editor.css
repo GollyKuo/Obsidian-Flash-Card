@@ -14,6 +14,14 @@
   vertical-align: baseline;
 }
 
+.cm-editor .fc-answer-inline-text {
+  display: inline;
+  border-radius: 0.35rem;
+  padding: 0 0.2em;
+  background: color-mix(in srgb, var(--fc-answer-chip-bg, rgba(58, 63, 71, 0.280)) 75%, transparent 25%);
+  color: color-mix(in srgb, var(--text-normal) 94%, var(--text-muted) 6%);
+}
+
 .cm-editor .fc-answer-multiline {
   color: var(--text-normal);
 }

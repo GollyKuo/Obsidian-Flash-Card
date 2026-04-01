@@ -3,9 +3,9 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 08:08，V0.1.24）
+## Current Context Snapshot（更新：2026-04-01 08:16，V0.1.25）
 
-- 當前版本：`v0.1.24`（本地待 commit）
+- 當前版本：`v0.1.25`（本地待 commit）
 - 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 的卡片管理能力。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -18,6 +18,30 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.25（本地定版）— 單行答案渲染 Style Strategy 落地（2026-04-01 08:16）
+
+### 目標
+- 將單行答案呈現從固定 chip 抽象成可擴充策略層，為後續樣式擴展保留彈性。
+
+### 主要調整
+- settings
+  - 新增 `singleLineAnswerRenderStyle` 設定欄位，預設值為 `chip`。
+  - 新增 `singleLineAnswerRenderStyles` 定義檔，首批支援 `chip` / `plain`。
+  - 設定頁新增「單行答案渲染樣式」下拉切換。
+- editor render strategy
+  - 新增 `singleLineAnswerRenderStrategy.ts`，集中管理單行答案裝飾策略。
+  - `AnswerHighlighter` 改由策略層產生單行答案 decoration，移除內嵌固定 chip 實作。
+  - reveal 點擊命中範圍擴充，支援 `plain` 樣式 DOM（`.fc-answer-inline-text`）。
+- style
+  - `editor.css` 新增 `plain` 樣式基礎外觀（純文字高亮）。
+
+### 驗證
+- `npm run check:docs-encoding`：通過
+- `npm test`：通過（69 tests）
+- `npm run build`：通過
 
 ---
 

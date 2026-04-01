@@ -6,6 +6,7 @@ import {
 import { registerPluginUi } from "./app/registerPluginUi";
 import { ANSWER_HIGHLIGHT_SCOPES } from "./settings/answerHighlightScopes";
 import { MULTI_LINE_ANSWER_RENDER_STYLES } from "./settings/multiLineAnswerRenderStyles";
+import { SINGLE_LINE_ANSWER_RENDER_STYLES } from "./settings/singleLineAnswerRenderStyles";
 import { FlashcardsSettingTab } from "./settings/FlashcardsSettingTab";
 import {
     DEFAULT_SETTINGS,
@@ -67,6 +68,15 @@ export default class FlashcardsPlugin extends Plugin {
             : [];
         this.settings.answerHighlightScopes =
             restoredScopes.length > 0 ? restoredScopes : ["cloze"];
+
+        if (
+            !SINGLE_LINE_ANSWER_RENDER_STYLES.includes(
+                this.settings.singleLineAnswerRenderStyle
+            )
+        ) {
+            this.settings.singleLineAnswerRenderStyle =
+                DEFAULT_SETTINGS.singleLineAnswerRenderStyle;
+        }
 
         if (
             !MULTI_LINE_ANSWER_RENDER_STYLES.includes(

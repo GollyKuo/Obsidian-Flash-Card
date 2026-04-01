@@ -8,6 +8,10 @@ import {
     MULTI_LINE_ANSWER_RENDER_STYLES,
     MULTI_LINE_ANSWER_RENDER_STYLE_LABELS,
 } from "./multiLineAnswerRenderStyles";
+import {
+    SINGLE_LINE_ANSWER_RENDER_STYLES,
+    SINGLE_LINE_ANSWER_RENDER_STYLE_LABELS,
+} from "./singleLineAnswerRenderStyles";
 import { DEFAULT_SETTINGS } from "./types";
 import type FlashcardsPlugin from "../main";
 
@@ -163,6 +167,33 @@ export class FlashcardsSettingTab extends PluginSettingTab {
                     });
                 });
         }
+
+        new Setting(containerEl)
+            .setName("單行答案渲染樣式")
+            .setDesc("選擇單行答案在編輯器中的高亮外觀")
+            .addDropdown((dropdown) => {
+                for (const style of SINGLE_LINE_ANSWER_RENDER_STYLES) {
+                    dropdown.addOption(
+                        style,
+                        SINGLE_LINE_ANSWER_RENDER_STYLE_LABELS[style]
+                    );
+                }
+
+                dropdown.setValue(this.plugin.settings.singleLineAnswerRenderStyle);
+                dropdown.onChange(async (value) => {
+                    if (
+                        !SINGLE_LINE_ANSWER_RENDER_STYLES.includes(
+                            value as (typeof SINGLE_LINE_ANSWER_RENDER_STYLES)[number]
+                        )
+                    ) {
+                        return;
+                    }
+
+                    this.plugin.settings.singleLineAnswerRenderStyle =
+                        value as (typeof SINGLE_LINE_ANSWER_RENDER_STYLES)[number];
+                    await this.plugin.saveSettings();
+                });
+            });
 
         new Setting(containerEl)
             .setName("多行答案渲染樣式")
