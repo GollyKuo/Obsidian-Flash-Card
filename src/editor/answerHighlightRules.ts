@@ -41,13 +41,69 @@ export interface MultilineAnswerBlock {
     blockIndentColumns: number;
 }
 
+export interface FlashcardLineParseCache {
+    multilineAnswerBlockByLine: Map<number, MultilineAnswerBlock>;
+    multilineStartLines: Set<number>;
+}
+
+export function buildFlashcardLineParseCache(params: {
+    lines: string[];
+    parser: FlashcardParser;
+}): FlashcardLineParseCache {
+    const { lines, parser } = params;
+    const cards = parser.parseDocument(lines.join("\n"));
+    const multilineAnswerBlockByLine = new Map<number, MultilineAnswerBlock>();
+    const multilineStartLines = new Set<number>();
+
+    for (const card of cards) {
+        if (card.endLineNumber === undefined) {
+            continue;
+        }
+
+        multilineStartLines.add(card.lineNumber);
+        const firstAnswerLine = lines[card.lineNumber + 1] ?? "";
+        const blockIndentColumns = countLeadingIndentColumns(firstAnswerLine);
+
+        for (
+            let lineNumber = card.lineNumber + 1;
+            lineNumber <= card.endLineNumber;
+            lineNumber += 1
+        ) {
+            const line = lines[lineNumber];
+            if (!line || !line.trim() || !/^\s+/.test(line)) {
+                continue;
+            }
+
+            const from = line.match(/^\s*/)?.[0].length ?? 0;
+            const to = line.trimEnd().length;
+            if (to <= from) {
+                continue;
+            }
+
+            multilineAnswerBlockByLine.set(lineNumber, {
+                from,
+                to,
+                startLineNumber: card.lineNumber,
+                endLineNumber: card.endLineNumber,
+                blockIndentColumns,
+            });
+        }
+    }
+
+    return {
+        multilineAnswerBlockByLine,
+        multilineStartLines,
+    };
+}
+
 export function collectAnswerHighlightRanges(params: {
     lines: string[];
     lineNumber: number;
     parser: FlashcardParser;
     scopes: Set<AnswerHighlightScope>;
+    cache?: FlashcardLineParseCache;
 }): AnswerHighlightRange[] {
-    const { lines, lineNumber, parser, scopes } = params;
+    const { lines, lineNumber, parser, scopes, cache } = params;
     if (scopes.size === 0) {
         return [];
     }
@@ -127,7 +183,12 @@ export function collectAnswerHighlightRanges(params: {
     }
 
     if (scopes.has("multi-line")) {
-        const multilineRange = findMultilineAnswerBlock(lines, lineNumber, parser);
+        const multilineRange = findMultilineAnswerBlock(
+            lines,
+            lineNumber,
+            parser,
+            cache
+        );
         if (multilineRange) {
             ranges.push({
                 from: multilineRange.from,
@@ -182,8 +243,9 @@ export function collectFlashcardSyntaxTokenRanges(params: {
     lines: string[];
     lineNumber: number;
     parser: FlashcardParser;
+    cache?: FlashcardLineParseCache;
 }): FlashcardSyntaxTokenRange[] {
-    const { lines, lineNumber, parser } = params;
+    const { lines, lineNumber, parser, cache } = params;
     const line = lines[lineNumber];
     if (!line) {
         return [];
@@ -235,7 +297,10 @@ export function collectFlashcardSyntaxTokenRanges(params: {
     }
 
     const multilineMatch = cleanLine.match(FORWARD_MULTILINE_TOKEN_PATTERN);
-    if (multilineMatch && parser.parseMultiLine(lines, lineNumber)) {
+    const isMultilineStart =
+        cache?.multilineStartLines.has(lineNumber) ??
+        Boolean(parser.parseMultiLine(lines, lineNumber));
+    if (multilineMatch && isMultilineStart) {
         return [extractTokenRange(multilineMatch[1], multilineMatch[2])];
     }
 
@@ -246,9 +311,10 @@ export function collectMultilineAnswerRange(params: {
     lines: string[];
     lineNumber: number;
     parser: FlashcardParser;
+    cache?: FlashcardLineParseCache;
 }): AnswerHighlightRange | null {
-    const { lines, lineNumber, parser } = params;
-    const block = findMultilineAnswerBlock(lines, lineNumber, parser);
+    const { lines, lineNumber, parser, cache } = params;
+    const block = findMultilineAnswerBlock(lines, lineNumber, parser, cache);
     return block ? { from: block.from, to: block.to } : null;
 }
 
@@ -256,16 +322,22 @@ export function collectMultilineAnswerBlock(params: {
     lines: string[];
     lineNumber: number;
     parser: FlashcardParser;
+    cache?: FlashcardLineParseCache;
 }): MultilineAnswerBlock | null {
-    const { lines, lineNumber, parser } = params;
-    return findMultilineAnswerBlock(lines, lineNumber, parser);
+    const { lines, lineNumber, parser, cache } = params;
+    return findMultilineAnswerBlock(lines, lineNumber, parser, cache);
 }
 
 function findMultilineAnswerBlock(
     lines: string[],
     lineNumber: number,
-    parser: FlashcardParser
+    parser: FlashcardParser,
+    cache?: FlashcardLineParseCache
 ): MultilineAnswerBlock | null {
+    if (cache) {
+        return cache.multilineAnswerBlockByLine.get(lineNumber) ?? null;
+    }
+
     const currentLine = lines[lineNumber];
     if (!currentLine || !/^\s+/.test(currentLine) || !currentLine.trim()) {
         return null;

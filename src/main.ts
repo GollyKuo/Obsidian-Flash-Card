@@ -28,13 +28,13 @@ export default class FlashcardsPlugin extends Plugin {
         this.applyAnswerHighlightThemeVars();
 
         this.runtime = createFlashcardsRuntime(this, () => this.settings);
+        await this.runtime.dataStore.load();
+
         this.runtime.blockIdManager.registerEvents();
         this.runtime.syncService.registerEvents();
 
         registerPluginUi(this, this.runtime, () => this.settings);
         this.addSettingTab(new FlashcardsSettingTab(this.app, this));
-
-        await this.runtime.dataStore.load();
 
         new Notice(`AI-Enriched Flashcards 已載入 v${this.manifest.version}`);
     }

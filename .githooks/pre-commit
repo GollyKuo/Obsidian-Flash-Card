@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "[pre-commit] Running docs encoding check..."
+npm run check:docs-encoding
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo "[pre-commit] Failed: docs encoding / JSON validation check did not pass."
+  exit $status
+fi
+
+echo "[pre-commit] Passed."

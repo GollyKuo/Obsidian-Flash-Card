@@ -36,4 +36,26 @@ describe("SaveQueue", () => {
         expect(saveMock).toHaveBeenCalledTimes(1);
         vi.useRealTimers();
     });
+
+    it("propagates save failures and allows later saves to recover", async () => {
+        vi.useFakeTimers();
+
+        const saveMock = vi
+            .fn<[], Promise<void>>()
+            .mockRejectedValueOnce(new Error("save failed once"))
+            .mockResolvedValue(undefined);
+        const queue = new SaveQueue(saveMock, 300);
+
+        queue.queue();
+        await vi.advanceTimersByTimeAsync(300);
+        await Promise.resolve();
+        expect(saveMock).toHaveBeenCalledTimes(1);
+
+        queue.queue();
+        await vi.advanceTimersByTimeAsync(300);
+        await Promise.resolve();
+        expect(saveMock).toHaveBeenCalledTimes(2);
+
+        vi.useRealTimers();
+    });
 });

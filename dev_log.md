@@ -3,9 +3,9 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 02:26，V0.1.23）
+## Current Context Snapshot（更新：2026-04-01 08:08，V0.1.24）
 
-- 當前版本：`v0.1.23`（已 commit 並推送）
+- 當前版本：`v0.1.24`（本地待 commit）
 - 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 的卡片管理能力。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -18,6 +18,34 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.24（本地定版）— 啟動流程、同步穩定性與提交防呆強化（2026-04-01 08:08）
+
+### 目標
+- 在繼續功能開發前，先完成五項架構補強：儲存錯誤傳遞、啟動順序修正、同步 debounce 調整、編輯器解析快取、pre-commit 防呆。
+
+### 主要調整
+- storage / queue
+  - `FlashcardRepository.save()` 改為錯誤向上拋出，不再靜默吞錯。
+  - `SaveQueue` 加入失敗後可恢復鏈結（不中斷後續保存），並在排程保存失敗時保留 pending 狀態以便重試。
+  - 新增 `SaveQueue` 回歸測試：驗證首次儲存失敗後，後續儲存仍可成功執行。
+- startup / lifecycle
+  - `main.ts` 啟動順序調整為：先 `dataStore.load()`，再註冊 `blockId/sync` 事件，降低啟動競態風險。
+- sync service
+  - `FlashcardSyncService` 改為「收集變更檔案 + trailing debounce flush」，避免 leading debounce 漏掉最後一次編輯。
+- editor performance
+  - `answerHighlightRules` 新增單次 build parse cache（多行區塊與起始行索引）。
+  - `AnswerHighlighter` 套用 parse cache，並重用文件解析結果處理 reveal 目標，減少重複 `parseDocument`。
+- commit guardrails
+  - 新增 `.githooks/pre-commit`，提交前固定執行 `npm run check:docs-encoding`。
+  - 新增 `scripts/setup-hooks.js` 與 `npm run setup:hooks`，用於設定 `core.hooksPath=.githooks`（受限環境改為提示手動設定）。
+
+### 驗證
+- `npm run check:docs-encoding`：通過（含 JSON validity check）
+- `npm test`：通過（69 tests）
+- `npm run build`：通過
 
 ---
 

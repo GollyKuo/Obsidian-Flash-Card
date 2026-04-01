@@ -74,36 +74,32 @@ export class FlashcardRepository {
     }
 
     async save(): Promise<void> {
-        try {
-            await this.ensureStorageReady();
+        await this.ensureStorageReady();
 
-            if (
-                this.dirtyCardIds.size === 0 &&
-                this.deletedCardIds.size === 0 &&
-                !this.manifestDirty
-            ) {
-                return;
-            }
-
-            for (const blockId of this.deletedCardIds) {
-                await this.removeCardFile(blockId);
-            }
-
-            for (const blockId of this.dirtyCardIds) {
-                const card = this.data.cards[blockId];
-                if (!card) {
-                    continue;
-                }
-
-                const path = getCardStoragePath(this.getCardsDirectory(), blockId);
-                await this.writeJsonFile(path, card);
-            }
-
-            await this.writeManifest();
-            this.clearDirtyState();
-        } catch (error) {
-            console.error("[Flashcards] Failed to save repository data", error);
+        if (
+            this.dirtyCardIds.size === 0 &&
+            this.deletedCardIds.size === 0 &&
+            !this.manifestDirty
+        ) {
+            return;
         }
+
+        for (const blockId of this.deletedCardIds) {
+            await this.removeCardFile(blockId);
+        }
+
+        for (const blockId of this.dirtyCardIds) {
+            const card = this.data.cards[blockId];
+            if (!card) {
+                continue;
+            }
+
+            const path = getCardStoragePath(this.getCardsDirectory(), blockId);
+            await this.writeJsonFile(path, card);
+        }
+
+        await this.writeManifest();
+        this.clearDirtyState();
     }
 
     getData(): FlashcardData {

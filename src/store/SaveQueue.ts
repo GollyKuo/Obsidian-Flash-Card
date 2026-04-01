@@ -20,7 +20,10 @@ export class SaveQueue {
 
         this.saveTimer = setTimeout(() => {
             this.saveTimer = null;
-            void this.flush();
+            void this.flush().catch(() => {
+                // Keep save pending for a later retry cycle.
+                this.pendingSave = true;
+            });
         }, this.debounceMs);
     }
 
@@ -55,9 +58,11 @@ export class SaveQueue {
     }
 
     private async enqueueSave(): Promise<void> {
-        this.saveChain = this.saveChain.then(async () => {
+        this.saveChain = this.saveChain
+            .catch(() => undefined)
+            .then(async () => {
             await this.saveFn();
-        });
+            });
 
         await this.saveChain;
     }

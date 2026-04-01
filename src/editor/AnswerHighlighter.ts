@@ -19,10 +19,13 @@ import {
     setRevealLine,
 } from "./revealState";
 import {
+    FlashcardLineParseCache,
+    buildFlashcardLineParseCache,
     collectAnswerHighlightRanges,
     collectMultilineAnswerBlock,
     collectFlashcardSyntaxTokenRanges,
 } from "./answerHighlightRules";
+import { FlashcardRaw } from "../parser/types";
 
 const HIDE_FLASHCARD_SYNTAX = Decoration.replace({});
 const MULTILINE_SOFT_BAND = Decoration.mark({
@@ -86,11 +89,14 @@ export function createAnswerHighlighterExtension(
             decorations: DecorationSet;
             readonly view: EditorView;
             readonly onMouseDown: (event: MouseEvent) => void;
+            private parsedDocSnapshot = "";
+            private parsedCards: FlashcardRaw[] = [];
 
             constructor(view: EditorView) {
                 this.view = view;
+                this.refreshParsedCards();
                 this.onMouseDown = (event: MouseEvent) => {
-                    handleAnswerHighlightMouseDown(view, parser, event);
+                    handleAnswerHighlightMouseDown(view, this.parsedCards, event);
                 };
                 view.dom.addEventListener("mousedown", this.onMouseDown);
                 this.decorations = safeBuildDecorations(
@@ -101,6 +107,10 @@ export function createAnswerHighlighterExtension(
             }
 
             update(update: ViewUpdate): void {
+                if (update.docChanged) {
+                    this.refreshParsedCards();
+                }
+
                 if (
                     update.docChanged ||
                     update.viewportChanged ||
@@ -121,6 +131,16 @@ export function createAnswerHighlighterExtension(
                     "mousedown",
                     this.onMouseDown
                 );
+            }
+
+            private refreshParsedCards(): void {
+                const docText = this.view.state.doc.toString();
+                if (docText === this.parsedDocSnapshot) {
+                    return;
+                }
+
+                this.parsedDocSnapshot = docText;
+                this.parsedCards = parser.parseDocument(docText);
             }
         },
         {
@@ -163,6 +183,10 @@ function buildDecorations(
     }
 
     const lines = view.state.doc.toString().split("\n");
+    const parseCache: FlashcardLineParseCache = buildFlashcardLineParseCache({
+        lines,
+        parser,
+    });
 
     for (const { from, to } of view.visibleRanges) {
         let pos = from;
@@ -177,6 +201,7 @@ function buildDecorations(
                     lines,
                     lineNumber,
                     parser,
+                    cache: parseCache,
                 });
                 const lineDecorations: Array<{
                     from: number;
@@ -200,6 +225,7 @@ function buildDecorations(
                           lines,
                           lineNumber,
                           parser,
+                          cache: parseCache,
                       })
                     : null;
                 if (multiLineBlock) {
@@ -254,6 +280,7 @@ function buildDecorations(
                     lineNumber,
                     parser,
                     scopes,
+                    cache: parseCache,
                 });
 
                 for (const range of ranges) {
@@ -295,7 +322,7 @@ function buildDecorations(
 
 function handleAnswerHighlightMouseDown(
     view: EditorView,
-    parser: FlashcardParser,
+    parsedCards: FlashcardRaw[],
     event: MouseEvent
 ): void {
     const rawTarget = event.target;
@@ -350,11 +377,7 @@ function handleAnswerHighlightMouseDown(
     }
 
     const clickedLineNumber = view.state.doc.lineAt(pos).number;
-    const revealTarget = resolveRevealTarget(
-        view,
-        parser,
-        clickedLineNumber
-    );
+    const revealTarget = resolveRevealTarget(clickedLineNumber, parsedCards);
     setRevealLine(
         view,
         revealTarget.revealLineNumber,
@@ -364,17 +387,15 @@ function handleAnswerHighlightMouseDown(
 }
 
 function resolveRevealTarget(
-    view: EditorView,
-    parser: FlashcardParser,
-    clickedLineNumber: number
+    clickedLineNumber: number,
+    parsedCards: FlashcardRaw[]
 ): {
     revealLineNumber: number;
     activeStartLineNumber: number;
     activeEndLineNumber: number;
 } {
     const clickedLineZeroIndexed = clickedLineNumber - 1;
-    const cards = parser.parseDocument(view.state.doc.toString());
-    for (const card of cards) {
+    for (const card of parsedCards) {
         const endLineNumber = card.endLineNumber ?? card.lineNumber;
         if (
             clickedLineZeroIndexed >= card.lineNumber &&

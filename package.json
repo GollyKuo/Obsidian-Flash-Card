@@ -1,6 +1,6 @@
 {
     "name": "ai-enriched-flashcards",
-    "version": "0.1.23",
+    "version": "0.1.24",
     "description": "AI-Enriched Flashcards Obsidian Plugin",
     "main": "main.js",
     "scripts": {
@@ -8,6 +8,7 @@
         "build": "node esbuild.config.mjs --production",
         "test": "vitest run",
         "check:docs-encoding": "node scripts/check-docs-encoding.js",
+        "setup:hooks": "node scripts/setup-hooks.js",
         "benchmark:store": "vitest bench --run src/store/FlashcardIndex.bench.ts src/store/FlashcardStorage.bench.ts"
     },
     "keywords": [],

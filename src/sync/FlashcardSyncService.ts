@@ -16,7 +16,8 @@ export class FlashcardSyncService {
     private engine: FlashcardSyncEngine;
     private dataStore: DataStore;
     private getSettings: SettingsAccessor;
-    private syncModifiedFile: (file: TAbstractFile) => void;
+    private flushModifiedFilesDebounced: () => void;
+    private pendingModifiedFiles = new Map<string, TFile>();
     private syncStatusListeners = new Set<SyncStatusListener>();
     private syncStatus: SyncStatusState = {
         phase: "idle",
@@ -35,12 +36,12 @@ export class FlashcardSyncService {
         this.engine = engine;
         this.dataStore = dataStore;
         this.getSettings = getSettings;
-        this.syncModifiedFile = debounce(
-            (file: TAbstractFile) => {
-                void this.handleModifiedFile(file);
+        this.flushModifiedFilesDebounced = debounce(
+            () => {
+                void this.flushPendingModifiedFiles();
             },
             600,
-            true
+            false
         );
     }
 
@@ -51,7 +52,7 @@ export class FlashcardSyncService {
                     return;
                 }
 
-                this.syncModifiedFile(file);
+                this.queueModifiedFile(file);
             })
         );
 
@@ -148,12 +149,28 @@ export class FlashcardSyncService {
         return result;
     }
 
-    private async handleModifiedFile(file: TAbstractFile): Promise<void> {
+    private queueModifiedFile(file: TAbstractFile): void {
         if (!(file instanceof TFile) || !this.isMarkdownFile(file)) {
             return;
         }
 
-        await this.runTrackedSync(() => this.syncFileCore(file));
+        this.pendingModifiedFiles.set(file.path, file);
+        this.flushModifiedFilesDebounced();
+    }
+
+    private async flushPendingModifiedFiles(): Promise<void> {
+        if (this.pendingModifiedFiles.size === 0) {
+            return;
+        }
+
+        const files = [...this.pendingModifiedFiles.values()];
+        this.pendingModifiedFiles.clear();
+
+        await this.runTrackedSync(async () => {
+            for (const file of files) {
+                await this.syncFileCore(file);
+            }
+        });
     }
 
     private async handleRename(
