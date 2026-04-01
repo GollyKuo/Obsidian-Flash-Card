@@ -3,9 +3,9 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 09:15，V0.1.27）
+## Current Context Snapshot（更新：2026-04-01 09:37，V0.1.28）
 
-- 當前版本：`v0.1.27`（本地待 commit）
+- 當前版本：`v0.1.28`（本地待 commit）
 - 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 卡片管理，並同步落地開發環境與 SOP 效率優化。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -22,6 +22,29 @@
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.28（本地定版）— 高亮快取與發版流程去重優化（2026-04-01 09:37）
+
+### 主要調整
+- editor performance
+  - `AnswerHighlighter` 新增 `parsedLines` / `parseCache` 快取，將高亮建構流程改為重用既有解析結果。
+  - `answerHighlightRules` 的 `buildFlashcardLineParseCache` 支援傳入已解析 cards，避免重複 `parseDocument`。
+  - 實際效果：游標移動/選取變更時不再重跑全文件解析，降低編輯期無效計算。
+- release / hook efficiency
+  - `scripts/release.js` 在 `--push` 路徑注入 `FC_SKIP_PREPUSH_VALIDATE=1`。
+  - `.githooks/pre-push` 加入 skip 分支，避免 release 先驗證後 push 再重複驗證一次。
+- rules refinement
+  - `.codex/skill/SKILL.md`：明確 `dev_log` 完整保留 + 日常只讀 snapshot 與最近 2~3 個版本。
+  - `.codex/skill/SKILL.md`：版本流程改為「原則完成 commit，僅在使用者明確要求時 push」。
+  - `Instruction.md` 同步 `dev_log` 讀取策略，降低 token 成本。
+
+### 驗證
+- `npm run validate:fast`：通過（49 tests）
+- `npm run validate:prepush`：通過（69 tests + build）
+- `npm run release -- <version> --dry-run`：通過（流程可用）
+- `npm run validate:docs`：通過
 
 ---
 

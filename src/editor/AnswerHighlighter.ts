@@ -65,7 +65,9 @@ export function createAnswerHighlighterExtension(
             readonly view: EditorView;
             readonly onMouseDown: (event: MouseEvent) => void;
             private parsedDocSnapshot = "";
+            private parsedLines: string[] = [];
             private parsedCards: FlashcardRaw[] = [];
+            private parseCache: FlashcardLineParseCache | null = null;
 
             constructor(view: EditorView) {
                 this.view = view;
@@ -77,7 +79,9 @@ export function createAnswerHighlighterExtension(
                 this.decorations = safeBuildDecorations(
                     view,
                     parser,
-                    getSettings
+                    getSettings,
+                    this.parsedLines,
+                    this.parseCache
                 );
             }
 
@@ -94,7 +98,9 @@ export function createAnswerHighlighterExtension(
                     this.decorations = safeBuildDecorations(
                         update.view,
                         parser,
-                        getSettings
+                        getSettings,
+                        this.parsedLines,
+                        this.parseCache
                     );
                 }
             }
@@ -115,7 +121,13 @@ export function createAnswerHighlighterExtension(
                 }
 
                 this.parsedDocSnapshot = docText;
+                this.parsedLines = docText.split("\n");
                 this.parsedCards = parser.parseDocument(docText);
+                this.parseCache = buildFlashcardLineParseCache({
+                    lines: this.parsedLines,
+                    parser,
+                    cards: this.parsedCards,
+                });
             }
         },
         {
@@ -127,10 +139,18 @@ export function createAnswerHighlighterExtension(
 function safeBuildDecorations(
     view: EditorView,
     parser: FlashcardParser,
-    getSettings: SettingsAccessor
+    getSettings: SettingsAccessor,
+    prebuiltLines?: string[],
+    prebuiltParseCache?: FlashcardLineParseCache | null
 ): DecorationSet {
     try {
-        return buildDecorations(view, parser, getSettings);
+        return buildDecorations(
+            view,
+            parser,
+            getSettings,
+            prebuiltLines,
+            prebuiltParseCache
+        );
     } catch (error) {
         console.error(
             "[Flashcards] AnswerHighlighter build failed. Decorations are reset for safety.",
@@ -143,7 +163,9 @@ function safeBuildDecorations(
 function buildDecorations(
     view: EditorView,
     parser: FlashcardParser,
-    getSettings: SettingsAccessor
+    getSettings: SettingsAccessor,
+    prebuiltLines?: string[],
+    prebuiltParseCache?: FlashcardLineParseCache | null
 ): DecorationSet {
     const settings = getSettings();
     const builder = new RangeSetBuilder<Decoration>();
@@ -157,11 +179,13 @@ function buildDecorations(
         return builder.finish();
     }
 
-    const lines = view.state.doc.toString().split("\n");
-    const parseCache: FlashcardLineParseCache = buildFlashcardLineParseCache({
-        lines,
-        parser,
-    });
+    const lines = prebuiltLines ?? view.state.doc.toString().split("\n");
+    const parseCache: FlashcardLineParseCache =
+        prebuiltParseCache ??
+        buildFlashcardLineParseCache({
+            lines,
+            parser,
+        });
 
     for (const { from, to } of view.visibleRanges) {
         let pos = from;

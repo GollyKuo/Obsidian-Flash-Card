@@ -3,6 +3,7 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+const SKIP_PREPUSH_VALIDATE_ENV = "FC_SKIP_PREPUSH_VALIDATE";
 
 function printUsage() {
   console.log("Usage: npm run release -- <version> [--dry-run] [--no-commit] [--push]");
@@ -95,7 +96,12 @@ function main() {
 
   if (shouldPush) {
     console.log("[release] step 5/5: push to origin/master");
-    runCommand(gitCommand, ["push", "origin", "master"]);
+    runCommand(gitCommand, ["push", "origin", "master"], {
+      env: {
+        ...process.env,
+        [SKIP_PREPUSH_VALIDATE_ENV]: "1",
+      },
+    });
     return;
   }
 

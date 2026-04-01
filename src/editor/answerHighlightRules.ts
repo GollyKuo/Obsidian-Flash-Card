@@ -49,9 +49,10 @@ export interface FlashcardLineParseCache {
 export function buildFlashcardLineParseCache(params: {
     lines: string[];
     parser: FlashcardParser;
+    cards?: ReturnType<FlashcardParser["parseDocument"]>;
 }): FlashcardLineParseCache {
-    const { lines, parser } = params;
-    const cards = parser.parseDocument(lines.join("\n"));
+    const { lines, parser, cards: preParsedCards } = params;
+    const cards = preParsedCards ?? parser.parseDocument(lines.join("\n"));
     const multilineAnswerBlockByLine = new Map<number, MultilineAnswerBlock>();
     const multilineStartLines = new Set<number>();
 

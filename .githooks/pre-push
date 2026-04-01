@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ "$FC_SKIP_PREPUSH_VALIDATE" = "1" ]; then
+  echo "[pre-push] Skip validate:prepush (already validated in release flow)."
+  exit 0
+fi
+
 echo "[pre-push] Running full quality checks..."
 npm run validate:prepush
 status=$?
@@ -10,4 +15,3 @@ if [ $status -ne 0 ]; then
 fi
 
 echo "[pre-push] Passed."
-

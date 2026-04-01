@@ -38,6 +38,7 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 ## 工作流程規則
 
 - 每次開啟新對話並開始開發前，必須主動依序閱讀：`SKILL.md` → `dev_log.md`（最上方 `Current Context Snapshot`）→ `Instruction.md` → `RoadMap.md` → `Retrospective.md`。
+- `dev_log.md` 必須保留完整歷程，不做刪減或精簡歸檔；日常讀取時預設只讀 `Current Context Snapshot` 與最近 2~3 個版本區段，需追溯時才向前補讀。
 - 若對話脈絡接近額度上限，應將高訊號狀態摘要回寫至 `Current Context Snapshot`（當前主軸、已知風險、下一步優先），避免資訊流失。
 - 遇到除錯、渲染異常、樣式衝突或反覆嘗試未果的問題時，先查閱 `Retrospective.md`，優先沿用已驗證的排查順序與教訓，避免重複走錯方向。
 - 每次推進下一個開發步驟前，先檢查目前架構是否足以承接該功能；若存在明顯缺口，應先提出並優先補強，再繼續往下實作。
@@ -70,7 +71,8 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 
 ## 版本控制與推送規則
 
-- 每次版本確認完成後（至少包含版本號更新、相關文件同步與必要驗證通過），應主動執行 Git 提交與推送。
+- 每次版本確認完成後（至少包含版本號更新、相關文件同步與必要驗證通過），原則上應完成 Git 提交；僅在使用者明確要求 push 時才執行推送。
+- 版本發佈優先使用 `npm run release -- <version>`，以減少手動步驟與漏項風險。
 - Commit 訊息需明確包含版本號（例如：`release: v0.1.9`）。
 - 若尚未設定 Git remote 或推送權限不足，需立即回報並請使用者提供遠端倉庫資訊或授權後再完成推送。
 
@@ -87,6 +89,7 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 - 受保護文件：`Manual.md`、`RoadMap.md`、`Instruction.md`、`Retrospective.md`、`dev_log.md`、`.codex/skill/SKILL.md`、`manifest.json`。
 - 以上文件優先使用 `apply_patch` 修改，避免整檔讀出後再整檔覆寫。
 - 禁止使用未明確指定編碼的批次改寫流程（例如 `Get-Content` -> 轉換 -> `Set-Content`）。
-- 每次 commit / push 前，固定執行 `npm run check:docs-encoding`。
+- 提交前以 `pre-commit` 自動執行 `npm run check:docs-encoding`；若 hooks 不可用，再手動執行。
+- 推送前以 `pre-push` 自動執行 `npm run validate:prepush`；若 hooks 不可用，再手動執行。
 - 若編碼檢查失敗，必須先停止發版流程，並先回復到最近的乾淨版本再繼續。
 
