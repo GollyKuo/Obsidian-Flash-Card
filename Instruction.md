@@ -64,10 +64,35 @@
   - `data.json` 僅記錄 relative path，不直接內嵌大型資產內容
 - **Answer Highlight Theme**: 支援低對比答案底色主題，並提供顏色/透明度與套用範圍（cloze-only / mixed / all answers）設定。
 - **Cloze Editor Rendering Ownership**: 編輯模式下 `==填空==` 由 plugin decoration 接管高亮樣式，非游標行隱藏語法符號並套用答案樣式，游標行保留原始語法以利編輯。
-- **Answer Chip Rendering**: 答案顯示採單一 chip widget，降低符號分詞造成的高亮邊緣破碎；chip 文字需保留常見內聯語法的顯示語意（例如 wikilink alias）。
+- **Single-line Answer Rendering Strategy**: 單行答案採策略式渲染（`chip` / `plain`，預設 `chip`）；`chip` 模式仍使用單一 widget 以降低符號分詞造成的高亮邊緣破碎，且需保留常見內聯語法的顯示語意（例如 wikilink alias）。
 - **Cleaning Tool**: 提供 settings-based maintenance tool，可移除所有 Block ID，讓筆記回到 pure Markdown。
 - **Storage Principle**: index 應優先視為可重建的 derived structure，而不是無限制膨脹的 primary schema；單卡更新應避免整包重寫。
 - **Highlight Scope Control**: 答案底色應由使用者設定決定套用範圍，避免將所有語法一律強制高亮。
+
+## 名詞基準 (Terminology Baseline)
+
+### 卡片型式（5 種，中英文固定命名）
+
+- `單行正向卡 (Single-line Forward Card)`：`正面 :: 背面`
+- `單行反向卡 (Single-line Reverse Card)`：`正面 ;; 背面`
+- `單行雙向卡 (Single-line Bidirectional Card)`：`正面 ::: 背面`
+- `填充卡 (Cloze Card)`：`==答案==`
+- `多行正向卡 (Multiline Forward Card)`：`問題 ::` + 後續縮排答案
+
+補充：
+- `{{fc ... /fc}}` 是「內嵌包裹語法」，不是第六種卡；它只是在同一行中包裹 `單行正向卡` 或 `填充卡`。
+- parser 內部主型別仍維持 `forward / reverse / bidirectional / cloze`，其中多行正向卡屬於 `forward` 的多行形態。
+
+### 答案呈現型式（4 種，中英文固定命名）
+
+- `膠囊樣式 (chip)`：單行答案 / 填充卡
+- `純文字高亮 (plain)`：單行答案 / 填充卡
+- `淡色背景帶 (soft-band)`：多行/清單答案
+- `右側線條 (right-rail)`：多行/清單答案
+
+補充：
+- `singleLineAnswerRenderStyle`：`chip | plain`
+- `multiLineAnswerRenderStyle`：`soft-band | right-rail`
 
 ## 當前執行原則 (Current Execution Focus)
 
@@ -89,3 +114,4 @@
 - 已完成（V0.1.19）：設定頁改為分頁式結構（一般/答案高亮/AI/維護工具），並完成編碼治理（`.editorconfig`、`.gitattributes`、UTF-8 無 BOM 一致化）
 - 已完成（V0.1.20）：抽離 `FlashcardsAppService` 作為 Action Layer，並為 `FlashcardSyncService` 補上 Sync State Layer（`idle/syncing/error`、`activeJobs`、`lastSyncedAt`、`lastError` 與 listener API）
 - 已完成（V0.1.21）：高亮編輯顯示觸發改為「僅點擊答案高亮區塊才 reveal」，並修正多行/清單答案點擊高亮後未顯示 Block ID。
+- 已完成（V0.1.25）：單行答案渲染改為 strategy layer，支援 `chip / plain` 切換並保留 `soft-band / right-rail` 多行樣式分工。

@@ -3,9 +3,9 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 08:16，V0.1.25）
+## Current Context Snapshot（更新：2026-04-01 08:32，V0.1.26）
 
-- 當前版本：`v0.1.25`（本地待 commit）
+- 當前版本：`v0.1.26`（本地待 commit）
 - 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 的卡片管理能力。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
@@ -15,9 +15,30 @@
   - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
 - 下一步優先：
   - 以 `RoadMap.md` 的 Sprint E 為主，先落地 `Cards` 管理分區骨架與查詢層。
+- 文件同步：
+  - 已在 `Manual.md` / `Instruction.md` / `RoadMap.md` 統一卡片型式（5 種）與答案呈現型式（4 種）的中英文命名基準。
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.26（本地定版）— 術語基準文件同步（2026-04-01 08:32）
+
+### 目標
+- 將卡片型式與答案呈現型式的中英文命名統一到核心文件，降低後續規劃與實作溝通誤差。
+
+### 主要調整
+- 文件同步（術語明確化）
+  - `Manual.md`：新增「卡片型式命名對照（5 種）」與「答案呈現型式命名對照（4 種）」。
+  - `Instruction.md`：新增術語基準章節，並將單行答案渲染描述更新為 strategy（`chip / plain`）。
+  - `RoadMap.md`：新增「術語基準（文件同步）」段落，作為後續規劃命名準則。
+  - `dev_log.md`：更新 Current Context Snapshot 與本版紀錄。
+- 版本同步
+  - `manifest.json` / `package.json` / `package-lock.json` 升版為 `0.1.26`。
+
+### 驗證
+- `npm run check:docs-encoding`：通過
 
 ---
 
