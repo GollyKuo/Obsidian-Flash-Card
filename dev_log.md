@@ -3,10 +3,10 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 09:37，V0.1.28）
+## Current Context Snapshot（更新：2026-04-01 13:32，V0.1.29）
 
-- 當前版本：`v0.1.28`（本地待 commit）
-- 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 卡片管理，並同步落地開發環境與 SOP 效率優化。
+- 當前版本：`v0.1.29`（本地待 commit）
+- 目前主軸：完成 `RoadMap` 主線重整（V0.2 卡片庫管理 / V0.3 AI / V0.4 複習樣式），接續細化 V0.3-P1 實作邊界。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
   - 多行答案僅保留 `淡色背景帶` 與 `右側線條` 兩種模式。
@@ -15,13 +15,33 @@
   - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
   - 在受限沙箱下執行 `vitest` 可能出現 `spawn EPERM` 假失敗，需先切換非沙箱重跑再判斷是否真實回歸。
 - 下一步優先：
-  - 以 `RoadMap.md` 的 Sprint E 為主，先落地 `Cards` 管理分區骨架與查詢層。
+  - 以 `RoadMap.md` 的 V0.3-P1 為主，先落地 `Hybrid + Manual` 的單卡 AI 流程。
 - 文件同步：
   - 已在 `Manual.md` / `Instruction.md` / `RoadMap.md` 統一卡片型式（5 種）與答案呈現型式（4 種）的中英文命名基準。
   - 已新增「開發環境與 SOP 優化專區」，並同步一鍵 release、測試分層、hook 分層與效率治理規範。
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.29（本地定版）— RoadMap 主線重整與 V0.3 AI 規格細化（2026-04-01 13:32）
+
+### 主要調整
+- roadmap structure
+  - 明確拆分：`V0.2 卡片庫管理系統`、`V0.3 AI 功能`、`V0.4 複習閃卡呈現樣式` 三條主線。
+  - `Sprint E / E.5 / F` 改為摘要定位，避免與版本主線重複維護。
+- V0.3 AI 規劃補齊
+  - 新增 8 項 AI 能力清單，並明確開發先後順序。
+  - 新增 `AI Auto / Manual Select / Hybrid` 三模式與優先級規則（Manual 覆蓋 Auto）。
+  - 新增內容類型路由規劃（文章、單字、術語、流程）以提升自動判斷品質。
+- 多模態資產規範定版
+  - 固定儲存路徑：`_Flashcards/Assets/images/`、`_Flashcards/Assets/audio/`。
+  - 新增檔名規則：時間戳 `YYYYMMDDHHmm`、短雜湊預設 `h4`（可升級 `h8`）。
+  - metadata 關聯寫回 `_Flashcards/Cards/<blockId>.json`。
+
+### 驗證
+- `npm run check:docs-encoding`：通過
 
 ---
 

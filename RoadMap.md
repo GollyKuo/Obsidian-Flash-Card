@@ -133,100 +133,25 @@
 目標：以單一 UI 入口整合卡片管理與學習分析，不拆成兩個分離 dashboard。
 
 - 建立統一 Dashboard Workspace（單一入口）
-- 第一階段優先完成 `Cards` 分區（列表、搜尋、篩選、排序、來源跳轉、due / sync 狀態）
-- 以獨立的 Cards Query Layer 支撐 `Cards` 分區，避免 UI 直接耦合 `DataStore` / `FlashcardRepository`
-- 第一版卡片管理以「卡片為主、來源為輔」：
-  - 預設支援依來源筆記、來源資料夾、卡片類型、學習狀態進行分組與篩選
-  - 原始筆記作為來源容器與追溯依據，而不是唯一管理單位
-- 提供檢視模式切換功能，至少包含 `分組檢視` 與 `列表檢視`，且第一版預設為 `分組檢視`
-- 在 `Cards` 分區提供來源健康度可見性，例如：來源筆記已移動、已遺失、已失聯等狀態提示
-- 保留標籤系統擴充彈性：
-  - 後續可接入筆記 tag 或卡片管理標籤，作為進階分組 / 篩選條件
-  - 第一版不以標籤作為唯一核心分組依據，避免管理模型過度依賴使用者先整理 tag
-- 卡片管理的標籤系統遵守「不污染原始筆記」原則：
-  - 不新增會干擾閱讀的單卡標籤 Markdown 語法到使用者筆記
-  - 筆記層標籤來自 Obsidian 原生 tag／frontmatter tag，作為卡片的 `inheritedTags`
-  - 單卡標籤作為 plugin metadata 管理，不寫回原始筆記內容
-- 標籤資料模型採雙來源、單一查詢視圖：
-  - `inheritedTags`：由來源筆記同步而來，可因筆記 tag 變更而重建
-  - `cardTags`：只屬於單張卡片，由卡片管理 UI 維護
-  - `effectiveTags`：`inheritedTags + cardTags` 去重後的查詢／分組／篩選結果
-- 單卡標籤的主儲存先落在 `_Flashcards/Cards/<blockId>.json`：
-  - 讓卡片內容、FSRS 狀態、AI enrichment、單卡標籤維持同一張 card shard 作為 primary record
-  - 避免過早抽出獨立標籤檔，降低同步複雜度與一致性風險
-  - 若未來卡片量增大、標籤查詢需要加速，再考慮新增 derived tag index，而不是改用獨立標籤檔作為 primary schema
-- 標籤同步規則：
-  - 筆記 tag 變更時，重新同步受影響卡片的 `inheritedTags`
-  - 單卡標籤 `cardTags` 不應被筆記重掃覆寫
-  - `effectiveTags` 永遠由讀取層或索引層生成，不作為唯一事實來源
-- `Cards` 分區的標籤互動：
-  - 支援以 `繼承標籤`、`單卡標籤`、`合併標籤` 三種角度搜尋與篩選
-  - UI 應能看出標籤來源，避免使用者誤以為所有 tag 都來自原始筆記
-- V0.2 卡片管理框架先以 `_Flashcards/Cards/<blockId>.json` 承載單卡標籤，後續實作若有規模或效能新需求，再同步修正 RoadMap / Instruction / Manual
-- 語法設計規格（V0.1.23 已定版）：
-  - 內嵌單行卡：`{{fc 正面 :: 背面 /fc}}`
-  - 內嵌填充卡：`{{fc 文字、==答案==、文字 /fc}}`
-  - `{{fc` 後與 `/fc}}` 前可接受有或沒有空白（例如 `{{fc正面 :: 背面/fc}}`）
-  - 已棄用 `{{fc: ...}}`，不解析也不高亮
-  - 解析保護規則：`code block` / `inline code` / `math` 區塊內不解析 `fc` 包裹語法
-  - 內嵌硬邊界：同一行只要出現 `{{fc` 或 `/fc}}` 但不合法，整行視為普通文字，不做 fallback 解析
-- 語法實作路線（同步現況）：
-  - P0（已完成，2026-04-01 02:26）：parser 新增內嵌單行卡與內嵌填充卡解析
-  - P1（已完成，2026-04-01 02:26）：補齊 parser / highlight / block id 回歸測試（含 malformed 與 deprecated）
-  - P1.5（規劃中）：新增編輯器命令 `Wrap selection as flashcard`，支援將選取內容一鍵包裝為 `{{fc ... /fc}}`（並可綁定快捷鍵）
-  - P2（規劃中）：UI 診斷與錯誤提示（未閉合 `/fc}}`、區塊內語法衝突）
-  - P3（規劃中）：視實測結果評估是否提供語法遷移工具
-- V0.2 開發順序優先級建議：
-  - P0：先完成 `Cards Query Layer`、來源健康度模型、`inheritedTags / cardTags / effectiveTags` 資料模型與查詢出口
-  - P1：完成 `Cards` 分區第一版 UI（分組檢視預設、列表檢視切換、搜尋、篩選、排序、來源跳轉）
-  - P2：補齊批次標籤操作、群組統計、細節抽屜或卡片詳情面板
-  - P3：視資料量與實測結果，導入虛擬清單、延遲載入、群組 lazy expand 與 derived tag / source indexes
-- 第二階段擴充 `Insights` 分區（熱點圖、趨勢、streak、到期量分析）
-- 保持資料層分責：UI 可整合，但管理查詢與分析查詢維持模組邊界
+- 第一階段：先完成 `Cards` 與 `Insights` 的工作區骨架與導航
+- `Cards` 分區的功能與資料模型細節，統一由「V0.2：卡片庫管理系統主線」維護
+- 與資料層保持分責：UI 可整合，但管理查詢與分析查詢維持模組邊界
 - 規劃已納入：2026-03-29，V0.1.5（先加入 RoadMap，尚未執行）
 
 ### Sprint E.5: 大規模卡片量性能與延遲控制（高優先，規劃中）
 
 目標：在大量筆記與大量卡片情境下，維持 `Cards` 分區、同步與複習流程的可用性與低延遲，避免 V0.2 之後再進行高成本回補。
 
-- 以 `primary record + derived index` 為性能策略：
-  - `_Flashcards/Cards/<blockId>.json` 持續作為單一卡片事實來源
-  - 來源健康度、標籤查詢、群組摘要、到期統計可追加 derived index，不直接改寫 primary schema
-- 查詢性能補強：
-  - `Cards Query Layer` 應支援快取 view model、群組計數、排序 key 預先計算
-  - 避免每次打開 `Cards` 分區都全量掃描所有 card shard 重新計算
-- UI 響應補強：
-  - `列表檢視` 預留 virtualization / windowing 能力
-  - `分組檢視` 預留 lazy expand / 延遲載入群組內容
-  - 卡片詳細資料與進階操作採按需載入，避免首屏載入過重
-- 同步與索引補強：
-  - 在 modify / rename / delete 流程中逐步改為增量更新索引
-  - 對高頻變更導入 debounce + job coalescing，減少重複同步
-  - 預留背景重建 derived indexes 的入口，避免前台操作卡頓
-- 標籤性能策略：
-  - 初期以 `Cards/<blockId>.json` 內的 `cardTags` 為主
-  - 當標籤查詢、群組或批次操作成本上升時，再新增 derived tag index
-- 驗證與門檻：
-  - 建立 benchmark / profiling 基線，持續觀察 `Cards` 首次開啟、群組切換、搜尋篩選、整庫同步的延遲
-  - 若實測顯示 UI 或同步延遲開始上升，再依序導入 derived indexes、虛擬清單、背景重建
+- 本節性能細項已整併至「V0.2-P3 / V0.2-P4」，避免多處重複維護
+- 本節保留定位：提醒在 V0.2 完成前，性能補強不可後置
 
 ### Sprint F: 學習體驗強化
 
 目標：讓複習流程更接近真正可日用的學習工具。
 
-- 強化 Review Modal 的資訊密度
-- 補強 Review UI Layer：將單一元件拆成較穩定的 container / presentational 結構，逐步移除過度集中的 inline style
-- 顯示預估下次間隔 / due 資訊
-- 支援鍵盤快捷鍵
-- 補上複習結束摘要
-- 優化 queue 排序與到期卡片呈現
-- 新增可自訂答案高亮主題（顏色/透明度），預設維持低對比深色半透明風格（已完成：2026-03-31，V0.1.18）
-- 新增高亮套用範圍選項（已完成：2026-03-29，V0.1.11；目前支援 `填空`、`單行答案`、`多行答案`、`雙向卡` 多選）
-- 高亮渲染重構第一階段：編輯模式 `==填空==` 由 plugin decoration 接管（非游標行），並完成原生 `.cm-highlight` 衝突處理與語法顯示切換（已完成：2026-03-30，V0.1.12）
-- 高亮渲染重構第二階段：答案改為單一 chip 膠囊渲染，修正符號場景邊緣破碎，並補上 `[[target|alias]]` 與 markdown link 顯示正規化（已完成：2026-03-30，V0.1.13）
-- 高亮渲染重構第三階段：將答案渲染策略依語法類型拆開；單行答案維持 chip，多行/清單答案改為獨立區塊渲染，並在設定頁提供 `淡色背景帶`、`右側線條` 兩種可選樣式（已完成：2026-03-31，V0.1.14）
-- 單行答案渲染策略化：新增 `chip / plain` 切換並維持多行 `soft-band / right-rail` 分層（已完成：2026-04-01 08:16，V0.1.25）
-- 高亮編輯顯示觸發修正：僅點擊答案高亮區塊才 reveal 語法與 Block ID，並修正多行/清單答案點擊高亮後未顯示 Block ID（已完成：2026-03-31 14:12，V0.1.21）
+- 本節保留「複習體驗」里程碑定位
+- 複習閃卡呈現樣式（答案渲染策略 / 主題 / 互動顯示）細節已整併至「V0.4：複習閃卡呈現樣式主線」
+- 本節仍追蹤與排程/鍵盤/摘要等流程體驗相關項目
 
 ### Sprint G: 行尾 HUD / 狀態提示
 
@@ -239,18 +164,103 @@
 
 ---
 
-## AI 主線
+## V0.2：卡片庫管理系統主線（整合規劃）
 
-### Sprint H: 單卡 AI 豐富化
+目標：先完成可日常使用的卡片庫管理能力，再進入 V0.3 的 AI 強化，避免流程倒掛。
+本章為 V0.2 卡片庫管理系統的唯一主規劃來源；Sprint 區塊僅保留摘要與里程碑定位。
 
-目標：先從最可控的單卡操作開始。
+### V0.2 範圍（整併自 Sprint E / Sprint E.5）
+
+- `Cards` 分區第一版 UI：搜尋、篩選、排序、來源跳轉、due/sync 狀態
+- 檢視模式切換：`分組檢視`（預設）與 `列表檢視`
+- `Cards Query Layer`：避免 UI 直接耦合 `DataStore` / `FlashcardRepository`
+- 來源健康度模型：來源筆記已移動、已遺失、已失聯等可見提示
+- 標籤雙來源模型：`inheritedTags`、`cardTags`、`effectiveTags`
+- 單卡標籤主儲存：`_Flashcards/Cards/<blockId>.json`（不污染原始筆記）
+- 大量資料性能策略：derived index、lazy expand、virtualization、增量同步、job coalescing
+
+### V0.2 分階段優先級
+
+- V0.2-P0：`Cards Query Layer` + 來源健康度模型 + `inheritedTags / cardTags / effectiveTags` 查詢出口
+- V0.2-P1：`Cards` 分區 UI 第一版（分組檢視預設、列表檢視切換、搜尋、篩選、排序、來源跳轉）
+- V0.2-P2：批次標籤操作、群組統計、細節抽屜／卡片詳情面板
+- V0.2-P3：性能補強（虛擬清單、延遲載入、group lazy expand、derived tag/source indexes）
+- V0.2-P4：benchmark/profiling 基線與延遲門檻，作為後續擴充的進入條件
+
+### V0.2 與 V0.3 邊界
+
+- V0.2 先完成卡片管理核心與性能底座
+- V0.3 再承接 AI enrich、批次 AI、多模態資產
+
+### V0.2 與 V0.4 邊界
+
+- V0.2 聚焦「卡片庫管理」：查詢、分組、標籤、來源健康度、資料與效能模型
+- V0.4 聚焦「複習呈現樣式」：複習時卡片/答案如何顯示與互動，不混入卡片庫管理資料模型
+
+---
+
+## V0.3：AI 功能主線（整合規劃）
+
+目標：將「AI enrich、批次處理、多模態資產」集中為同一版主題，避免規劃分散在不同 Sprint。
+本章為 V0.3 AI 規劃主來源；與 AI 相關的 Sprint 僅作歷史對照（Sprint H/I）。
+
+### V0.3 前置條件（已完成，來自 V0.1.x）
+
+- AI 設定預留欄位（已完成：2026-03-29，V0.1.6）
+- 設定頁分頁包含 AI 分頁（已完成：2026-03-31，V0.1.19）
+- 卡片分片儲存架構已就位（`_Flashcards/Cards/<blockId>.json`），可承接 AI enrichment 欄位
+- HUD 區塊已預留「與 AI enrich 按鈕共存」的 UI 評估項目（Sprint G）
+
+### V0.3 AI 能力清單（全量納入）
+
+1. 卡片優化建議：檢查題幹與答案品質，提供可記憶化改寫建議
+2. 自動產卡候選：由段落抽取單行卡/填充卡候選，採「建議清單」而非直接覆寫
+3. 標籤建議：根據卡片內容推薦 `cardTags`，由使用者確認後套用
+4. 難度與認知負荷評估：估計卡片難度並建議拆卡/合卡
+5. 干擾選項生成：為單卡生成常見誤答，強化回想訓練
+6. 複習前重點摘要：針對當日到期卡片生成預熱摘要
+7. 錯題回顧分析：聚合常錯卡片並產出盲點主題建議
+8. 多模態延伸：圖片/音訊輔助與 OCR 流程整合
+
+### V0.3 互動模式規劃（Auto + Manual + Hybrid）
+
+- `AI Auto`：AI 自動判斷內容類型並推薦協助流程
+- `Manual Select`：使用者可勾選需要的 AI 協助項目（可覆蓋 AI 判斷）
+- `Hybrid`（建議預設）：先由 AI 推薦，再由使用者確認後執行
+- 規則：Manual 優先級高於 Auto；Hybrid 以「使用者最終勾選」作為執行依據
+
+### V0.3 開發先後順序（依建議）
+
+1. 卡片優化建議
+2. 自動產卡候選
+3. 標籤建議
+4. 難度與認知負荷評估
+5. 複習前重點摘要
+6. 錯題回顧分析
+7. 干擾選項生成
+8. 多模態延伸
+
+### V0.3-P1（原 Sprint H）：單卡 AI 豐富化（先做）
+
+目標：先落地低風險、高價值且不污染原始筆記的 AI 能力。
 
 - 針對單張卡片觸發 AI enrich
 - 傳入標題、縮排父層與卡片內容作為 context
-- 將 explanation 結果寫入對應卡片儲存檔（`_Flashcards/Cards/<blockId>.json`）
-- 預留 `_Flashcards/Assets/images/` 與 `_Flashcards/Assets/audio/` 資產路徑
+- 優先落地：卡片優化建議、自動產卡候選、標籤建議
+- 補充落地：難度評估與拆卡/合卡建議
+- 互動模式先落地：`Hybrid`（預設） + `Manual Select`（覆蓋）
+- 將結果寫入對應卡片儲存檔（`_Flashcards/Cards/<blockId>.json`）
 
-### Sprint I: 批次 AI 與多模態
+### V0.3-P2：學習分析與回顧增強
+
+目標：在單卡能力穩定後，補強整體複習流程的 AI 輔助價值。
+
+- 複習前重點摘要（到期卡片預熱）
+- 錯題回顧分析（盲點主題建議）
+- 干擾選項生成（進階回想訓練）
+- 導入內容類型路由（文章/段落、單字、術語、流程）以強化 Auto 判斷品質
+
+### V0.3-P3（原 Sprint I）：批次 AI 與多模態
 
 目標：擴展 AI 流程，但不破壞目前穩定核心。
 
@@ -258,6 +268,84 @@
 - 整合圖片轉卡片 / OCR 流程
 - 將 AI 生成資產分流存入 `_Flashcards/Assets/images/` 與 `_Flashcards/Assets/audio/`
 - 設計失敗重試與模型切換機制
+- 補齊 `AI Auto` 完整自動模式（含批次任務）與可追蹤的覆蓋紀錄
+
+### V0.3 多模態資產檔名規則（定版）
+
+1. 檔名以 `blockId` 作為主鍵起始。
+2. 檔名包含用途欄位（例如 `mnemonic`、`explain`、`tts`）。
+3. 檔名包含時間戳 `YYYYMMDDHHmm`。
+4. 檔名包含短雜湊，預設使用 `h4`；若未來規模提升可升級為 `h8`。
+5. 檔案保留真實副檔名（如 `.png`、`.webp`、`.mp3`、`.wav`）。
+6. 檔名僅使用 ASCII 字元（避免跨平台與編碼問題）。
+7. 詳細 metadata（`type` / `mime` / `model` / `createdAt` / `path`）記錄於 `_Flashcards/Cards/<blockId>.json`。
+
+範例（目前規則）：
+- `<blockId>__mnemonic__202604011425__a1b2.webp`
+- `<blockId>__tts__202604011425__7f9c.mp3`
+
+### V0.3 驗收重點
+
+- 單卡流程穩定：可重試、可追蹤、可回寫
+- 批次流程可控：有佇列狀態、錯誤隔離、不中斷整批
+- 多模態資產可維護：圖片/音訊分流、索引與卡片關聯一致
+
+---
+
+## V0.4：複習閃卡呈現樣式主線（整合規劃）
+
+目標：專注於「複習時」閃卡本身的視覺與互動樣式，不與 V0.2 卡片庫管理功能耦合。
+本章為 V0.4 複習樣式規劃主來源；Sprint F 僅保留摘要定位。
+
+### V0.4 範圍
+
+- Review Modal 內卡片資訊密度與排版層級
+- 答案呈現策略與樣式系統：
+  - 單行答案：`chip / plain`
+  - 多行答案：`soft-band / right-rail`
+- 顯示主題與可讀性控制（顏色、透明度、對比）
+- 互動顯示行為（reveal / edit mode 切換一致性）
+- 複習流程體驗：鍵盤操作、摘要資訊、到期/間隔資訊呈現
+
+### V0.4 分階段優先級
+
+- V0.4-P0：整理樣式 token 與 style strategy，建立可擴充主題架構
+- V0.4-P1：統一 Review Modal 與編輯器中答案樣式語彙，避免同語法不同視覺
+- V0.4-P2：補強互動一致性（點擊 reveal、保持編輯模式、回到閱讀模式規則）
+- V0.4-P3：進行樣式效能與可讀性驗證（長文、多卡片、不同主題）
+
+### V0.4 開工任務清單（可直接實作）
+
+- Task V0.4-P0-1：建立樣式 token 與策略映射
+  - 對應模組：`src/styles/editor.css`、`src/styles/main.css`、`src/settings/singleLineAnswerRenderStyles.ts`、`src/settings/multiLineAnswerRenderStyles.ts`
+  - 驗收：樣式名稱、CSS 變數、設定值三者一致；新增樣式不需改 parser
+- Task V0.4-P0-2：整理樣式設定入口
+  - 對應模組：`src/settings/FlashcardsSettingTab.ts`、`src/settings/types.ts`
+  - 驗收：單行/多行樣式切換可獨立設定，且與既有設定相容
+- Task V0.4-P1-1：統一編輯器與複習面板答案視覺語彙
+  - 對應模組：`src/editor/AnswerHighlighter.ts`、`src/editor/singleLineAnswerRenderStrategy.ts`、`src/ui/ReviewModal.tsx`、`src/ui/ReviewModalContainer.tsx`
+  - 驗收：同語法在 editor/review 顯示風格一致，不出現同卡不同樣式
+- Task V0.4-P1-2：補齊樣式回歸測試
+  - 對應模組：`src/editor/answerHighlightRules.test.ts`、`src/editor/answerChipText.test.ts`
+  - 驗收：`chip/plain/soft-band/right-rail` 切換不影響既有語法解析與高亮範圍
+- Task V0.4-P2-1：互動狀態機一致化（reveal/edit/read）
+  - 對應模組：`src/editor/revealState.ts`、`src/editor/BlockIdHider.ts`、`src/editor/AnswerHighlighter.ts`
+  - 驗收：編輯模式下點擊內容不自動跳回閱讀模式；僅依明確規則切換
+- Task V0.4-P2-2：Review Modal 互動細節補強
+  - 對應模組：`src/ui/ReviewModal.tsx`、`src/ui/ReviewModalContainer.tsx`
+  - 驗收：鍵盤操作、顯示摘要、到期資訊與樣式切換彼此不衝突
+- Task V0.4-P3-1：樣式效能驗證
+  - 對應模組：`src/store/FlashcardStorage.bench.ts`（延伸基線）、`src/editor/AnswerHighlighter.ts`
+  - 驗收：大量卡片/長文場景下樣式切換不出現明顯卡頓與閃爍
+- Task V0.4-P3-2：可讀性驗證與手測清單
+  - 對應模組：`Manual.md`（使用說明同步）
+  - 驗收：至少覆蓋單行卡、多行卡、填充卡三類；亮色/暗色主題可讀性達標
+
+### V0.4 驗收重點
+
+- 相同卡片語法在不同場景（編輯器/複習）視覺語意一致
+- 不同樣式可切換且不影響解析與排程正確性
+- 樣式切換不造成明顯延遲、閃爍或高亮失效
 
 ---
 
@@ -289,8 +377,11 @@
 3. Sprint C: 設定頁與維護工具
 4. Sprint D: 效能與儲存縮放優化
 5. Sprint E: Dashboard Workspace（整合式）
-6. Sprint F: 學習體驗強化
-7. Sprint G: 行尾 HUD / 狀態提示
-8. Sprint H: 單卡 AI 豐富化
-9. Sprint I: 批次 AI 與多模態
-10. v2.0 之後的長期功能
+6. V0.2: 卡片庫管理系統主線（整合規劃）
+7. Sprint F: 學習體驗強化
+8. Sprint G: 行尾 HUD / 狀態提示
+9. V0.3-P1: 單卡 AI 豐富化（低風險高價值）
+10. V0.3-P2: 學習分析與回顧增強
+11. V0.3-P3: 批次 AI 與多模態
+12. V0.4: 複習閃卡呈現樣式主線（整合規劃）
+13. v2.0 之後的長期功能
