@@ -11,6 +11,15 @@ const DOC_FILES = [
   "manifest.json",
 ];
 
+function hasUtf8Bom(buffer) {
+  return (
+    buffer.length >= 3 &&
+    buffer[0] === 0xef &&
+    buffer[1] === 0xbb &&
+    buffer[2] === 0xbf
+  );
+}
+
 function countPrivateUseChars(text) {
   let count = 0;
   for (const ch of text) {
@@ -31,15 +40,18 @@ for (const relativeFile of DOC_FILES) {
     continue;
   }
 
-  const text = fs.readFileSync(fullPath, "utf8");
+  const buffer = fs.readFileSync(fullPath);
+  const text = buffer.toString("utf8");
   const replacementCount = (text.match(/\uFFFD/g) || []).length;
   const privateUseCount = countPrivateUseChars(text);
+  const hasBom = hasUtf8Bom(buffer);
 
-  if (replacementCount > 0 || privateUseCount > 0) {
+  if (replacementCount > 0 || privateUseCount > 0 || hasBom) {
     issues.push({
       file: relativeFile,
       replacementCount,
       privateUseCount,
+      hasBom,
     });
   }
 }
@@ -48,7 +60,7 @@ if (issues.length > 0) {
   console.error("Encoding check failed: suspicious characters detected.");
   for (const issue of issues) {
     console.error(
-      `- ${issue.file}: U+FFFD=${issue.replacementCount}, PUA=${issue.privateUseCount}`,
+      `- ${issue.file}: U+FFFD=${issue.replacementCount}, PUA=${issue.privateUseCount}, BOM=${issue.hasBom ? "yes" : "no"}`,
     );
   }
   process.exit(1);

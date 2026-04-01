@@ -3,23 +3,47 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 08:32，V0.1.26）
+## Current Context Snapshot（更新：2026-04-01 09:15，V0.1.27）
 
-- 當前版本：`v0.1.26`（本地待 commit）
-- 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 的卡片管理能力。
+- 當前版本：`v0.1.27`（本地待 commit）
+- 目前主軸：在穩定語法與高亮基線上，依 `RoadMap` 推進 V0.2 卡片管理，並同步落地開發環境與 SOP 效率優化。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
   - 多行答案僅保留 `淡色背景帶` 與 `右側線條` 兩種模式。
 - 已知風險：
   - CodeMirror decoration 建構順序錯誤會導致整體高亮失效。
   - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
+  - 在受限沙箱下執行 `vitest` 可能出現 `spawn EPERM` 假失敗，需先切換非沙箱重跑再判斷是否真實回歸。
 - 下一步優先：
   - 以 `RoadMap.md` 的 Sprint E 為主，先落地 `Cards` 管理分區骨架與查詢層。
 - 文件同步：
   - 已在 `Manual.md` / `Instruction.md` / `RoadMap.md` 統一卡片型式（5 種）與答案呈現型式（4 種）的中英文命名基準。
+  - 已新增「開發環境與 SOP 優化專區」，並同步一鍵 release、測試分層、hook 分層與效率治理規範。
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.27（本地定版）— 開發環境與 SOP 效率優化落地（2026-04-01 09:15）
+
+### 主要調整
+- 新增腳本與流程：
+  - `scripts/release.js`（`npm run release -- <version>`）
+  - `test:fast` / `test:full` / `validate:fast` / `validate:prepush`
+  - `.githooks/pre-push`（push 前重檢查）
+  - `setup:dev-shell` / `setup:workspace-alias`（UTF-8 shell 與路徑別名）
+- 文件與規範同步：
+  - `RoadMap.md` 新增「開發環境與 SOP 優化專區」
+  - `Instruction.md` 新增變更類型 SOP、測試分層與持續效率治理規則
+  - `.codex/skill/SKILL.md` 新增主動偵測效率問題並回寫 roadmap 的約束
+
+### 驗證
+- `npm run validate:fast`：通過（49 tests）
+- `npm run validate:prepush`：通過（69 tests + build）
+- `npm run release -- 0.1.27 --dry-run`：通過（流程驗證成功，未改動版本）
+- `npm run setup:dev-shell`：通過（UTF-8 shell）
+- `npm run setup:workspace-alias`：通過（`O:` -> 專案根目錄；受限環境需改用非沙箱）
 
 ---
 

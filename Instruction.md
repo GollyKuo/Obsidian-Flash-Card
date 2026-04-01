@@ -2,7 +2,7 @@
 
 ## 版本
 
-- `v1.4`
+- `v1.5`
 
 ## 專案目標 (Objective)
 
@@ -93,6 +93,41 @@
 補充：
 - `singleLineAnswerRenderStyle`：`chip | plain`
 - `multiLineAnswerRenderStyle`：`soft-band | right-rail`
+
+## 開發效率 SOP（Environment & Workflow）
+
+### 變更類型對應流程
+
+- `docs-only`（僅文件/版本欄位）
+  - 命令：`npm run validate:docs`
+- `core-change`（parser/editor/sync/store 等核心邏輯）
+  - 命令：`npm run validate:fast`
+  - 需要發版前再補：`npm run validate:prepush`
+- `release`
+  - 命令：`npm run release -- <version>`
+  - 例如：`npm run release -- 0.1.27`
+
+### 測試分層原則
+
+- 快速回歸：`npm run test:fast`
+- 全量回歸：`npm run test:full`
+- 推送前固定：`npm run validate:prepush`
+
+### Git Hook 原則
+
+- `pre-commit`：只做輕量檢查（編碼/JSON），不阻塞日常提交速度
+- `pre-push`：執行完整檢查（encoding + full test + build）
+
+### Windows 開發環境便利腳本
+
+- `npm run setup:dev-shell`：切換 PowerShell UTF-8 編碼模式
+- `npm run setup:workspace-alias`：以 `subst` 建立工作路徑別名（預設 `O:`）
+
+### 持續效率治理
+
+- 開發過程需主動偵測效率異常（無效重測、重複 patch、token 浪費、流程重工）。
+- 若驗證命令在受限環境出現 `spawn EPERM`，先改用非沙箱重跑確認，避免錯把環境限制當成程式錯誤。
+- 一旦確認為可持續問題，需提出具體修正，並同步更新 `RoadMap.md` 的「開發環境與 SOP 優化專區」。
 
 ## 當前執行原則 (Current Execution Focus)
 

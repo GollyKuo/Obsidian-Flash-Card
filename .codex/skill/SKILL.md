@@ -49,6 +49,8 @@ description: 在此專案中開發與維護 AI-Enriched Flashcards Obsidian plug
 - 優先採用 incremental delivery，避免一次做大型、推測性過高的重寫。
 - 除非使用者明確要求，否則不得回滾 worktree 中既有的使用者修改。
 - 將 buildability、note safety、sync correctness 的優先級放在炫目新功能之前。
+- 開發過程需主動偵測效率不佳訊號（例如 token 浪費、無效重測、重複 patch、流程重工）；一旦可確認為可持續問題，必須主動提醒使用者並提出改善方案。
+- 上述效率改善若具持續價值，需同步回寫至 `RoadMap.md` 的「開發環境與 SOP 優化專區」，維持流程可持續演進。
 
 ## 文件維護規則
 

@@ -38,6 +38,31 @@
 - `{{fc ... /fc}}` 為內嵌包裹語法，不獨立算一種卡片型式。
 - 若未來新增型式或重新命名，需同步更新 `Manual.md`、`Instruction.md`、`RoadMap.md`。
 
+## 開發環境與 SOP 優化專區（Efficiency Ops）
+
+目標：降低開發過程中的等待時間、重工與無效驗證成本，讓「日常迭代快、發版前嚴格、流程可重複」成為固定節奏。
+
+- Step 1：一鍵發版流程（已完成：2026-04-01 09:08，待下版發佈）
+  - 新增 `scripts/release.js`（`npm run release -- <version>`）
+  - 固定流程：`validate:prepush -> npm version -> manifest version sync -> git add/commit`（可選 `--push`）
+- Step 2：測試分層與回歸核心集（已完成：2026-04-01 09:08，待下版發佈）
+  - 新增 `test:fast`（parser/highlight/block id 核心回歸）
+  - 新增 `test:full`（全量）
+  - 新增 `validate:fast`、`validate:prepush` 腳本，減少日常全量測試浪費
+- Step 3：提交/推送雙層檢查（已完成：2026-04-01 09:08，待下版發佈）
+  - `pre-commit` 保持輕量（文件編碼與 JSON 檢查）
+  - 新增 `pre-push` 重檢查（`validate:prepush`）
+- Step 4：變更類型 SOP 對應表（已完成：2026-04-01 09:08，待下版發佈）
+  - docs-only、核心邏輯、發版三種流程對應固定驗證命令
+  - 減少「每次都跑過多測試」與「漏跑必要驗證」的雙重風險
+- Step 5：Windows 開發環境便利化（已完成：2026-04-01 09:08，待下版發佈）
+  - 新增 `setup:dev-shell`：一鍵切換 PowerShell UTF-8（降低亂碼風險）
+  - 新增 `setup:workspace-alias`：快速建立 `subst` 路徑別名（縮短長路徑操作）
+- Step 6：效率監控治理（進行中）
+  - 開發過程主動偵測效率不佳訊號（例如：無效重測、流程重工、token 浪費）
+  - 若測試在受限環境出現 `spawn EPERM` 類型錯誤，先以非沙箱重跑確認，避免把環境問題誤判為程式回歸
+  - 發現後主動提出「可執行修正」並同步回寫到本專區，形成持續優化迴圈
+
 ---
 
 ## 近期優先級

@@ -1,7 +1,21 @@
-const { execFileSync } = require("child_process");
+const { spawnSync } = require("child_process");
 
 function runGit(args) {
-  return execFileSync("git", args, { encoding: "utf8" }).trim();
+  const result = spawnSync("git", args, {
+    encoding: "utf8",
+    shell: false,
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    const message = (result.stderr || "").trim() || `git ${args.join(" ")} failed`;
+    throw new Error(message);
+  }
+
+  return (result.stdout || "").trim();
 }
 
 const TARGET_HOOKS_PATH = ".githooks";
@@ -24,5 +38,6 @@ try {
     "Could not auto-configure Git hooks path in this environment. " +
       "Please run manually: git config core.hooksPath .githooks"
   );
-  console.warn(error);
+  const message = error instanceof Error ? error.message : String(error);
+  console.warn(`[setup-hooks] ${message}`);
 }
