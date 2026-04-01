@@ -2,7 +2,7 @@
 
 ## 版本
 
-- `v1.5`
+- `v1.6`
 
 ## 專案目標 (Objective)
 
@@ -68,6 +68,17 @@
 - **Cleaning Tool**: 提供 settings-based maintenance tool，可移除所有 Block ID，讓筆記回到 pure Markdown。
 - **Storage Principle**: index 應優先視為可重建的 derived structure，而不是無限制膨脹的 primary schema；單卡更新應避免整包重寫。
 - **Highlight Scope Control**: 答案底色應由使用者設定決定套用範圍，避免將所有語法一律強制高亮。
+
+## 手機相容硬規範 (Mobile Compatibility Baseline)
+
+- 自即日起，所有新增功能皆必須評估 Obsidian 手機端（iOS / Android）相容性，不得僅以桌面行為為預設。
+- 每次涉及 UI / 互動 / 渲染 / 資產流程的變更，至少檢查：
+  - 事件層：`pointer/touch` 相容，避免只依賴 `mousedown`。
+  - UI：小螢幕可操作（按鈕尺寸、間距、排版層級）。
+  - 互動：不依賴 hover；關鍵流程有可觸控替代操作。
+  - 效能：長文與多卡片情境不出現明顯卡頓或過度重算。
+  - 多模態：圖片/音訊在手機端可讀取、可播放、可清理。
+- 若某功能本版暫不支援手機，必須在 `RoadMap.md` 與 `dev_log.md` 明確標記「暫不支援、原因、補齊版本」。
 
 ## 名詞基準 (Terminology Baseline)
 

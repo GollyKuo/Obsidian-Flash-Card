@@ -3,10 +3,10 @@
 本文件記錄專案版本變更、架構調整、驗證結果與文件同步狀態。
 自即日起，新增的完成時間、更新時間或里程碑時間戳一律使用 `YYYY-MM-DD HH:mm`（24 小時制）；既有歷史紀錄不追溯修改。
 
-## Current Context Snapshot（更新：2026-04-01 13:32，V0.1.29）
+## Current Context Snapshot（更新：2026-04-01 14:29，V0.1.30）
 
-- 當前版本：`v0.1.29`（本地待 commit）
-- 目前主軸：完成 `RoadMap` 主線重整（V0.2 卡片庫管理 / V0.3 AI / V0.4 複習樣式），接續細化 V0.3-P1 實作邊界。
+- 當前版本：`v0.1.30`（本地待 commit）
+- 目前主軸：完成 RoadMap 版本順序重排（V0.2 手機相容 -> V0.3 卡片庫管理 -> V0.4 複習樣式 -> V0.5 AI），優先推進 V0.2 mobile 能力層。
 - 已知穩定做法：
   - 單行答案／cloze 使用 chip 渲染。
   - 多行答案僅保留 `淡色背景帶` 與 `右側線條` 兩種模式。
@@ -15,13 +15,30 @@
   - Editor CSS 與 UI CSS 必須維持分層，避免 selector 汙染。
   - 在受限沙箱下執行 `vitest` 可能出現 `spawn EPERM` 假失敗，需先切換非沙箱重跑再判斷是否真實回歸。
 - 下一步優先：
-  - 以 `RoadMap.md` 的 V0.3-P1 為主，先落地 `Hybrid + Manual` 的單卡 AI 流程。
+  - 以 `RoadMap.md` 的 V0.2-P0/P1 為主，先落地 `Mobile/Desktop Capability Layer` 與 pointer/touch 事件相容層。
 - 文件同步：
   - 已在 `Manual.md` / `Instruction.md` / `RoadMap.md` 統一卡片型式（5 種）與答案呈現型式（4 種）的中英文命名基準。
   - 已新增「開發環境與 SOP 優化專區」，並同步一鍵 release、測試分層、hook 分層與效率治理規範。
 - 開發節奏：
   - 採三段式流程：`試驗階段（本地驗證）` -> `正式階段（穩定版基線重寫）` -> `發版階段（文件同步後再推送）`。
 - 新對話啟動讀檔順序：`SKILL.md` -> `dev_log.md`（本快照） -> `Instruction.md` -> `RoadMap.md` -> `Retrospective.md`
+
+---
+
+## V0.1.30（本地定版）— 手機優先路線重排與規範同步（2026-04-01 14:29）
+
+### 主要調整
+- roadmap priority remap
+  - 版本主線重排為：`V0.2 手機相容` -> `V0.3 卡片庫管理` -> `V0.4 複習樣式` -> `V0.5 AI`。
+  - 相關交叉引用、邊界描述、分階段代號與執行順序同步更新。
+  - 在 `V0.2` 新增「重大先行優化（開工前先做）」：事件層抽象、Capability Layer、mobile 響應式骨架、衝突檔防呆。
+- governance sync
+  - `Instruction.md` 新增手機相容硬規範，要求新功能必做 mobile 評估；若暫不支援需在 `RoadMap/dev_log` 註記。
+  - `.codex/skill/SKILL.md` 新增 mobile checklist 執行規則，並要求暫不支援項目需文件化追蹤。
+  - `RoadMap.md` 的 Efficiency Ops 新增 Step 7（`*[conflicted*]` 檔案 pre-commit 防呆）。
+
+### 驗證
+- `npm run check:docs-encoding`：通過
 
 ---
 
